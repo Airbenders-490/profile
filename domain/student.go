@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"time"
 )
 
@@ -12,8 +13,22 @@ type Student struct {
 	School string `json:"school"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	Reviews []Review
 }
+
+type StudentUseCase interface {
+	Create(ctx context.Context, st *Student) error
+	GetById(ctx context.Context, id string) (*Student, error)
+	Update(ctx context.Context, st *Student) error
+	Delete(ctx context.Context, id string) error
+}
+
+type StudentRepository interface {
+	Create(ctx context.Context, id string, st *Student) error
+	GetById(ctx context.Context, id string) (*Student, error)
+	Update(ctx context.Context, st *Student) error
+	Delete(ctx context.Context, id string) error
+}
+
 
 
 
