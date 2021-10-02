@@ -6,6 +6,7 @@ import (
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/utils/errors"
 	"github.com/google/uuid"
+	"log"
 	"reflect"
 	"time"
 )
@@ -28,13 +29,17 @@ func (s *studentUseCase) Create(c context.Context, st *domain.Student) error {
 	defer cancel()
 
 	if st.ID != "" {
-		existingStudent, _ := s.studentRepository.GetById(ctx, st.ID)
-		if reflect.DeepEqual(*existingStudent, domain.Student{}) {
-			return errors.NewConflictError(fmt.Sprintf("Student with ID %s already exists", st.ID))
+		existingStudent, err := s.studentRepository.GetById(ctx, st.ID)
+		if err == nil {
+			if !reflect.DeepEqual(*existingStudent, domain.Student{}) {
+				return errors.NewConflictError(fmt.Sprintf("Student with ID %s already exists", st.ID))
+			}
 		}
+	} else {
+		log.Println("WHY ARE WE DOING THIS?")
+		st.ID = uuid.New().String()
 	}
 
-	st.ID = uuid.New().String()
 	st.CreatedAt = time.Now()
 	st.UpdatedAt = time.Now()
 	err := s.studentRepository.Create(ctx, st.ID, st)
@@ -52,6 +57,9 @@ func (s *studentUseCase) GetById(c context.Context, id string) (*domain.Student,
 	if err != nil {
 		return nil, err
 	}
+	if reflect.DeepEqual(student, &domain.Student{}) {
+		return nil, errors.NewNotFoundError(fmt.Sprintf("No such student with ID %s exists", id))
+	}
 	return student, nil
 }
 
@@ -59,7 +67,10 @@ func (s *studentUseCase) Update(c context.Context, st *domain.Student) error {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
 	defer cancel()
 
-	existingStudent, _ := s.studentRepository.GetById(ctx, st.ID)
+	existingStudent, err := s.studentRepository.GetById(ctx, st.ID)
+	if err != nil {
+		return err
+	}
 	if reflect.DeepEqual(existingStudent, &domain.Student{}) {
 		return errors.NewNotFoundError(fmt.Sprintf("No such student with ID %s exists", st.ID))
 	}
@@ -87,7 +98,10 @@ func (s *studentUseCase) Delete(c context.Context, id string) error {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
 	defer cancel()
 
-	existingStudent, _ := s.studentRepository.GetById(ctx, id)
+	existingStudent, err := s.studentRepository.GetById(ctx, id)
+	if err != nil {
+		return err
+	}
 	if reflect.DeepEqual(existingStudent, &domain.Student{}) {
 		return errors.NewNotFoundError(fmt.Sprintf("No such student with ID %s exists", id))
 	}
