@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// StudentRepositoryMock struct
 type StudentRepositoryMock struct {
 	mock.Mock
 }
@@ -13,13 +14,14 @@ type StudentRepositoryMock struct {
 /*
 type StudentRepository interface {
 	Create(ctx context.Context, id string, st *Student) error
-	GetById(ctx context.Context, id string) (*Student, error)
+	GetByID(ctx context.Context, id string) (*Student, error)
 	Update(ctx context.Context, st *Student) error
 	Delete(ctx context.Context, id string) error
 }
- */
+*/
 
-func (m StudentRepositoryMock) Create(ctx context.Context, id string, st *domain.Student) error {
+// Create -- StudentRepositoryMock
+func (m *StudentRepositoryMock) Create(ctx context.Context, id string, st *domain.Student) error {
 	args := m.Called(ctx, id, st)
 
 	var r0 error
@@ -31,7 +33,8 @@ func (m StudentRepositoryMock) Create(ctx context.Context, id string, st *domain
 	return r0
 }
 
-func (m StudentRepositoryMock) GetById(ctx context.Context, id string) (*domain.Student, error) {
+// GetByID -- StudentRepositoryMock
+func (m *StudentRepositoryMock) GetByID(ctx context.Context, id string) (*domain.Student, error) {
 	args := m.Called(ctx, id)
 
 	var r0 *domain.Student
@@ -53,7 +56,8 @@ func (m StudentRepositoryMock) GetById(ctx context.Context, id string) (*domain.
 	return r0, r1
 }
 
-func (m StudentRepositoryMock) Update(ctx context.Context, st *domain.Student) error {
+// Update -- StudentRepositoryMock
+func (m *StudentRepositoryMock) Update(ctx context.Context, st *domain.Student) error {
 	args := m.Called(ctx, st)
 
 	var r0 error
@@ -66,7 +70,8 @@ func (m StudentRepositoryMock) Update(ctx context.Context, st *domain.Student) e
 	return r0
 }
 
-func (m StudentRepositoryMock) Delete(ctx context.Context, id string) error {
+// Delete -- StudentRepositoryMock
+func (m *StudentRepositoryMock) Delete(ctx context.Context, id string) error {
 	args := m.Called(ctx, id)
 
 	var r0 error

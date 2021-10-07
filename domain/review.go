@@ -2,10 +2,11 @@ package domain
 
 import "time"
 
+// Review struct
 type Review struct {
-	ID string `json:"id"`
-	reviewed Student `json:"reviewed"`
-	reviewer Student `json:"reviewer"`
+	ID        string  `json:"id"`
+	Reviewed  Student `json:"reviewed"`
+	Reviewer  Student `json:"reviewer"`
 	CreatedAt time.Time
-	tags []Tag `json:"tags"`
+	Tags      []Tag `json:"tags"`
 }

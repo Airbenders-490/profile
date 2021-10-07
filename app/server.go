@@ -9,6 +9,7 @@ func server() *gin.Engine {
 	return router
 }
 
+// Start runs the server
 func Start() {
 	router := server()
 	router.Run()

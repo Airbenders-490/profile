@@ -6,10 +6,12 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// StudentUseCase Mock struct
 type StudentUseCase struct {
 	mock.Mock
 }
 
+// Create - StudentUseCaseMock
 func (m *StudentUseCase) Create(ctx context.Context, st *domain.Student) error {
 	args := m.Called(ctx, st)
 
@@ -22,7 +24,8 @@ func (m *StudentUseCase) Create(ctx context.Context, st *domain.Student) error {
 	return r0
 }
 
-func (m *StudentUseCase) GetById(ctx context.Context, id string) (*domain.Student, error) {
+// GetByID - StudentUseCaseMock
+func (m *StudentUseCase) GetByID(ctx context.Context, id string) (*domain.Student, error) {
 	args := m.Called(ctx, id)
 
 	var r0 *domain.Student
@@ -44,6 +47,7 @@ func (m *StudentUseCase) GetById(ctx context.Context, id string) (*domain.Studen
 	return r0, r1
 }
 
+// Update - StudentUseCaseMock
 func (m *StudentUseCase) Update(ctx context.Context, st *domain.Student) error {
 	args := m.Called(ctx, st)
 
@@ -57,6 +61,7 @@ func (m *StudentUseCase) Update(ctx context.Context, st *domain.Student) error {
 	return r0
 }
 
+// Delete - StudentUseCaseMock
 func (m *StudentUseCase) Delete(ctx context.Context, id string) error {
 	args := m.Called(ctx, id)
 

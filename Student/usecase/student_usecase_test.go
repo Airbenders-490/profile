@@ -16,11 +16,11 @@ import (
 /*
 type StudentUseCase interface {
 	Create(ctx context.Context, st *Student) error
-	GetById(ctx context.Context, id string) (*Student, error)
+	GetByID(ctx context.Context, id string) (*Student, error)
 	Update(ctx context.Context, st *Student) error
 	Delete(ctx context.Context, id string) error
 }
- */
+*/
 
 func TestCreate(t *testing.T) {
 	mockStudentRepo := new(mocks.StudentRepositoryMock)
@@ -31,16 +31,16 @@ func TestCreate(t *testing.T) {
 		GeneralInfo: "I like plants",
 		School:      "KGS",
 		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now().Add(72*time.Hour),
+		UpdatedAt:   time.Now().Add(72 * time.Hour),
 	}
 
 	t.Run("case success", func(t *testing.T) {
 		mockStudentRepo.
-			On("GetById", mock.Anything, mock.AnythingOfType("string")).
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(nil, errors.New("error")).
 			Once()
 		mockStudentRepo.
-			On("Create", mock.Anything, mock.AnythingOfType("string") ,mock.AnythingOfType("*domain.Student")).
+			On("Create", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("*domain.Student")).
 			Return(nil).
 			Once()
 		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
@@ -54,7 +54,7 @@ func TestCreate(t *testing.T) {
 
 	t.Run("case error-in-repo-for-create", func(t *testing.T) {
 		mockStudentRepo.
-			On("GetById", mock.Anything, mock.AnythingOfType("string")).
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(nil, errors.New("error")).
 			Once()
 		mockStudentRepo.
@@ -72,7 +72,7 @@ func TestCreate(t *testing.T) {
 
 	t.Run("case error-already-exists", func(t *testing.T) {
 		mockStudentRepo.
-			On("GetById", mock.Anything, mock.AnythingOfType("string")).
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(mockStudent, nil).
 			Once()
 		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
@@ -94,17 +94,17 @@ func TestGetByID(t *testing.T) {
 		GeneralInfo: "I like plants",
 		School:      "KGS",
 		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now().Add(72*time.Hour),
+		UpdatedAt:   time.Now().Add(72 * time.Hour),
 	}
 
 	t.Run("case success", func(t *testing.T) {
 		mockStudentRepo.
-			On("GetById", mock.Anything, mock.AnythingOfType("string")).
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(mockStudent, nil).
 			Once()
 		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
 
-		student, err := u.GetById(context.TODO(), mockStudent.ID)
+		student, err := u.GetByID(context.TODO(), mockStudent.ID)
 
 		assert.NoError(t, err)
 		assert.NotNil(t, student)
@@ -114,12 +114,12 @@ func TestGetByID(t *testing.T) {
 
 	t.Run("case error", func(t *testing.T) {
 		mockStudentRepo.
-			On("GetById", mock.Anything, mock.AnythingOfType("string")).
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(nil, errors.New("error")).
 			Once()
 		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
 
-		student, err := u.GetById(context.TODO(), mockStudent.ID)
+		student, err := u.GetByID(context.TODO(), mockStudent.ID)
 
 		assert.Error(t, err)
 		assert.True(t, reflect.ValueOf(student).IsNil())
@@ -129,12 +129,12 @@ func TestGetByID(t *testing.T) {
 
 	t.Run("case err-empty-student", func(t *testing.T) {
 		mockStudentRepo.
-			On("GetById", mock.Anything, mock.AnythingOfType("string")).
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(&domain.Student{}, nil).
 			Once()
 		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
 
-		student, err := u.GetById(context.TODO(), mockStudent.ID)
+		student, err := u.GetByID(context.TODO(), mockStudent.ID)
 
 		assert.Error(t, err)
 		assert.True(t, reflect.ValueOf(student).IsNil())
@@ -152,12 +152,12 @@ func TestUpdate(t *testing.T) {
 		GeneralInfo: "I like plants",
 		School:      "KGS",
 		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now().Add(72*time.Hour),
+		UpdatedAt:   time.Now().Add(72 * time.Hour),
 	}
 
 	t.Run("success", func(t *testing.T) {
 		mockStudentRepo.
-			On("GetById", mock.Anything, mock.AnythingOfType("string")).
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(mockStudent, nil).
 			Once()
 		mockStudentRepo.
@@ -175,7 +175,7 @@ func TestUpdate(t *testing.T) {
 
 	t.Run("err-no-student-exists", func(t *testing.T) {
 		mockStudentRepo.
-			On("GetById", mock.Anything, mock.AnythingOfType("string")).
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(nil, errors.New("error")).
 			Once()
 
@@ -189,7 +189,7 @@ func TestUpdate(t *testing.T) {
 
 	t.Run("err-empty-student", func(t *testing.T) {
 		mockStudentRepo.
-			On("GetById", mock.Anything, mock.AnythingOfType("string")).
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(&domain.Student{}, nil).
 			Once()
 
@@ -211,12 +211,12 @@ func TestDelete(t *testing.T) {
 		GeneralInfo: "I like plants",
 		School:      "KGS",
 		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now().Add(72*time.Hour),
+		UpdatedAt:   time.Now().Add(72 * time.Hour),
 	}
 
 	t.Run("success", func(t *testing.T) {
 		mockStudentRepo.
-			On("GetById", mock.Anything, mock.AnythingOfType("string")).
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(mockStudent, nil).
 			Once()
 		mockStudentRepo.
@@ -234,7 +234,7 @@ func TestDelete(t *testing.T) {
 
 	t.Run("err-no-student-exists", func(t *testing.T) {
 		mockStudentRepo.
-			On("GetById", mock.Anything, mock.AnythingOfType("string")).
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(nil, errors.New("error")).
 			Once()
 
@@ -248,7 +248,7 @@ func TestDelete(t *testing.T) {
 
 	t.Run("err-empty-student", func(t *testing.T) {
 		mockStudentRepo.
-			On("GetById", mock.Anything, mock.AnythingOfType("string")).
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(&domain.Student{}, nil).
 			Once()
 

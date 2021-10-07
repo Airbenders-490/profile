@@ -10,7 +10,7 @@ import (
 
 type studentRepository struct {
 	repo map[string]domain.Student
-	m sync.Mutex
+	m    sync.Mutex
 }
 
 func NewStudentRepository() domain.StudentRepository {
@@ -27,7 +27,7 @@ func (r *studentRepository) Create(ctx context.Context, id string, st *domain.St
 	return nil
 }
 
-func (r *studentRepository) GetById(ctx context.Context, id string) (*domain.Student, error) {
+func (r *studentRepository) GetByID(ctx context.Context, id string) (*domain.Student, error) {
 	r.m.Lock()
 	defer r.m.Unlock()
 

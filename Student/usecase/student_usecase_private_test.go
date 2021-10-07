@@ -16,7 +16,7 @@ func TestUpdateStudent(t *testing.T) {
 		GeneralInfo: "I like plants",
 		School:      "KGS",
 		CreatedAt:   now,
-		UpdatedAt:   now.Add(72*time.Hour),
+		UpdatedAt:   now.Add(72 * time.Hour),
 	}
 	toUpdate := &domain.Student{
 		ID:          "",
@@ -25,7 +25,7 @@ func TestUpdateStudent(t *testing.T) {
 		GeneralInfo: "",
 		School:      "Concordia University",
 		CreatedAt:   now,
-		UpdatedAt:   now.Add(72*time.Hour),
+		UpdatedAt:   now.Add(72 * time.Hour),
 	}
 	expected := &domain.Student{
 		ID:          "asd",
