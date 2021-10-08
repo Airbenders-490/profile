@@ -6,6 +6,7 @@ import (
 
 func server() *gin.Engine {
 	router := gin.Default()
+	mapURLs(router)
 	return router
 }
 

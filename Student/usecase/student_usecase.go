@@ -64,11 +64,12 @@ func (s *studentUseCase) GetByID(c context.Context, id string) (*domain.Student,
 }
 
 // Update checks if the student exists and updates if so. Otherwise, returns error
-func (s *studentUseCase) Update(c context.Context, st *domain.Student) error {
+func (s *studentUseCase) Update(c context.Context, id string, st *domain.Student) error {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
 	defer cancel()
 
-	existingStudent, err := s.studentRepository.GetByID(ctx, st.ID)
+	st.ID = id
+	existingStudent, err := s.studentRepository.GetByID(ctx, id)
 	if err != nil {
 		return err
 	}

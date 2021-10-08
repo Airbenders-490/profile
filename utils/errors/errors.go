@@ -4,8 +4,8 @@ import "net/http"
 
 // RestError struct. Has a status code and a custom message
 type RestError struct {
-	Code    int
-	Message string
+	Code    int `json:"code"`
+	Message string `json:"message"`
 }
 
 func (e RestError) Error() string {

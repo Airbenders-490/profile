@@ -166,7 +166,7 @@ func TestUpdate(t *testing.T) {
 			Once()
 
 		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
-		err := u.Update(context.TODO(), mockStudent)
+		err := u.Update(context.TODO(), mockStudent.ID, mockStudent)
 
 		assert.NoError(t, err)
 
@@ -180,7 +180,7 @@ func TestUpdate(t *testing.T) {
 			Once()
 
 		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
-		err := u.Update(context.TODO(), mockStudent)
+		err := u.Update(context.TODO(), mockStudent.ID, mockStudent)
 
 		assert.Error(t, err)
 
@@ -194,7 +194,7 @@ func TestUpdate(t *testing.T) {
 			Once()
 
 		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
-		err := u.Update(context.TODO(), mockStudent)
+		err := u.Update(context.TODO(), mockStudent.ID, mockStudent)
 
 		assert.Error(t, err)
 

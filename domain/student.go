@@ -20,7 +20,7 @@ type Student struct {
 type StudentUseCase interface {
 	Create(ctx context.Context, st *Student) error
 	GetByID(ctx context.Context, id string) (*Student, error)
-	Update(ctx context.Context, st *Student) error
+	Update(ctx context.Context, id string, st *Student) error
 	Delete(ctx context.Context, id string) error
 }
 
