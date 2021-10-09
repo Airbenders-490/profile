@@ -4,7 +4,7 @@ import "net/http"
 
 // RestError struct. Has a status code and a custom message
 type RestError struct {
-	Code    int `json:"code"`
+	Code    int    `json:"code"`
 	Message string `json:"message"`
 }
 
