@@ -44,7 +44,7 @@ func TestStudentHandler_GetByID(t *testing.T) {
 		// make their times the same. TODO: Find fix
 		receivedStudent.UpdatedAt = mockStudent.UpdatedAt
 		receivedStudent.CreatedAt = mockStudent.CreatedAt
-		assert.EqualValues(t, receivedStudent, mockStudent)
+		assert.EqualValues(t, mockStudent, receivedStudent)
 		mockUseCase.AssertExpectations(t)
 	})
 

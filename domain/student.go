@@ -8,7 +8,8 @@ import (
 // Student struct
 type Student struct {
 	ID          string `json:"id"` //uuid string
-	Name        string `json:"name"`
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
 	Email       string `json:"email"` //TODO: validate:required
 	GeneralInfo string `json:"general_info"`
 	School      string `json:"school"`

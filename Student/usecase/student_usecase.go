@@ -81,8 +81,11 @@ func (s *studentUseCase) Update(c context.Context, id string, st *domain.Student
 }
 
 func updateStudent(existing *domain.Student, toUpdate *domain.Student) {
-	if toUpdate.Name != "" {
-		existing.Name = toUpdate.Name
+	if toUpdate.FirstName != "" {
+		existing.FirstName = toUpdate.FirstName
+	}
+	if toUpdate.LastName != "" {
+		existing.LastName = toUpdate.LastName
 	}
 	if toUpdate.Email != "" {
 		existing.Email = toUpdate.Email

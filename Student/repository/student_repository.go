@@ -2,61 +2,117 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/utils/errors"
-	"sync"
+	"github.com/jackc/pgx/v4/pgxpool"
+	"time"
 )
 
 type studentRepository struct {
-	repo map[string]domain.Student
-	m    sync.Mutex
+	db *pgxpool.Pool
 }
 
-func NewStudentRepository() domain.StudentRepository {
+func NewStudentRepository(db *pgxpool.Pool) domain.StudentRepository {
 	return &studentRepository{
-		repo: make(map[string]domain.Student),
+		db: db,
 	}
 }
 
-func (r *studentRepository) Create(ctx context.Context, id string, st *domain.Student) error {
-	r.m.Lock()
-	defer r.m.Unlock()
+const (
+	insert = `INSERT INTO public.student(
+	id, first_name, last_name, email, general_info, school, created_at, updated_at)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`
+	selectByID = `SELECT id, first_name, last_name, email, general_info, school, created_at, updated_at
+	FROM public.student WHERE id=$1;`
+	update = `UPDATE public.student
+	SET first_name=$2, last_name=$3, email=$4, general_info=$5, school=$6, created_at=$7, updated_at=$8
+	WHERE id=$1;`
+	delete = `DELETE FROM public.student
+	WHERE id=$1;`
+)
 
-	r.repo[id] = *st
+func (r *studentRepository) Create(ctx context.Context, id string, st *domain.Student) error {
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	defer tx.Rollback(ctx)
+
+	_, err = tx.Exec(ctx, insert, id, st.FirstName, st.LastName, st.Email, st.GeneralInfo, st.School, st.CreatedAt, st.UpdatedAt)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
 	return nil
 }
 
 func (r *studentRepository) GetByID(ctx context.Context, id string) (*domain.Student, error) {
-	r.m.Lock()
-	defer r.m.Unlock()
-
-	if val, ok := r.repo[id]; ok {
-		return &val, nil
+	rows, err := r.db.Query(ctx, selectByID, id)
+	if err != nil {
+		err = errors.NewInternalServerError(err.Error())
+		return nil, err
 	}
-	return nil, errors.NewNotFoundError(fmt.Sprintf("Student with id %s not found.", id))
+	defer rows.Close()
+
+	var student domain.Student
+	for rows.Next() {
+		values, err := rows.Values()
+		if err != nil {
+			err = errors.NewInternalServerError(err.Error())
+			return nil, err
+		}
+
+		student.ID = values[0].(string)
+		student.FirstName = values[1].(string)
+		student.LastName = values[2].(string)
+		student.Email = values[3].(string)
+		student.GeneralInfo = values[4].(string)
+		student.School = values[5].(string)
+		student.CreatedAt = values[6].(time.Time)
+		student.UpdatedAt = values[7].(time.Time)
+	}
+
+	return &student, nil
 }
 
 func (r *studentRepository) Update(ctx context.Context, st *domain.Student) error {
-	r.m.Lock()
-	defer r.m.Unlock()
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	defer tx.Rollback(ctx)
 
-	if _, ok := r.repo[st.ID]; ok {
-		r.repo[st.ID] = *st
-		return nil
+	_, err = tx.Exec(ctx, update, st.ID, st.FirstName, st.LastName, st.Email, st.GeneralInfo, st.School, st.CreatedAt, st.UpdatedAt)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
 	}
 
-	return errors.NewNotFoundError(fmt.Sprintf("Student with id %s not found.", st.ID))
+	err = tx.Commit(ctx)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	return nil
 }
 
 func (r *studentRepository) Delete(ctx context.Context, id string) error {
-	r.m.Lock()
-	defer r.m.Unlock()
-
-	_, ok := r.repo[id]
-	if ok {
-		delete(r.repo, id)
-		return nil
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
 	}
-	return errors.NewNotFoundError(fmt.Sprintf("Student with id %s not found.", id))
+	defer tx.Rollback(ctx)
+
+	_, err = tx.Exec(ctx, delete, id)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	return nil
 }
