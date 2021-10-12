@@ -15,4 +15,5 @@ func mapStudentURLs(h *http.StudentHandler, r *gin.Engine) {
 
 func mapSchoolURLs(h *schoolHttp.SchoolHandler, r *gin.Engine) {
 	r.GET("/school", h.SearchStudentSchool)
+	r.POST("/school/confirm", h.SendConfirmationMail)
 }

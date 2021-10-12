@@ -5,19 +5,25 @@ import (
 	"context"
 	"fmt"
 	"github.com/airbenders/profile/domain"
+	"github.com/airbenders/profile/utils"
 	"github.com/airbenders/profile/utils/errors"
+	"github.com/google/uuid"
 	"log"
+	"os"
 	"strings"
+	"text/template"
 	"time"
 )
 
 type schoolUseCase struct {
 	r       domain.SchoolRepository
+	str domain.StudentRepository
+	mailer utils.Mailer
 	timeout time.Duration
 }
 
-func NewSchoolUseCase(r domain.SchoolRepository, timeout time.Duration) domain.SchoolUseCase {
-	return &schoolUseCase{r, timeout}
+func NewSchoolUseCase(r domain.SchoolRepository, str domain.StudentRepository, mailer utils.Mailer, timeout time.Duration) domain.SchoolUseCase {
+	return &schoolUseCase{r, str, mailer, timeout}
 }
 
 func (s *schoolUseCase) SearchSchoolByDomain(c context.Context, domainName string) ([]domain.School, error) {
@@ -61,4 +67,54 @@ func parseDomainName(name string) string {
 		domainNameLike.WriteString(fmt.Sprintf("|%s", domainName))
 	}
 	return domainNameLike.String()
+}
+
+func (s *schoolUseCase) SendConfirmation(c context.Context, st *domain.Student, email string, school *domain.School) error {
+	ctx, cancel :=  context.WithTimeout(c, s.timeout)
+	defer cancel()
+
+	token := uuid.New().String()
+	domainName := os.Getenv("DOMAIN")
+	if domainName == "" {
+		log.Fatalln("Domain name not provided")
+	}
+	confirmationUrl := fmt.Sprintf("%s/school/confirmation", domainName)
+	url := fmt.Sprintf("%s?token=%s", confirmationUrl, token)
+
+	confirmation := &domain.Confirmation{
+		Token:     token,
+		School:    *school,
+		Student:   *st,
+		CreatedAt: time.Now(),
+	}
+
+	err := s.r.SaveConfirmationToken(ctx, confirmation)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+
+	body := createEmailBody(st.FirstName, school.Name, url)
+	return s.mailer.SendSimpleMail(email, body)
+}
+
+func createEmailBody(name, school, url string) []byte {
+	t, err := template.ParseFiles("static/confirmation_template.html")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	var body bytes.Buffer
+	mimeHeaders := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
+	body.Write([]byte(fmt.Sprintf("Subject: This is a test subject \n%s\n\n", mimeHeaders)))
+	fmt.Println(url)
+	t.Execute(&body, struct {
+		Name string
+		School string
+		Email string
+	}{
+		Name: name,
+		School: school,
+		Email: url,
+	})
+
+	return body.Bytes()
 }

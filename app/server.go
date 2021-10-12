@@ -8,6 +8,7 @@ import (
 	"github.com/airbenders/profile/Student/delivery/http"
 	"github.com/airbenders/profile/Student/repository"
 	"github.com/airbenders/profile/Student/usecase"
+	"github.com/airbenders/profile/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"log"
@@ -34,7 +35,8 @@ func Start() {
 	studentHandler := http.NewStudentHandler(studentUseCase)
 
 	schoolRepository := repository2.NewSchoolRepository(pool)
-	schoolUseCase := usecase2.NewSchoolUseCase(schoolRepository, time.Second)
+	mail := utils.NewSimpleMail()
+	schoolUseCase := usecase2.NewSchoolUseCase(schoolRepository, studentRepository, mail, time.Second)
 	schoolHandler := http2.NewSchoolHandler(schoolUseCase)
 
 	router := Server(studentHandler, schoolHandler)

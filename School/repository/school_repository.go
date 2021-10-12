@@ -20,6 +20,9 @@ func NewSchoolRepository(db *pgxpool.Pool) domain.SchoolRepository {
 const (
 	findByDomain = `SELECT s.id, s.name, s.country FROM (select id, name, country, unnest(domains) as domain from 
 	school) as s WHERE s.domain SIMILAR TO ($1)`
+	insertConfirmation = `INSERT INTO public.confirmation(
+	token, sc_id, st_id, created_at)
+	VALUES ($1, $2, $3, $4);`
 )
 
 func (r *schoolRepository) SearchByDomain(ctx context.Context, domainName string) ([]domain.School, error) {
@@ -47,4 +50,25 @@ func (r *schoolRepository) SearchByDomain(ctx context.Context, domainName string
 	}
 
 	return schools, nil
+}
+
+
+func (r *schoolRepository) SaveConfirmationToken(ctx context.Context, confirmation *domain.Confirmation) error {
+	 tx, err := r.db.Begin(ctx)
+	 if err != nil {
+	 	return errors.NewInternalServerError(err.Error())
+	 }
+	 defer tx.Rollback(ctx)
+
+	 _, err = tx.Exec(ctx, insertConfirmation, confirmation.Token, confirmation.School.ID, confirmation.Student.ID, confirmation.CreatedAt)
+	 if err != nil {
+		 return errors.NewInternalServerError(err.Error())
+	 }
+
+	 err = tx.Commit(ctx)
+	 if err != nil {
+	 	return errors.NewInternalServerError(err.Error())
+	 }
+
+	 return nil
 }
