@@ -2,6 +2,9 @@ package app
 
 import (
 	"context"
+	http2 "github.com/airbenders/profile/School/delivery/http"
+	repository2 "github.com/airbenders/profile/School/repository"
+	usecase2 "github.com/airbenders/profile/School/usecase"
 	"github.com/airbenders/profile/Student/delivery/http"
 	"github.com/airbenders/profile/Student/repository"
 	"github.com/airbenders/profile/Student/usecase"
@@ -12,9 +15,10 @@ import (
 	"time"
 )
 
-func Server(h *http.StudentHandler) *gin.Engine {
+func Server(stundetHandler *http.StudentHandler, schoolHandler *http2.SchoolHandler) *gin.Engine {
 	router := gin.Default()
-	mapStudentURLs(h, router)
+	mapStudentURLs(stundetHandler, router)
+	mapSchoolURLs(schoolHandler, router)
 	return router
 }
 
@@ -24,9 +28,15 @@ func Start() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	repository := repository.NewStudentRepository(pool)
-	useCase := usecase.NewStudentUseCase(repository, time.Second)
-	h := http.NewStudentHandler(useCase)
-	router := Server(h)
+
+	studentRepository := repository.NewStudentRepository(pool)
+	studentUseCase := usecase.NewStudentUseCase(studentRepository, time.Second)
+	studentHandler := http.NewStudentHandler(studentUseCase)
+
+	schoolRepository := repository2.NewSchoolRepository(pool)
+	schoolUseCase := usecase2.NewSchoolUseCase(schoolRepository, time.Second)
+	schoolHandler := http2.NewSchoolHandler(schoolUseCase)
+
+	router := Server(studentHandler, schoolHandler)
 	router.Run()
 }
