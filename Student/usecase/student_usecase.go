@@ -96,7 +96,7 @@ func updateStudent(existing *domain.Student, toUpdate *domain.Student) {
 	existing.UpdatedAt = time.Now()
 }
 
-// Delete removes the student if it exists. Otherwise returns error
+// Delete removes the student if it exists. Otherwise, returns error
 func (s *studentUseCase) Delete(c context.Context, id string) error {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
 	defer cancel()

@@ -56,9 +56,38 @@ func (h *SchoolHandler) SendConfirmationMail(c *gin.Context) {
 
 	err = h.u.SendConfirmation(ctx, &domain.Student{ID: "asd", FirstName: "Yassou"}, email, &school)
 	if err != nil {
-		c.JSON(500, err.Error())
-		return
+		switch v := err.(type) {
+		case *errors.RestError:
+			c.JSON(v.Code, v)
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, errors.NewInternalServerError(err.Error()))
+			return
+		}
 	}
 
 	c.JSON(200, httputils.NewResponse("email sent"))
+}
+
+func (h *SchoolHandler) ConfirmSchoolRegistration(c *gin.Context) {
+	ctx := c.Request.Context()
+	token := c.Query("token")
+	if token  == "" {
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("must provide a valid email"))
+		return
+	}
+
+	err := h.u.ConfirmSchoolEnrollment(ctx, token)
+	if err != nil {
+		switch v := err.(type) {
+		case *errors.RestError:
+			c.JSON(v.Code, v)
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, errors.NewInternalServerError(err.Error()))
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, httputils.NewResponse("school confirmed"))
 }

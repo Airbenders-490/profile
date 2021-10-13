@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"log"
 	"os"
+	"reflect"
 	"strings"
 	"text/template"
 	"time"
@@ -73,6 +74,17 @@ func (s *schoolUseCase) SendConfirmation(c context.Context, st *domain.Student, 
 	ctx, cancel :=  context.WithTimeout(c, s.timeout)
 	defer cancel()
 
+	student, err := s.str.GetByID(ctx, st.ID)
+	if err != nil {
+		return err
+	}
+	if reflect.DeepEqual(student, &domain.Student{}) {
+		return errors.NewNotFoundError("student not found")
+	}
+	if student.School != nil {
+		return errors.NewBadRequestError("school already confirmed")
+	}
+
 	token := uuid.New().String()
 	domainName := os.Getenv("DOMAIN")
 	if domainName == "" {
@@ -88,7 +100,7 @@ func (s *schoolUseCase) SendConfirmation(c context.Context, st *domain.Student, 
 		CreatedAt: time.Now(),
 	}
 
-	err := s.r.SaveConfirmationToken(ctx, confirmation)
+	err = s.r.SaveConfirmationToken(ctx, confirmation)
 	if err != nil {
 		return errors.NewInternalServerError(err.Error())
 	}
@@ -104,8 +116,7 @@ func createEmailBody(name, school, url string) []byte {
 	}
 	var body bytes.Buffer
 	mimeHeaders := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
-	body.Write([]byte(fmt.Sprintf("Subject: This is a test subject \n%s\n\n", mimeHeaders)))
-	fmt.Println(url)
+	body.Write([]byte(fmt.Sprintf("Subject: Anonymous app confirmation email\n%s\n\n", mimeHeaders)))
 	t.Execute(&body, struct {
 		Name string
 		School string
@@ -117,4 +128,27 @@ func createEmailBody(name, school, url string) []byte {
 	})
 
 	return body.Bytes()
+}
+
+func (s *schoolUseCase) ConfirmSchoolEnrollment(c context.Context, token string) error {
+	ctx, cancel := context.WithTimeout(c, s.timeout)
+	defer cancel()
+
+	confirmation, err := s.r.GetConfirmationByToken(ctx, token)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	if reflect.DeepEqual(*confirmation, domain.Confirmation{}) {
+		return errors.NewNotFoundError("invalid token")
+	}
+	if confirmation.CreatedAt.Add(time.Hour*24).Before(time.Now()) {
+		return errors.NewBadRequestError("token already expired")
+	}
+
+	err = s.r.AddSchoolForStudent(ctx, confirmation.Student.ID, confirmation.School.ID)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+
+	return nil
 }

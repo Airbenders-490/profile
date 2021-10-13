@@ -28,7 +28,7 @@ const (
 	update = `UPDATE public.student
 	SET first_name=$2, last_name=$3, email=$4, general_info=$5, created_at=$6, updated_at=$7
 	WHERE id=$1;`
-	delete = `DELETE FROM public.student
+	deleteStudent = `DELETE FROM public.student
 	WHERE id=$1;`
 )
 
@@ -74,7 +74,7 @@ func (r *studentRepository) GetByID(ctx context.Context, id string) (*domain.Stu
 		student.Email = values[3].(string)
 		student.GeneralInfo = values[4].(string)
 		if values[5] != nil {
-			student.School.ID = values[5].(string)
+			student.School = &domain.School{ID: values[5].(string)}
 		}
 		student.CreatedAt = values[6].(time.Time)
 		student.UpdatedAt = values[7].(time.Time)
@@ -109,7 +109,7 @@ func (r *studentRepository) Delete(ctx context.Context, id string) error {
 	}
 	defer tx.Rollback(ctx)
 
-	_, err = tx.Exec(ctx, delete, id)
+	_, err = tx.Exec(ctx, deleteStudent, id)
 	if err != nil {
 		return errors.NewInternalServerError(err.Error())
 	}

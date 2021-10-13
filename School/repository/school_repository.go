@@ -5,6 +5,7 @@ import (
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/utils/errors"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"time"
 )
 
 type schoolRepository struct {
@@ -23,6 +24,9 @@ const (
 	insertConfirmation = `INSERT INTO public.confirmation(
 	token, sc_id, st_id, created_at)
 	VALUES ($1, $2, $3, $4);`
+	getConfirmationByToken = `SELECT token, sc_id, st_id, created_at FROM confirmation WHERE token=$1`
+	updateStudentWithSchool = `UPDATE public.student
+	SET school=$1 WHERE id=$2;`
 )
 
 func (r *schoolRepository) SearchByDomain(ctx context.Context, domainName string) ([]domain.School, error) {
@@ -71,4 +75,47 @@ func (r *schoolRepository) SaveConfirmationToken(ctx context.Context, confirmati
 	 }
 
 	 return nil
+}
+
+func (r *schoolRepository) GetConfirmationByToken(ctx context.Context, token string) (*domain.Confirmation, error) {
+	rows, err := r.db.Query(ctx, getConfirmationByToken, token)
+	if err != nil {
+		err = errors.NewInternalServerError(err.Error())
+		return nil, err
+	}
+	defer rows.Close()
+
+	var confirmation domain.Confirmation
+	for rows.Next() {
+		values, err := rows.Values()
+		if err != nil {
+			err = errors.NewInternalServerError(err.Error())
+			return nil, err
+		}
+
+		confirmation.Token = values[0].(string)
+		confirmation.School.ID = values[1].(string)
+		confirmation.Student.ID = values[2].(string)
+		confirmation.CreatedAt = values[3].(time.Time)
+	}
+
+	return &confirmation, nil
+}
+
+func (r *schoolRepository) AddSchoolForStudent(ctx context.Context, stID string, scID string) error {
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	defer tx.Rollback(ctx)
+	_, err = tx.Exec(ctx, updateStudentWithSchool, scID, stID)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	return nil
 }
