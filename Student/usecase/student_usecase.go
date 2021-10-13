@@ -93,9 +93,6 @@ func updateStudent(existing *domain.Student, toUpdate *domain.Student) {
 	if toUpdate.GeneralInfo != "" {
 		existing.GeneralInfo = toUpdate.GeneralInfo
 	}
-	if toUpdate.School != "" {
-		existing.School = toUpdate.School
-	}
 	existing.UpdatedAt = time.Now()
 }
 

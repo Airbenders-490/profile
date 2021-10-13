@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 	"github.com/airbenders/profile/domain"
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/pgxpool"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"io/ioutil"
 	"log"
 	"net/http"

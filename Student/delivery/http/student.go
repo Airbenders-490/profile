@@ -22,7 +22,6 @@ func (h *StudentHandler) GetByID(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("id must be provided"))
 		return
 	}
-
 	ctx := c.Request.Context()
 	student, err := h.UseCase.GetByID(ctx, id)
 	if err != nil {

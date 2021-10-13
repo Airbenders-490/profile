@@ -3,6 +3,7 @@ package http
 import (
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/utils/errors"
+	"github.com/airbenders/profile/utils/httputils"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"reflect"
@@ -53,10 +54,11 @@ func (h *SchoolHandler) SendConfirmationMail(c *gin.Context) {
 		return
 	}
 
-	err = h.u.SendConfirmation(ctx, &domain.Student{ID: "asd", FirstName: "Mark"}, email, &school)
+	err = h.u.SendConfirmation(ctx, &domain.Student{ID: "asd", FirstName: "Yassou"}, email, &school)
 	if err != nil {
 		c.JSON(500, err.Error())
+		return
 	}
 
-	c.JSON(200, "sent")
+	c.JSON(200, httputils.NewResponse("email sent"))
 }

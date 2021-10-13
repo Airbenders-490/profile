@@ -12,7 +12,7 @@ type Student struct {
 	LastName    string `json:"last_name"`
 	Email       string `json:"email"` //TODO: validate:required
 	GeneralInfo string `json:"general_info"`
-	School      string `json:"school"`
+	School      *School `json:"school"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
