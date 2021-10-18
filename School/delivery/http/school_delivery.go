@@ -54,7 +54,7 @@ func (h *SchoolHandler) SendConfirmationMail(c *gin.Context) {
 		return
 	}
 
-	err = h.u.SendConfirmation(ctx, &domain.Student{ID: "asd", FirstName: "Yassou"}, email, &school)
+	err = h.u.SendConfirmation(ctx, &domain.Student{ID: "asd", FirstName: "Stella"}, email, &school)
 	if err != nil {
 		switch v := err.(type) {
 		case *errors.RestError:

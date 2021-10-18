@@ -9,7 +9,7 @@ type Mailer interface {
 	SendSimpleMail(to string, body []byte) error
 }
 
-func NewSimpleMail() simpleMail {
+func NewSimpleMail() Mailer {
 	return simpleMail{
 		from:     os.Getenv("EMAIL"),
 		password: os.Getenv("PASSWORD"),

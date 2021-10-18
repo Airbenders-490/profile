@@ -16,9 +16,9 @@ import (
 	"time"
 )
 
-func Server(stundetHandler *http.StudentHandler, schoolHandler *http2.SchoolHandler) *gin.Engine {
+func Server(studentHandler *http.StudentHandler, schoolHandler *http2.SchoolHandler) *gin.Engine {
 	router := gin.Default()
-	mapStudentURLs(stundetHandler, router)
+	mapStudentURLs(studentHandler, router)
 	mapSchoolURLs(schoolHandler, router)
 	return router
 }
