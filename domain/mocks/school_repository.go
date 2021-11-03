@@ -6,20 +6,21 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// SchoolRepositoryMock struct
 type SchoolRepositoryMock struct {
 	mock.Mock
 }
 
 // SearchByDomain -- SchoolRepositoryMock
-func (m *SchoolRepositoryMock) SearchByDomain(ctx context.Context, name string) (*[]domain.School, error) {
+func (m *SchoolRepositoryMock) SearchByDomain(ctx context.Context, name string) ([]domain.School, error) {
 	args := m.Called(ctx, name)
 
-	var r0 *[]domain.School
-	if rf, ok := args.Get(0).(func(context.Context, string) *[]domain.School); ok {
+	var r0 []domain.School
+	if rf, ok := args.Get(0).(func(context.Context, string) []domain.School); ok {
 		r0 = rf(ctx, name)
 	} else {
 		if args.Get(0) != nil {
-			r0 = args.Get(0).(*[]domain.School)
+			r0 = args.Get(0).([]domain.School)
 		}
 	}
 
@@ -33,6 +34,7 @@ func (m *SchoolRepositoryMock) SearchByDomain(ctx context.Context, name string) 
 	return r0, r1
 }
 
+// SaveConfirmationToken -- SchoolRepositoryMock
 func (m *SchoolRepositoryMock) SaveConfirmationToken(ctx context.Context, confirmation *domain.Confirmation) error {
 	args := m.Called(ctx, confirmation)
 
@@ -45,6 +47,7 @@ func (m *SchoolRepositoryMock) SaveConfirmationToken(ctx context.Context, confir
 	return r0
 }
 
+// GetConfirmationByToken -- SchoolRepositoryMock
 func (m *SchoolRepositoryMock) GetConfirmationByToken(ctx context.Context, token string) (*domain.Confirmation, error) {
 	args := m.Called(ctx, token)
 
@@ -68,6 +71,7 @@ func (m *SchoolRepositoryMock) GetConfirmationByToken(ctx context.Context, token
 
 }
 
+// AddSchoolForStudent -- SchoolRepositoryMock
 func (m *SchoolRepositoryMock) AddSchoolForStudent(ctx context.Context, stID string, scID string) error {
 	args := m.Called(ctx, stID, scID)
 
