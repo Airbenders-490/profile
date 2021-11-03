@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/utils/errors"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -23,6 +22,8 @@ const (
 	insertReview      = `INSERT INTO review (id, reviewed, reviewer, created_at) VALUES ($1, $2, $3, $4);`
 	joinWithTags      = `INSERT INTO review_tag (review_id, tag_name) VALUES ($1, $2)`
 	getReviewForAndBy = `SELECT * FROM review WHERE reviewed=$1 and reviewer=$2`
+
+	deleteExistingTags = `DELETE FROM review_tag WHERE review_id=$1`
 )
 
 // AddReview adds the review to the review table as well as joins the tags
@@ -43,6 +44,12 @@ func (r *reviewRepository) AddReview(ctx context.Context, review *domain.Review)
 		return errors.NewInternalServerError(err.Error())
 	}
 
+	err = r.addTags(ctx, review)
+
+	return err
+}
+
+func (r *reviewRepository) addTags(ctx context.Context, review *domain.Review) error {
 	for _, tag := range review.Tags {
 		txTag, err := r.db.Begin(ctx)
 		if err != nil {
@@ -58,7 +65,6 @@ func (r *reviewRepository) AddReview(ctx context.Context, review *domain.Review)
 		}
 		_ = txTag.Rollback(ctx)
 	}
-
 	return nil
 }
 
@@ -76,7 +82,7 @@ func (r *reviewRepository) GetReviewByAndFor(ctx context.Context, reviewer strin
 		if err != nil {
 			return nil, errors.NewInternalServerError(err.Error())
 		}
-		fmt.Println(values)
+
 		review.ID = values[0].(string)
 		review.Reviewed.ID = values[1].(string)
 		review.Reviewer.ID = values[2].(string)
@@ -87,7 +93,29 @@ func (r *reviewRepository) GetReviewByAndFor(ctx context.Context, reviewer strin
 	return &review, nil
 }
 
-// EditReview only changes the tags in a review. Nothing else
-func (r *reviewRepository) EditReview(ctx context.Context, review *domain.Review) error {
-	panic("implement me")
+// UpdateReviewTags only changes the tags in a review. Nothing else
+func (r *reviewRepository) UpdateReviewTags(ctx context.Context, review *domain.Review) error {
+	// delete existing tags
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+
+	_, err = tx.Exec(ctx, deleteExistingTags, review.ID)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+
+	// add the new ones
+	err = r.addTags(ctx, review)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+
+	return nil
 }

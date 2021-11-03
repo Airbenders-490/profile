@@ -27,4 +27,5 @@ func mapTagURLs(h *tagHttp.TagHandler, r *gin.Engine) {
 
 func mapReviewURLs(h *reviewHttp.ReviewHandler, r *gin.Engine) {
 	r.POST("/review/:reviewed", h.AddReview)
+	r.PUT("/review/:reviewed/update", h.EditReview)
 }

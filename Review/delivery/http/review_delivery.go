@@ -51,3 +51,37 @@ func (h *ReviewHandler) AddReview(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, createdReview)
 }
+
+// EditReview alters the tags for the review
+func (h *ReviewHandler) EditReview(c *gin.Context) {
+	reviewed := c.Param("reviewed")
+	if reviewed == "" {
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("must provide reviewed id"))
+		return
+	}
+
+	var review domain.Review
+	err := c.ShouldBindJSON(&review)
+	if err != nil || review.Reviewed.ID == "" || review.Tags == nil {
+		fmt.Println(review, err.Error())
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid review body"))
+		return
+	}
+
+	ctx := c.Request.Context()
+	// todo: get this from auth!
+	reviewer := "asda"
+	updatedReview, err := h.u.EditReview(ctx, &review, reviewer)
+	if err != nil {
+		switch v := err.(type) {
+		case *errors.RestError:
+			c.JSON(v.Code, v)
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, errors.NewInternalServerError(err.Error()))
+			return
+		}
+	}
+
+	c.JSON(http.StatusCreated, updatedReview)
+}
