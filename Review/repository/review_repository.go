@@ -5,7 +5,6 @@ import (
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/utils/errors"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"log"
 	"time"
 )
 
@@ -19,11 +18,12 @@ func NewReviewRepository(db *pgxpool.Pool) domain.ReviewRepository {
 }
 
 const (
-	insertReview      = `INSERT INTO review (id, reviewed, reviewer, created_at) VALUES ($1, $2, $3, $4);`
-	joinWithTags      = `INSERT INTO review_tag (review_id, tag_name) VALUES ($1, $2)`
-	getReviewForAndBy = `SELECT * FROM review WHERE reviewed=$1 and reviewer=$2`
-
+	insertReview       = `INSERT INTO review (id, reviewed, reviewer, created_at) VALUES ($1, $2, $3, $4);`
+	joinWithTags       = `INSERT INTO review_tag (review_id, tag_name) VALUES ($1, $2)`
+	getReviewForAndBy  = `SELECT * FROM review WHERE reviewed=$1 and reviewer=$2`
+	getReviewsFor      = `SELECT * FROM review WHERE reviewed=$1`
 	deleteExistingTags = `DELETE FROM review_tag WHERE review_id=$1`
+	getTagsFor         = `SELECT tag_name FROM review_tag WHERE review_id=$1`
 )
 
 // AddReview adds the review to the review table as well as joins the tags
@@ -68,6 +68,28 @@ func (r *reviewRepository) addTags(ctx context.Context, review *domain.Review) e
 	return nil
 }
 
+func (r *reviewRepository) getTagsFor(ctx context.Context, review *domain.Review) ([]domain.Tag, error) {
+	rows, err := r.db.Query(ctx, getTagsFor, review.ID)
+	if err != nil {
+		return nil, errors.NewInternalServerError(err.Error())
+	}
+
+	var tags []domain.Tag
+	for rows.Next() {
+		values, err := rows.Values()
+		if err != nil {
+			return nil, errors.NewInternalServerError(err.Error())
+		}
+
+		var tag domain.Tag
+		tag.Name = values[0].(string)
+
+		tags = append(tags, tag)
+	}
+
+	return tags, nil
+}
+
 // GetReviewByAndFor returns a review if it exists. Otherwise, returns nil. CAN RETURN nil, nil if no error and no
 // review is found!
 func (r *reviewRepository) GetReviewByAndFor(ctx context.Context, reviewer string, reviewed string) (*domain.Review, error) {
@@ -89,7 +111,6 @@ func (r *reviewRepository) GetReviewByAndFor(ctx context.Context, reviewer strin
 		review.CreatedAt = values[3].(time.Time)
 	}
 
-	log.Println(review, err)
 	return &review, nil
 }
 
@@ -118,4 +139,35 @@ func (r *reviewRepository) UpdateReviewTags(ctx context.Context, review *domain.
 	}
 
 	return nil
+}
+
+func (r *reviewRepository) GetReviewsFor(ctx context.Context, reviewed string) ([]domain.Review, error) {
+	rows, err := r.db.Query(ctx, getReviewsFor, reviewed)
+	if err != nil {
+		return nil, errors.NewInternalServerError(err.Error())
+	}
+
+	var reviews []domain.Review
+	for rows.Next() {
+		value, err := rows.Values()
+		if err != nil {
+			return nil, errors.NewInternalServerError(err.Error())
+		}
+
+		var review domain.Review
+		review.ID = value[0].(string)
+		review.Reviewed.ID = value[1].(string)
+		review.Reviewer.ID = value[2].(string)
+		review.CreatedAt = value[3].(time.Time)
+
+		tags, err := r.getTagsFor(ctx, &review)
+		if err != nil {
+			return nil, errors.NewInternalServerError(err.Error())
+		}
+		review.Tags = tags
+
+		reviews = append(reviews, review)
+	}
+
+	return reviews, nil
 }
