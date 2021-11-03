@@ -2,6 +2,9 @@ package app
 
 import (
 	"context"
+	http4 "github.com/airbenders/profile/Review/delivery/http"
+	repository4 "github.com/airbenders/profile/Review/repository"
+	usecase4 "github.com/airbenders/profile/Review/usecase"
 	http2 "github.com/airbenders/profile/School/delivery/http"
 	repository2 "github.com/airbenders/profile/School/repository"
 	usecase2 "github.com/airbenders/profile/School/usecase"
@@ -23,11 +26,13 @@ import (
 func Server(
 	studentHandler *http.StudentHandler,
 	schoolHandler *http2.SchoolHandler,
-	tagHandler *http3.TagHandler) *gin.Engine {
+	tagHandler *http3.TagHandler,
+	reviewHandler *http4.ReviewHandler) *gin.Engine {
 	router := gin.Default()
 	mapStudentURLs(studentHandler, router)
 	mapSchoolURLs(schoolHandler, router)
 	mapTagURLs(tagHandler, router)
+	mapReviewURLs(reviewHandler, router)
 	return router
 }
 
@@ -51,6 +56,10 @@ func Start() {
 	tagUseCase := usecase3.NewTagUseCase(tagRepository, time.Second)
 	tagHandler := http3.NewTagHandler(tagUseCase)
 
-	router := Server(studentHandler, schoolHandler, tagHandler)
+	reviewRepository := repository4.NewReviewRepository(pool)
+	reviewUseCase := usecase4.NewReviewUseCase(reviewRepository, studentRepository, time.Second)
+	reviewHandler := http4.NewReviewHandler(reviewUseCase)
+
+	router := Server(studentHandler, schoolHandler, tagHandler, reviewHandler)
 	router.Run()
 }

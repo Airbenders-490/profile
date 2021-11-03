@@ -1,6 +1,7 @@
 package app
 
 import (
+	reviewHttp "github.com/airbenders/profile/Review/delivery/http"
 	schoolHttp "github.com/airbenders/profile/School/delivery/http"
 	"github.com/airbenders/profile/Student/delivery/http"
 	tagHttp "github.com/airbenders/profile/Tag/delivery/http"
@@ -22,4 +23,8 @@ func mapSchoolURLs(h *schoolHttp.SchoolHandler, r *gin.Engine) {
 
 func mapTagURLs(h *tagHttp.TagHandler, r *gin.Engine) {
 	r.GET("/all-tags", h.GetAllTags)
+}
+
+func mapReviewURLs(h *reviewHttp.ReviewHandler, r *gin.Engine) {
+	r.POST("/review/:reviewed", h.AddReview)
 }
