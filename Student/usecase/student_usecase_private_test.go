@@ -14,8 +14,8 @@ func TestUpdateStudent(t *testing.T) {
 	_ = faker.FakeData(&school)
 	existing := &domain.Student{
 		ID:          "asd",
-		FirstName:        "Sunny",
-		LastName:        "Moony",
+		FirstName:   "Sunny",
+		LastName:    "Moony",
 		Email:       "none@gmail.com",
 		GeneralInfo: "I like plants",
 		CreatedAt:   now,
@@ -30,8 +30,8 @@ func TestUpdateStudent(t *testing.T) {
 	}
 	expected := &domain.Student{
 		ID:          "asd",
-		FirstName:        "Sunny",
-		LastName:        "Moony",
+		FirstName:   "Sunny",
+		LastName:    "Moony",
 		Email:       "something@gmail.com",
 		GeneralInfo: "I like plants",
 		CreatedAt:   now,

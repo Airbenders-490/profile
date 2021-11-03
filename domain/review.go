@@ -13,6 +13,7 @@ type Review struct {
 	Tags      []Tag `json:"tags"`
 }
 
+// ReviewUseCase is the contract every use case must employ
 type ReviewUseCase interface {
 	AddReview(review *Review, reviewerID int) (*Review, error)
 	EditReview(review *Review, reviewerID int) (*Review, error)
