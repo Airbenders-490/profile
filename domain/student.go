@@ -7,11 +7,11 @@ import (
 
 // Student struct
 type Student struct {
-	ID          string `json:"id"` //uuid string
-	FirstName   string `json:"first_name"`
-	LastName    string `json:"last_name"`
-	Email       string `json:"email"` //TODO: validate:required
-	GeneralInfo string `json:"general_info"`
+	ID          string  `json:"id"` //uuid string
+	FirstName   string  `json:"first_name"`
+	LastName    string  `json:"last_name"`
+	Email       string  `json:"email"` //TODO: validate:required
+	GeneralInfo string  `json:"general_info"`
 	School      *School `json:"school"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time

@@ -3,6 +3,7 @@ package app
 import (
 	schoolHttp "github.com/airbenders/profile/School/delivery/http"
 	"github.com/airbenders/profile/Student/delivery/http"
+	tagHttp "github.com/airbenders/profile/Tag/delivery/http"
 	"github.com/gin-gonic/gin"
 )
 
@@ -13,11 +14,12 @@ func mapStudentURLs(h *http.StudentHandler, r *gin.Engine) {
 	r.DELETE("/student/:id", h.Delete)
 }
 
-// {"AI123", "Adam"}
-// {"BI123", "Adam"}
-
 func mapSchoolURLs(h *schoolHttp.SchoolHandler, r *gin.Engine) {
 	r.GET("/school", h.SearchStudentSchool)
 	r.POST("/school/confirm", h.SendConfirmationMail)
 	r.GET("/school/confirmation", h.ConfirmSchoolRegistration)
+}
+
+func mapTagURLs(h *tagHttp.TagHandler, r *gin.Engine) {
+	r.GET("/all-tags", h.GetAllTags)
 }
