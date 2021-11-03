@@ -47,7 +47,7 @@ func (h *SchoolHandler) SearchStudentSchool(c *gin.Context) {
 func (h *SchoolHandler) SendConfirmationMail(c *gin.Context) {
 	ctx := c.Request.Context()
 	email := c.Query("email")
-	if email  == "" {
+	if email == "" {
 		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("must provide a valid email"))
 		return
 	}
@@ -77,7 +77,7 @@ func (h *SchoolHandler) SendConfirmationMail(c *gin.Context) {
 func (h *SchoolHandler) ConfirmSchoolRegistration(c *gin.Context) {
 	ctx := c.Request.Context()
 	token := c.Query("token")
-	if token  == "" {
+	if token == "" {
 		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("must provide a valid email"))
 		return
 	}

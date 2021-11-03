@@ -18,8 +18,8 @@ import (
 
 type schoolUseCase struct {
 	r       domain.SchoolRepository
-	str domain.StudentRepository
-	mailer utils.Mailer
+	str     domain.StudentRepository
+	mailer  utils.Mailer
 	timeout time.Duration
 }
 
@@ -76,7 +76,7 @@ func parseDomainName(name string) string {
 // SendConfirmation sends an email to the student's school email address with a generated token
 // also stores the token in the repository with the student's and school's IDs for confirmation later
 func (s *schoolUseCase) SendConfirmation(c context.Context, st *domain.Student, email string, school *domain.School) error {
-	ctx, cancel :=  context.WithTimeout(c, s.timeout)
+	ctx, cancel := context.WithTimeout(c, s.timeout)
 	defer cancel()
 
 	student, err := s.str.GetByID(ctx, st.ID)
@@ -123,13 +123,13 @@ func createEmailBody(name, school, url string) []byte {
 	mimeHeaders := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
 	body.Write([]byte(fmt.Sprintf("Subject: Anonymous app confirmation email\n%s\n\n", mimeHeaders)))
 	t.Execute(&body, struct {
-		Name string
+		Name   string
 		School string
-		Email string
+		Email  string
 	}{
-		Name: name,
+		Name:   name,
 		School: school,
-		Email: url,
+		Email:  url,
 	})
 
 	return body.Bytes()
@@ -148,7 +148,7 @@ func (s *schoolUseCase) ConfirmSchoolEnrollment(c context.Context, token string)
 	if reflect.DeepEqual(*confirmation, domain.Confirmation{}) {
 		return errors.NewNotFoundError("invalid token")
 	}
-	if confirmation.CreatedAt.Add(time.Hour*24).Before(time.Now()) {
+	if confirmation.CreatedAt.Add(time.Hour * 24).Before(time.Now()) {
 		return errors.NewBadRequestError("token already expired")
 	}
 

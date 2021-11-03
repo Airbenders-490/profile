@@ -25,7 +25,7 @@ const (
 	insertConfirmation = `INSERT INTO public.confirmation(
 	token, sc_id, st_id, created_at)
 	VALUES ($1, $2, $3, $4);`
-	getConfirmationByToken = `SELECT token, sc_id, st_id, created_at FROM confirmation WHERE token=$1`
+	getConfirmationByToken  = `SELECT token, sc_id, st_id, created_at FROM confirmation WHERE token=$1`
 	updateStudentWithSchool = `UPDATE public.student
 	SET school=$1 WHERE id=$2;`
 )
@@ -60,23 +60,23 @@ func (r *schoolRepository) SearchByDomain(ctx context.Context, domainName string
 
 // SaveConfirmationToken saves the token which will be used to confirm student's school. Returns nil if can't save
 func (r *schoolRepository) SaveConfirmationToken(ctx context.Context, confirmation *domain.Confirmation) error {
-	 tx, err := r.db.Begin(ctx)
-	 if err != nil {
-	 	return errors.NewInternalServerError(err.Error())
-	 }
-	 defer tx.Rollback(ctx)
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	defer tx.Rollback(ctx)
 
-	 _, err = tx.Exec(ctx, insertConfirmation, confirmation.Token, confirmation.School.ID, confirmation.Student.ID, confirmation.CreatedAt)
-	 if err != nil {
-		 return errors.NewInternalServerError(err.Error())
-	 }
+	_, err = tx.Exec(ctx, insertConfirmation, confirmation.Token, confirmation.School.ID, confirmation.Student.ID, confirmation.CreatedAt)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
 
-	 err = tx.Commit(ctx)
-	 if err != nil {
-	 	return errors.NewInternalServerError(err.Error())
-	 }
+	err = tx.Commit(ctx)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
 
-	 return nil
+	return nil
 }
 
 // GetConfirmationByToken returns a Confirmation with verifiable token and the student and school info.

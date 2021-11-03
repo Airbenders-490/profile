@@ -21,7 +21,7 @@ func NewSimpleMail() Mailer {
 }
 
 type simpleMail struct {
-	from string
+	from     string
 	password string
 	// smtp.gmail.com
 	smtpHost string
@@ -32,5 +32,5 @@ type simpleMail struct {
 // SendSimpleMail utilizes the golang smtp library to send a simple mail
 func (s simpleMail) SendSimpleMail(to string, body []byte) error {
 	auth := smtp.PlainAuth("Stud Pal", s.from, s.password, s.smtpHost)
-	return smtp.SendMail(s.smtpHost + ":" + s.smtpPort, auth, s.from, []string{to}, body)
+	return smtp.SendMail(s.smtpHost+":"+s.smtpPort, auth, s.from, []string{to}, body)
 }
