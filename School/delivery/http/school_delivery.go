@@ -9,14 +9,17 @@ import (
 	"reflect"
 )
 
+// SchoolHandler struct
 type SchoolHandler struct {
 	u domain.SchoolUseCase
 }
 
+// NewSchoolHandler returns a new SchoolHandler
 func NewSchoolHandler(u domain.SchoolUseCase) *SchoolHandler {
 	return &SchoolHandler{u}
 }
 
+// SearchStudentSchool is an endpoint that returns schools that matches the name
 func (h *SchoolHandler) SearchStudentSchool(c *gin.Context) {
 	domainName, ok := c.GetQuery("domain")
 	if !ok || domainName == "" {
@@ -40,6 +43,7 @@ func (h *SchoolHandler) SearchStudentSchool(c *gin.Context) {
 	c.JSON(http.StatusOK, schools)
 }
 
+// SendConfirmationMail sends email to the client for school confirmation
 func (h *SchoolHandler) SendConfirmationMail(c *gin.Context) {
 	ctx := c.Request.Context()
 	email := c.Query("email")
@@ -69,6 +73,7 @@ func (h *SchoolHandler) SendConfirmationMail(c *gin.Context) {
 	c.JSON(200, httputils.NewResponse("email sent"))
 }
 
+// ConfirmSchoolRegistration is an internal endpoint (not accessible from the app) that is embedded in the email
 func (h *SchoolHandler) ConfirmSchoolRegistration(c *gin.Context) {
 	ctx := c.Request.Context()
 	token := c.Query("token")

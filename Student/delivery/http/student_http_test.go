@@ -38,6 +38,9 @@ func TestStudentHandler_GetByID(t *testing.T) {
 
 		assert.Equal(t, response.StatusCode, 200)
 		responseBody, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			assert.Fail(t, "failed to read from message")
+		}
 		var receivedStudent domain.Student
 		err = json.Unmarshal(responseBody, &receivedStudent)
 		assert.NoError(t, err)
@@ -58,6 +61,9 @@ func TestStudentHandler_GetByID(t *testing.T) {
 
 		assert.Equal(t, response.StatusCode, 404)
 		responseBody, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			assert.Fail(t, "failed to read from message")
+		}
 		var restError e.RestError
 		err = json.Unmarshal(responseBody, &restError)
 		assert.NoError(t, err)
@@ -131,7 +137,11 @@ func TestStudentHandler_Create(t *testing.T) {
 		defer response.Body.Close()
 
 		assert.Equal(t, 400, response.StatusCode)
-		responseBody, err := ioutil.ReadAll(response.Body)
+		var responseBody []byte
+		responseBody, err = ioutil.ReadAll(response.Body)
+		if err != nil {
+			assert.Fail(t, "failed to read from message")
+		}
 		var restError e.RestError
 		err = json.Unmarshal(responseBody, &restError)
 		assert.NoError(t, err)
@@ -151,7 +161,11 @@ func TestStudentHandler_Create(t *testing.T) {
 		defer response.Body.Close()
 
 		assert.Equal(t, restErr.Code, response.StatusCode)
-		responseBody, err := ioutil.ReadAll(response.Body)
+		var responseBody []byte
+		responseBody, err = ioutil.ReadAll(response.Body)
+		if err != nil {
+			assert.Fail(t, "failed to read from message")
+		}
 		var receivedError e.RestError
 		err = json.Unmarshal(responseBody, &receivedError)
 		assert.NoError(t, err)

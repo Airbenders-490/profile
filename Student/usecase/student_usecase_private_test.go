@@ -11,7 +11,7 @@ import (
 func TestUpdateStudent(t *testing.T) {
 	now := time.Now()
 	var school domain.School
-	faker.FakeData(&school)
+	_ = faker.FakeData(&school)
 	existing := &domain.Student{
 		ID:          "asd",
 		FirstName:        "Sunny",

@@ -13,6 +13,7 @@ type studentRepository struct {
 	db *pgxpool.Pool
 }
 
+// NewStudentRepository is the constructor
 func NewStudentRepository(db *pgxpool.Pool) domain.StudentRepository {
 	return &studentRepository{
 		db: db,
@@ -32,6 +33,7 @@ const (
 	WHERE id=$1;`
 )
 
+// Create stores the student in the db. Returns err if unable to
 func (r *studentRepository) Create(ctx context.Context, id string, st *domain.Student) error {
 	fmt.Println(st)
 	tx, err := r.db.Begin(ctx)
@@ -52,6 +54,7 @@ func (r *studentRepository) Create(ctx context.Context, id string, st *domain.St
 	return nil
 }
 
+// GetByID returns either an empty student or valid student if it exsits. Returns nil and error if there's some db error
 func (r *studentRepository) GetByID(ctx context.Context, id string) (*domain.Student, error) {
 	rows, err := r.db.Query(ctx, selectByID, id)
 	if err != nil {
@@ -83,6 +86,7 @@ func (r *studentRepository) GetByID(ctx context.Context, id string) (*domain.Stu
 	return &student, nil
 }
 
+// Update changes the record in the db. Returns err if isn't able to
 func (r *studentRepository) Update(ctx context.Context, st *domain.Student) error {
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -102,6 +106,7 @@ func (r *studentRepository) Update(ctx context.Context, st *domain.Student) erro
 	return nil
 }
 
+// Delete deletes the record in the db. Returns err if isn't able to
 func (r *studentRepository) Delete(ctx context.Context, id string) error {
 	tx, err := r.db.Begin(ctx)
 	if err != nil {

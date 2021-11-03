@@ -13,6 +13,9 @@ func mapStudentURLs(h *http.StudentHandler, r *gin.Engine) {
 	r.DELETE("/student/:id", h.Delete)
 }
 
+// {"AI123", "Adam"}
+// {"BI123", "Adam"}
+
 func mapSchoolURLs(h *schoolHttp.SchoolHandler, r *gin.Engine) {
 	r.GET("/school", h.SearchStudentSchool)
 	r.POST("/school/confirm", h.SendConfirmationMail)

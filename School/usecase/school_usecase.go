@@ -23,10 +23,13 @@ type schoolUseCase struct {
 	timeout time.Duration
 }
 
+// NewSchoolUseCase is the constructor
 func NewSchoolUseCase(r domain.SchoolRepository, str domain.StudentRepository, mailer utils.Mailer, timeout time.Duration) domain.SchoolUseCase {
 	return &schoolUseCase{r, str, mailer, timeout}
 }
 
+// SearchSchoolByDomain doesn't do much processing. just returns the school slice if received from the repository.
+// returns nil and 404 error if there are no schools
 func (s *schoolUseCase) SearchSchoolByDomain(c context.Context, domainName string) ([]domain.School, error) {
 	ctx, cancel := context.WithTimeout(c, s.timeout)
 	defer cancel()
@@ -70,6 +73,8 @@ func parseDomainName(name string) string {
 	return domainNameLike.String()
 }
 
+// SendConfirmation sends an email to the student's school email address with a generated token
+// also stores the token in the repository with the student's and school's IDs for confirmation later
 func (s *schoolUseCase) SendConfirmation(c context.Context, st *domain.Student, email string, school *domain.School) error {
 	ctx, cancel :=  context.WithTimeout(c, s.timeout)
 	defer cancel()
@@ -90,8 +95,8 @@ func (s *schoolUseCase) SendConfirmation(c context.Context, st *domain.Student, 
 	if domainName == "" {
 		log.Fatalln("Domain name not provided")
 	}
-	confirmationUrl := fmt.Sprintf("%s/school/confirmation", domainName)
-	url := fmt.Sprintf("%s?token=%s", confirmationUrl, token)
+	confirmationURL := fmt.Sprintf("%s/school/confirmation", domainName)
+	url := fmt.Sprintf("%s?token=%s", confirmationURL, token)
 
 	confirmation := &domain.Confirmation{
 		Token:     token,
@@ -130,6 +135,8 @@ func createEmailBody(name, school, url string) []byte {
 	return body.Bytes()
 }
 
+// ConfirmSchoolEnrollment checks if the record for the token exists in the repository.
+// if it does, it checks to ensure it's more than 24 hours old
 func (s *schoolUseCase) ConfirmSchoolEnrollment(c context.Context, token string) error {
 	ctx, cancel := context.WithTimeout(c, s.timeout)
 	defer cancel()

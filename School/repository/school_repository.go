@@ -12,6 +12,7 @@ type schoolRepository struct {
 	db *pgxpool.Pool
 }
 
+// NewSchoolRepository returns an instance of school repository
 func NewSchoolRepository(db *pgxpool.Pool) domain.SchoolRepository {
 	return &schoolRepository{
 		db: db,
@@ -29,6 +30,7 @@ const (
 	SET school=$1 WHERE id=$2;`
 )
 
+// SearchByDomain finds the schools matching the domain name pattern. Otherwise returns an empty slice
 func (r *schoolRepository) SearchByDomain(ctx context.Context, domainName string) ([]domain.School, error) {
 	rows, err := r.db.Query(ctx, findByDomain, domainName)
 	if err != nil {
@@ -56,7 +58,7 @@ func (r *schoolRepository) SearchByDomain(ctx context.Context, domainName string
 	return schools, nil
 }
 
-
+// SaveConfirmationToken saves the token which will be used to confirm student's school. Returns nil if can't save
 func (r *schoolRepository) SaveConfirmationToken(ctx context.Context, confirmation *domain.Confirmation) error {
 	 tx, err := r.db.Begin(ctx)
 	 if err != nil {
@@ -77,6 +79,8 @@ func (r *schoolRepository) SaveConfirmationToken(ctx context.Context, confirmati
 	 return nil
 }
 
+// GetConfirmationByToken returns a Confirmation with verifiable token and the student and school info.
+// Return empty confirmation if no such record found
 func (r *schoolRepository) GetConfirmationByToken(ctx context.Context, token string) (*domain.Confirmation, error) {
 	rows, err := r.db.Query(ctx, getConfirmationByToken, token)
 	if err != nil {
@@ -102,6 +106,8 @@ func (r *schoolRepository) GetConfirmationByToken(ctx context.Context, token str
 	return &confirmation, nil
 }
 
+// AddSchoolForStudent is invoked when the student's school is confirmed. Student table is altered to store the school
+// ID now
 func (r *schoolRepository) AddSchoolForStudent(ctx context.Context, stID string, scID string) error {
 	tx, err := r.db.Begin(ctx)
 	if err != nil {

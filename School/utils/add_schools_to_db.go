@@ -35,9 +35,9 @@ func addSchoolsToDB() {
 	defer tx.Rollback(context.Background())
 
 	var schools []domain.School
-	resp, _ := http.Get("https://raw.githubusercontent.com/Hipo/university-domains-list/master/world_universities_and_domains.json")
-	schoolJson, _ := ioutil.ReadAll(resp.Body)
-	_ = json.Unmarshal(schoolJson, &schools)
+	resp, _ := http.Get("https://raw.githubusercontent.com/Hipo/university-domains-list/master/world_universities_and_domains.JSON")
+	schoolJSON, _ := ioutil.ReadAll(resp.Body)
+	_ = json.Unmarshal(schoolJSON, &schools)
 
 	for _, school := range schools {
 		school.ID = uuid.New().String()

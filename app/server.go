@@ -16,6 +16,7 @@ import (
 	"time"
 )
 
+// Server is a constructor. Returns the router after mapping all the urls
 func Server(studentHandler *http.StudentHandler, schoolHandler *http2.SchoolHandler) *gin.Engine {
 	router := gin.Default()
 	mapStudentURLs(studentHandler, router)
