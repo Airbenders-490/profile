@@ -22,6 +22,7 @@ type ReviewUseCase interface {
 
 // ReviewRepository is the contract every review repository must employ
 type ReviewRepository interface {
+	GetReviewsFor(ctx context.Context, reviewed string) ([]Review, error)
 	GetReviewByAndFor(ctx context.Context, reviewer string, reviewed string) (*Review, error)
 	AddReview(ctx context.Context, review *Review) error
 	UpdateReviewTags(ctx context.Context, review *Review) error

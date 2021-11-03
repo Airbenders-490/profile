@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/utils/errors"
+	"log"
 	"reflect"
 	"time"
 )
@@ -12,13 +13,15 @@ import (
 type studentUseCase struct {
 	studentRepository domain.StudentRepository
 	//TODO: add review and possibly tag repositories to fetch their data too
-	contextTimeout time.Duration
+	reviewRepository domain.ReviewRepository
+	contextTimeout   time.Duration
 }
 
 // NewStudentUseCase returns a configured StudentUseCase
-func NewStudentUseCase(sr domain.StudentRepository, timeout time.Duration) domain.StudentUseCase {
+func NewStudentUseCase(sr domain.StudentRepository, rr domain.ReviewRepository, timeout time.Duration) domain.StudentUseCase {
 	return &studentUseCase{
 		studentRepository: sr,
+		reviewRepository:  rr,
 		contextTimeout:    timeout,
 	}
 }
@@ -60,6 +63,13 @@ func (s *studentUseCase) GetByID(c context.Context, id string) (*domain.Student,
 	if reflect.DeepEqual(student, &domain.Student{}) {
 		return nil, errors.NewNotFoundError(fmt.Sprintf("No such student with ID %s exists", id))
 	}
+
+	reviews, err := s.reviewRepository.GetReviewsFor(ctx, student.ID)
+	if err != nil {
+		log.Println("Can't get the reviews right now.")
+	}
+	student.Reviews = reviews
+
 	return student, nil
 }
 

@@ -15,6 +15,7 @@ type Student struct {
 	School      *School `json:"school"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+	Reviews     []Review `json:"reviews"`
 }
 
 // StudentUseCase interface defines the functions all studentUseCases should have

@@ -44,7 +44,8 @@ func Start() {
 	}
 
 	studentRepository := repository.NewStudentRepository(pool)
-	studentUseCase := usecase.NewStudentUseCase(studentRepository, time.Second)
+	reviewRepository := repository4.NewReviewRepository(pool)
+	studentUseCase := usecase.NewStudentUseCase(studentRepository, reviewRepository, time.Second)
 	studentHandler := http.NewStudentHandler(studentUseCase)
 
 	schoolRepository := repository2.NewSchoolRepository(pool)
@@ -56,7 +57,6 @@ func Start() {
 	tagUseCase := usecase3.NewTagUseCase(tagRepository, time.Second)
 	tagHandler := http3.NewTagHandler(tagUseCase)
 
-	reviewRepository := repository4.NewReviewRepository(pool)
 	reviewUseCase := usecase4.NewReviewUseCase(reviewRepository, studentRepository, time.Second)
 	reviewHandler := http4.NewReviewHandler(reviewUseCase)
 
