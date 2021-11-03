@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"context"
 	"time"
 )
 
@@ -15,7 +16,13 @@ type Review struct {
 
 // ReviewUseCase is the contract every use case must employ
 type ReviewUseCase interface {
-	AddReview(review *Review, reviewerID int) (*Review, error)
-	EditReview(review *Review, reviewerID int) (*Review, error)
-	DeleteReview(review *Review, reviewerID int) error
+	AddReview(ctx context.Context, review *Review, reviewerID string) (*Review, error)
+	EditReview(ctx context.Context, review *Review, reviewerID string) (*Review, error)
+}
+
+// ReviewRepository is the contract every review repository must employ
+type ReviewRepository interface {
+	GetReviewByAndFor(ctx context.Context, reviewer string, reviewed string) (*Review, error)
+	AddReview(ctx context.Context, review *Review) error
+	EditReview(ctx context.Context, review *Review) error
 }
