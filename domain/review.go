@@ -24,5 +24,5 @@ type ReviewUseCase interface {
 type ReviewRepository interface {
 	GetReviewByAndFor(ctx context.Context, reviewer string, reviewed string) (*Review, error)
 	AddReview(ctx context.Context, review *Review) error
-	EditReview(ctx context.Context, review *Review) error
+	UpdateReviewTags(ctx context.Context, review *Review) error
 }

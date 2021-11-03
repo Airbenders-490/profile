@@ -199,7 +199,7 @@ func TestStudentHandler_Create(t *testing.T) {
 func TestStudentHandler_Update(t *testing.T) {
 	mockUseCase := new(mocks.StudentUseCase)
 	h := &http.StudentHandler{UseCase: mockUseCase}
-	r := app.Server (h, nil, nil, nil)
+	r := app.Server(h, nil, nil, nil)
 	var mockStudent domain.Student
 	err := faker.FakeData(&mockStudent)
 	assert.NoError(t, err)
