@@ -8,6 +8,9 @@ import (
 	"github.com/airbenders/profile/Student/delivery/http"
 	"github.com/airbenders/profile/Student/repository"
 	"github.com/airbenders/profile/Student/usecase"
+	http3 "github.com/airbenders/profile/Tag/delivery/http"
+	repository3 "github.com/airbenders/profile/Tag/repository"
+	usecase3 "github.com/airbenders/profile/Tag/usecase"
 	"github.com/airbenders/profile/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -17,10 +20,14 @@ import (
 )
 
 // Server is a constructor. Returns the router after mapping all the urls
-func Server(studentHandler *http.StudentHandler, schoolHandler *http2.SchoolHandler) *gin.Engine {
+func Server(
+	studentHandler *http.StudentHandler,
+	schoolHandler *http2.SchoolHandler,
+	tagHandler *http3.TagHandler) *gin.Engine {
 	router := gin.Default()
 	mapStudentURLs(studentHandler, router)
 	mapSchoolURLs(schoolHandler, router)
+	mapTagURLs(tagHandler, router)
 	return router
 }
 
@@ -40,6 +47,10 @@ func Start() {
 	schoolUseCase := usecase2.NewSchoolUseCase(schoolRepository, studentRepository, mail, time.Second)
 	schoolHandler := http2.NewSchoolHandler(schoolUseCase)
 
-	router := Server(studentHandler, schoolHandler)
+	tagRepository := repository3.NewTagRepository(pool)
+	tagUseCase := usecase3.NewTagUseCase(tagRepository, time.Second)
+	tagHandler := http3.NewTagHandler(tagUseCase)
+
+	router := Server(studentHandler, schoolHandler, tagHandler)
 	router.Run()
 }

@@ -22,5 +22,5 @@ type SchoolRepository interface {
 	SearchByDomain(ctx context.Context, name string) ([]School, error)
 	SaveConfirmationToken(ctx context.Context, confirmation *Confirmation) error
 	GetConfirmationByToken(ctx context.Context, token string) (*Confirmation, error)
-	AddSchoolForStudent(ctx context.Context, stID ,scID string) error
+	AddSchoolForStudent(ctx context.Context, stID, scID string) error
 }

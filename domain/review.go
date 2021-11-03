@@ -1,6 +1,8 @@
 package domain
 
-import "time"
+import (
+	"time"
+)
 
 // Review struct
 type Review struct {
@@ -9,4 +11,10 @@ type Review struct {
 	Reviewer  Student `json:"reviewer"`
 	CreatedAt time.Time
 	Tags      []Tag `json:"tags"`
+}
+
+type ReviewUseCase interface {
+	AddReview(review *Review, reviewerID int) (*Review, error)
+	EditReview(review *Review, reviewerID int) (*Review, error)
+	DeleteReview(review *Review, reviewerID int) error
 }
