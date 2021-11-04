@@ -6,19 +6,21 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// SchoolUseCase Mock struct
 type SchoolUseCase struct {
 	mock.Mock
 }
 
-func (m *SchoolUseCase) SearchSchoolByDomain(c context.Context, domainName string) (*[]domain.School, error){
+// SearchSchoolByDomain - SchoolUseCase
+func (m *SchoolUseCase) SearchSchoolByDomain(c context.Context, domainName string) ([]domain.School, error){
 	args := m.Called(c, domainName)
 
-	var r0 *[]domain.School
-	if rf, ok := args.Get(0).(func(context.Context, string) *[]domain.School); ok{
+	var r0 []domain.School
+	if rf, ok := args.Get(0).(func(context.Context, string) []domain.School); ok{
 		r0 = rf(c, domainName)
 	}else{
 		if args.Get(0) != nil{
-			r0 = args.Get(0).(*[]domain.School)
+			r0 = args.Get(0).([]domain.School)
 		}
 	}
 	var r1 error
@@ -30,6 +32,7 @@ func (m *SchoolUseCase) SearchSchoolByDomain(c context.Context, domainName strin
 	return r0, r1
 }
 
+// SendConfirmation - SchoolUseCase
 func (m *SchoolUseCase) SendConfirmation(c context.Context, st *domain.Student, email string, school *domain.School) error {
 	args := m.Called(c, st, email, school)
 
@@ -42,6 +45,7 @@ func (m *SchoolUseCase) SendConfirmation(c context.Context, st *domain.Student, 
 	return r0
 }
 
+// ConfirmSchoolEnrollment - SchoolUseCase
 func (m *SchoolUseCase) ConfirmSchoolEnrollment(c context.Context, token string) error {
 	args := m.Called(c, token)
 
