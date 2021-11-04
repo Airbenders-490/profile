@@ -8,6 +8,7 @@ import (
 	"github.com/bxcodec/faker/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -23,12 +24,42 @@ func TestSearchSchoolByDomain(t *testing.T) {
 			On("SearchSchoolByDomain", mock.Anything, mock.AnythingOfType("string")).
 			Return(nil, errors.New("error")).
 			Once()
-		u := NewSchoolUseCase(mockSchoolRepo, mockStudentRepo , nil , time.Second)
+		u := usercase.NewSchoolUseCase(mockSchoolRepo, mockStudentRepo , nil , time.Second)
 
-		school, err := u.SearchSchoolByDomain(context.TODO(), &mockSchool)
+		school, err := u.SearchSchoolByDomain(context.TODO(), mockSchool.Name)
 
 		assert.NotNil(t, school)
 		assert.NoError(t, err)
+
+		mockSchoolRepo.AssertExpectations(t)
+	})
+
+	t.Run("case error", func(t *testing.T) {
+		mockSchoolRepo.
+			On("SearchSchoolByDomain", mock.Anything, mock.AnythingOfType("string")).
+			Return(nil, errors.New("error")).
+			Once()
+		u := NewSchoolUseCase(mockSchoolRepo, mockStudentRepo , nil , time.Second)
+
+		school, err := u.SearchSchoolByDomain(context.TODO(), mockSchool.Name)
+
+		assert.Error(t, err)
+		assert.True(t, reflect.ValueOf(school).IsNil())
+
+		mockSchoolRepo.AssertExpectations(t)
+	})
+
+	t.Run("case err-empty-student", func(t *testing.T) {
+		mockSchoolRepo.
+			On("SearchSchoolByDomain", mock.Anything, mock.AnythingOfType("string")).
+			Return(nil, errors.New("error")).
+			Once()
+		u := NewSchoolUseCase(mockSchoolRepo, mockStudentRepo , nil , time.Second)
+
+		school, err := u.SearchSchoolByDomain(context.TODO(), mockSchool.Name)
+
+		assert.Error(t, err)
+		assert.True(t, reflect.ValueOf(school).IsNil())
 
 		mockSchoolRepo.AssertExpectations(t)
 	})
