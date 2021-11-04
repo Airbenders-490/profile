@@ -10,15 +10,15 @@ type SchoolUseCase struct {
 	mock.Mock
 }
 
-func (m *SchoolUseCase) SearchSchoolByDomain(c context.Context, domainName string) (*[]domain.School, error){
+func (m *SchoolUseCase) SearchSchoolByDomain(c context.Context, domainName string) ([]domain.School, error){
 	args := m.Called(c, domainName)
 
-	var r0 *[]domain.School
-	if rf, ok := args.Get(0).(func(context.Context, string) *[]domain.School); ok{
+	var r0 []domain.School
+	if rf, ok := args.Get(0).(func(context.Context, string) []domain.School); ok{
 		r0 = rf(c, domainName)
 	}else{
 		if args.Get(0) != nil{
-			r0 = args.Get(0).(*[]domain.School)
+			r0 = args.Get(0).([]domain.School)
 		}
 	}
 	var r1 error
