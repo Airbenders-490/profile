@@ -94,3 +94,15 @@ func (u *reviewUseCase) EditReview(c context.Context, review *domain.Review, rev
 	review.Reviewed = *student
 	return review, nil
 }
+
+func (u *reviewUseCase) GetReviewsBy(c context.Context, reviewer string) ([]domain.Review, error) {
+	ctx, cancel := context.WithTimeout(c, u.timeout)
+	defer cancel()
+
+	reviews, err := u.rr.GetReviewsFor(ctx, reviewer)
+	if err != nil {
+		return nil, err
+	}
+
+	return reviews, nil
+}
