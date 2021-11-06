@@ -29,6 +29,7 @@ func Server(
 	tagHandler *http3.TagHandler,
 	reviewHandler *http4.ReviewHandler) *gin.Engine {
 	router := gin.Default()
+
 	mapStudentURLs(studentHandler, router)
 	mapSchoolURLs(schoolHandler, router)
 	mapTagURLs(tagHandler, router)

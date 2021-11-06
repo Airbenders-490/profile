@@ -85,3 +85,27 @@ func (h *ReviewHandler) EditReview(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, updatedReview)
 }
+
+// GetReviewsBy returns the reviews made by that student
+func (h *ReviewHandler) GetReviewsBy(c *gin.Context) {
+	reviewer := c.Param("reviewer")
+	if reviewer == "" {
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("must provide reviewer id"))
+		return
+	}
+
+	ctx := c.Request.Context()
+	reviews, err := h.u.GetReviewsBy(ctx, reviewer)
+	if err != nil {
+		switch v := err.(type) {
+		case *errors.RestError:
+			c.JSON(v.Code, v)
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, errors.NewInternalServerError(err.Error()))
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, reviews)
+}

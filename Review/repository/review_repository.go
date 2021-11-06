@@ -22,6 +22,7 @@ const (
 	joinWithTags       = `INSERT INTO review_tag (review_id, tag_name) VALUES ($1, $2)`
 	getReviewForAndBy  = `SELECT * FROM review WHERE reviewed=$1 and reviewer=$2`
 	getReviewsFor      = `SELECT * FROM review WHERE reviewed=$1`
+	getReviewsBy       = `SELECT * FROM review WHERE reviewer=$1`
 	deleteExistingTags = `DELETE FROM review_tag WHERE review_id=$1`
 	getTagsFor         = `SELECT tag_name FROM review_tag WHERE review_id=$1`
 )
@@ -68,17 +69,17 @@ func (r *reviewRepository) addTags(ctx context.Context, review *domain.Review) e
 	return nil
 }
 
-func (r *reviewRepository) getTagsFor(ctx context.Context, review *domain.Review) ([]domain.Tag, error) {
+func (r *reviewRepository) getTagsFor(ctx context.Context, review *domain.Review) error {
 	rows, err := r.db.Query(ctx, getTagsFor, review.ID)
 	if err != nil {
-		return nil, errors.NewInternalServerError(err.Error())
+		return errors.NewInternalServerError(err.Error())
 	}
 
 	var tags []domain.Tag
 	for rows.Next() {
 		values, err := rows.Values()
 		if err != nil {
-			return nil, errors.NewInternalServerError(err.Error())
+			return errors.NewInternalServerError(err.Error())
 		}
 
 		var tag domain.Tag
@@ -87,7 +88,8 @@ func (r *reviewRepository) getTagsFor(ctx context.Context, review *domain.Review
 		tags = append(tags, tag)
 	}
 
-	return tags, nil
+	review.Tags = tags
+	return nil
 }
 
 // GetReviewByAndFor returns a review if it exists. Otherwise, returns nil. CAN RETURN nil, nil if no error and no
@@ -160,11 +162,40 @@ func (r *reviewRepository) GetReviewsFor(ctx context.Context, reviewed string) (
 		review.Reviewer.ID = value[2].(string)
 		review.CreatedAt = value[3].(time.Time)
 
-		tags, err := r.getTagsFor(ctx, &review)
+		err = r.getTagsFor(ctx, &review)
 		if err != nil {
 			return nil, errors.NewInternalServerError(err.Error())
 		}
-		review.Tags = tags
+
+		reviews = append(reviews, review)
+	}
+
+	return reviews, nil
+}
+
+func (r *reviewRepository) GetReviewsBy(ctx context.Context, reviewer string) ([]domain.Review, error) {
+	rows, err := r.db.Query(ctx, getReviewsBy, reviewer)
+	if err != nil {
+		return nil, errors.NewInternalServerError(err.Error())
+	}
+
+	var reviews []domain.Review
+	for rows.Next() {
+		values, err := rows.Values()
+		if err != nil {
+			return nil, errors.NewInternalServerError(err.Error())
+		}
+
+		var review domain.Review
+		review.ID = values[0].(string)
+		review.Reviewer.ID = values[1].(string)
+		review.Reviewed.ID = values[2].(string)
+		review.CreatedAt = values[3].(time.Time)
+
+		err = r.getTagsFor(ctx, &review)
+		if err != nil {
+			return nil, errors.NewInternalServerError(err.Error())
+		}
 
 		reviews = append(reviews, review)
 	}
