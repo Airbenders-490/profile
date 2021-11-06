@@ -156,10 +156,33 @@ func TestSchoolHandler_SendConfirmationMail(t *testing.T){
 		mockUseCase := new(mocks.SchoolUseCase)
 		h := http.NewSchoolHandler(mockUseCase)
 		r := app.Server(nil, h)
-		reqFound := httptest.NewRequest("PUT", fmt.Sprintf("/school/confirm?email=%s", ""), nil)
+		reqFound := httptest.NewRequest("POST", fmt.Sprintf("/school/confirm?email=%s", ""), nil)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
-		assert.Equal(t, 404, w.Code)
+		assert.Equal(t, 400, w.Code)
+	})
+
+	t.Run("confirmation-failure", func(t *testing.T) {
+		mockUseCase.On("SendConfirmation", mock.Anything,
+			mock.AnythingOfType("*domain.Student"), mock.AnythingOfType("string"),
+			mock.AnythingOfType("*domain.School")).Return(errors.New("some error")).Once()
+		postBody, err := json.Marshal(mockSchool)
+		assert.NoError(t, err)
+		reader := strings.NewReader(string(postBody))
+		response, err := server.Client().Post(fmt.Sprintf("%s/school/confirm?email=%s", server.URL, "adam.yafout@gmail.com"),
+			"application/JSON", reader)
+		assert.NoError(t, err)
+		defer response.Body.Close()
+
+		assert.Equal(t, response.StatusCode, 500)
+		_, err = ioutil.ReadAll(response.Body)
+		if err != nil {
+			assert.Fail(t, "failed to read from message")
+		}
+
+
+
+		mockUseCase.AssertExpectations(t)
 	})
 
 
