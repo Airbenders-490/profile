@@ -5,12 +5,6 @@ import (
 )
 
 type SimpleMail struct {
-	from string
-	password string
-	// smtp.gmail.com
-	smtpHost string
-	// 587
-	smtpPort string
 	mock.Mock
 }
 

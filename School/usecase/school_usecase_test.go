@@ -68,8 +68,6 @@ func TestSearchSchoolByDomain(t *testing.T) {
 func TestSendConfirmation(t *testing.T) {
 	mockSchoolRepo := new(mocks.SchoolRepositoryMock)
 	mockStudentRepo := new(mocks.StudentRepositoryMock)
-	mockMailerMail := new(mocks.SimpleMail)
-	//mockMailer := new(mocks.Mailer)
 	var mockSchool domain.School
 	var mockStudent domain.Student
 	var mockMailer mocks.SimpleMail
@@ -78,11 +76,8 @@ func TestSendConfirmation(t *testing.T) {
 	t.Cleanup(func(){os.Setenv("DOMAIN", env)})
 	faker.FakeData(&mockStudent)
 
-
-	//TODO Fix this :( 
-	// path doesnt work working directory
-	// mock simplemail doesnt work (:
 	t.Run("case-success", func(t *testing.T){
+		//mockMailer := mocks.SimpleMail{}
 		faker.FakeData(&mockMailer)
 		mockStudent.School = nil
 		mockStudentRepo.
@@ -92,7 +87,7 @@ func TestSendConfirmation(t *testing.T) {
 			On("SaveConfirmationToken", mock.Anything, mock.AnythingOfType("*domain.Confirmation")).
 			Return(nil).
 			Once()
-		mockMailerMail.On("SendSimpleMail", mock.AnythingOfType("string"), mock.AnythingOfType("[]byte")).
+		mockMailer.On("SendSimpleMail", mock.AnythingOfType("string"), mock.Anything).
 			Return(nil).Once()
 		u := NewSchoolUseCase(mockSchoolRepo, mockStudentRepo, mockMailer, time.Second)
 
