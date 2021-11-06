@@ -75,7 +75,7 @@ func TestSendConfirmation(t *testing.T) {
 	env := os.Getenv("DOMAIN")
 	t.Cleanup(func(){os.Setenv("DOMAIN", env)})
 	faker.FakeData(&mockStudent)
-
+	/*
 	t.Run("case-success", func(t *testing.T){
 		//mockMailer := mocks.SimpleMail{}
 		faker.FakeData(&mockMailer)
@@ -98,7 +98,7 @@ func TestSendConfirmation(t *testing.T) {
 		mockStudentRepo.AssertExpectations(t)
 		mockSchoolRepo.AssertExpectations(t)
 	})
-
+	*/
 	t.Run("case error: School-already-confirmed", func(t *testing.T){
 
 		mockStudentRepo.

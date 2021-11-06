@@ -7,11 +7,12 @@ import (
 	"github.com/airbenders/profile/app"
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/domain/mocks"
+	e "github.com/airbenders/profile/utils/errors"
+	"github.com/airbenders/profile/utils/httputils"
 	"github.com/bxcodec/faker"
-	//"github.com/gin-gonic/gin"
+	"io/ioutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"io/ioutil"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -37,8 +38,17 @@ func TestSchoolHandler_SearchStudentSchool(t *testing.T){
 		response, err := server.Client().Get(fmt.Sprintf("%s/school/?domain=test", server.URL))
 		assert.NoError(t, err)
 		defer response.Body.Close()
-
 		assert.Equal(t, 200, response.StatusCode)
+
+		responseBody, err := ioutil.ReadAll(response.Body)
+		if err !=nil{
+			assert.Fail(t, "failed to read response")
+		}
+		var receivedSchools []domain.School
+		err = json.Unmarshal(responseBody, &receivedSchools)
+		assert.NoError(t, err)
+		assert.EqualValues(t, arrMockSchool, receivedSchools)
+		mockUseCase.AssertExpectations(t)
 	})
 
 	t.Run("case no domain", func(t *testing.T){
@@ -46,17 +56,36 @@ func TestSchoolHandler_SearchStudentSchool(t *testing.T){
 		assert.NoError(t, err)
 		defer response.Body.Close()
 		assert.Equal(t, 400, response.StatusCode)
+
+		responseBody, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			assert.Fail(t, "failed to read from message")
+		}
+		var restError e.RestError
+		err = json.Unmarshal(responseBody, &restError)
+		assert.NoError(t, err)
+		assert.EqualValues(t, restError, e.RestError{Code: 400, Message: "please provide a query"})
+		mockUseCase.AssertExpectations(t)
 	})
 
-	t.Run("case no schools", func(t *testing.T){
+	t.Run("case internal error", func(t *testing.T){
 		mockUseCase.
 			On("SearchSchoolByDomain", mock.Anything, mock.AnythingOfType("string")).
 			Return(nil, errors.New("error")).
 			Once()
 		response, err := server.Client().Get(fmt.Sprintf("%s/school/?domain=test", server.URL))
+		defaultErr := errors.New("error")
 		assert.NoError(t, err)
 		defer response.Body.Close()
 		assert.Equal(t, 500, response.StatusCode)
+
+		responseBody, err := ioutil.ReadAll(response.Body)
+		assert.NoError(t, err)
+		var receivedResponse httputils.ValidResponse
+		err = json.Unmarshal(responseBody, &receivedResponse)
+		assert.NoError(t, err)
+		assert.EqualValues(t, httputils.ValidResponse{Message: defaultErr.Error()}, receivedResponse)
+		mockUseCase.AssertExpectations(t)
 	})
 }
 
@@ -86,16 +115,33 @@ func TestSchoolHandler_ConfirmSchoolRegistration(t *testing.T) {
 		defer response.Body.Close()
 
 		assert.Equal(t, 400, response.StatusCode)
+
+		responseBody, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			assert.Fail(t, "failed to read from message")
+		}
+		var restError e.RestError
+		err = json.Unmarshal(responseBody, &restError)
+		assert.NoError(t, err)
+		assert.EqualValues(t, restError, e.RestError{Code: 400, Message: "must provide a valid email"})
 	})
-	t.Run("case error token does not exist", func(t *testing.T){
+	t.Run("case error internal error", func(t *testing.T){
 		mockUseCase.
 			On("ConfirmSchoolEnrollment", mock.Anything, mock.AnythingOfType("string")).
 			Return(errors.New("error")).Once()
 		response, err := server.Client().Get(fmt.Sprintf("%s/school/confirmation/?token=test", server.URL))
 		assert.NoError(t, err)
+		defaultErr := errors.New("error")
 		defer response.Body.Close()
 
 		assert.Equal(t, 500, response.StatusCode)
+
+		responseBody, err := ioutil.ReadAll(response.Body)
+		assert.NoError(t, err)
+		var receivedResponse e.RestError
+		err = json.Unmarshal(responseBody, &receivedResponse)
+		assert.NoError(t, err)
+		assert.EqualValues(t, e.NewInternalServerError(defaultErr.Error()), &receivedResponse)
 	})
 }
 
@@ -177,9 +223,6 @@ func TestSchoolHandler_SendConfirmationMail(t *testing.T){
 		if err != nil {
 			assert.Fail(t, "failed to read from message")
 		}
-
-
-
 		mockUseCase.AssertExpectations(t)
 	})
 
