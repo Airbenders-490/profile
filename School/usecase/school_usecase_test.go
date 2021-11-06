@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"os"
-	"reflect"
 	"testing"
 	"time"
 )
@@ -84,11 +83,6 @@ func TestSendConfirmation(t *testing.T) {
 	// path doesnt work working directory
 	// mock simplemail doesnt work (:
 	t.Run("case-success", func(t *testing.T){
-		//os.Chdir("/profile")
-		//newDir, _ := os.Getwd()
-		//if newDir != "/profile"{
-		//	os.Exit(0)
-		//}
 		faker.FakeData(&mockMailer)
 		mockStudent.School = nil
 		mockStudentRepo.
