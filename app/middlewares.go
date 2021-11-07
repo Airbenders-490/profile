@@ -4,9 +4,11 @@ import (
 	"github.com/airbenders/profile/utils/errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/sony/gobreaker"
 	"log"
 	"net/http"
 	"strings"
+	"time"
 )
 
 // Middleware defines the contracts
@@ -14,7 +16,7 @@ type Middleware interface {
 	AuthMiddleware() gin.HandlerFunc
 }
 
-type middleware struct {}
+type middleware struct{}
 
 // NewMiddleware is a constructor
 func NewMiddleware() Middleware {
@@ -34,7 +36,28 @@ func (h *middleware) AuthMiddleware() gin.HandlerFunc {
 		}
 		client := &http.Client{}
 		url := "http://localhost:3000/api/validate"
-		request, err := http.NewRequest("GET", url, nil)
+		circuitBeakerSettings := gobreaker.Settings{
+			Name:          "auth",
+			MaxRequests:   5,
+			Interval:      time.Millisecond*50,
+			Timeout:       time.Second,
+			ReadyToTrip:   nil,
+			OnStateChange: nil,
+			IsSuccessful:  nil,
+		}
+		cb := gobreaker.NewCircuitBreaker(circuitBeakerSettings)
+		cbResponse, err := cb.Execute(func() (interface{}, error) {
+			request, err := http.NewRequest("GET", url, nil)
+			if err != nil {
+				return nil, err
+			}
+			request.Header.Set("Authorization", authToken)
+			response, err := client.Do(request)
+			if err != nil {
+				return nil, err
+			}
+			return response, nil
+		})
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "some error occurred while making a request",
@@ -44,9 +67,6 @@ func (h *middleware) AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		request.Header.Set("Authorization", authToken)
-		response, err := client.Do(request)
-
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "some error occurred while confirming the token",
@@ -54,6 +74,11 @@ func (h *middleware) AuthMiddleware() gin.HandlerFunc {
 			log.Println(err.Error())
 			c.Abort()
 			return
+		}
+
+		response, ok := cbResponse.(*http.Response)
+		if !ok {
+			c.JSON(http.StatusInternalServerError, errors.NewInternalServerError("some error occurred with cb"))
 		}
 		if response.StatusCode == 200 {
 			jwtToken := strings.Replace(c.Request.Header.Get("Authorization"), "Bearer ", "", 1)

@@ -37,7 +37,7 @@ func TestStudentHandler_GetByID(t *testing.T) {
 		assert.NoError(t, err)
 		defer response.Body.Close()
 
-		assert.Equal(t,  200, response.StatusCode)
+		assert.Equal(t, 200, response.StatusCode)
 		responseBody, err := ioutil.ReadAll(response.Body)
 		if err != nil {
 			assert.Fail(t, "failed to read from message")
