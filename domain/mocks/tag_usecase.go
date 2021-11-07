@@ -7,12 +7,12 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-// StudentUseCase Mock struct
+// TagUseCase Mock struct
 type TagUseCase struct {
 	mock.Mock
 }
 
-// mock : GetAllTags returns all the tags
+// GetAllTags - TagUseCase
 func (m *TagUseCase) GetAllTags(ctx context.Context) ([]domain.Tag, error) {
 	args := m.Called(ctx)
 
