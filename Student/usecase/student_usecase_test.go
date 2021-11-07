@@ -125,7 +125,7 @@ func TestGetByID(t *testing.T) {
 			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(&domain.Student{}, nil).
 			Once()
-		u := usecase.NewStudentUseCase(mockStudentRepo,mockReviewRepo, time.Second)
+		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
 
 		student, err := u.GetByID(context.TODO(), mockStudent.ID)
 
@@ -219,7 +219,7 @@ func TestDelete(t *testing.T) {
 			Return(nil, errors.New("error")).
 			Once()
 
-		u := usecase.NewStudentUseCase(mockStudentRepo,mockReviewRepo, time.Second)
+		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
 		err := u.Delete(context.TODO(), mockStudent.ID)
 
 		assert.Error(t, err)

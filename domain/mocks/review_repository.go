@@ -18,7 +18,7 @@ type ReviewRepository interface {
 	AddReview(ctx context.Context, review *Review) error
 	UpdateReviewTags(ctx context.Context, review *Review) error
 }
- */
+*/
 
 func (m *ReviewRepositoryMock) GetReviewsFor(ctx context.Context, reviewed string) ([]domain.Review, error) {
 	args := m.Called(ctx, reviewed)
