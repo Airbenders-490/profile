@@ -6,16 +6,12 @@ import (
 	"github.com/airbenders/profile/domain"
 	"github.com/stretchr/testify/mock"
 )
-
+//ReviewUseCase Mock struct
 type ReviewUseCase struct {
 	mock.Mock
 }
 
-/*
-AddReview(ctx context.Context, review *Review, reviewerID string) (*Review, error)
-EditReview(ctx context.Context, review *Review, reviewerID string) (*Review, error)
-GetReviewsBy(ctx context.Context, reviewer string) ([]Review, error)*/
-//
+// AddReview - ReviewUseCase
 func (m *ReviewUseCase) AddReview(ctx context.Context, review *domain.Review, reviewerID string) (*domain.Review, error) {
 	args := m.Called(ctx, review, reviewerID)
 
@@ -38,7 +34,7 @@ func (m *ReviewUseCase) AddReview(ctx context.Context, review *domain.Review, re
 	return r0, r1
 
 }
-
+// EditReview - ReviewUseCase
 func (m *ReviewUseCase) EditReview(ctx context.Context, review *domain.Review, reviewerID string) (*domain.Review, error) {
 	args := m.Called(ctx, review, reviewerID)
 
@@ -61,7 +57,7 @@ func (m *ReviewUseCase) EditReview(ctx context.Context, review *domain.Review, r
 	return r0, r1
 
 }
-
+// GetReviewsBy - ReviewUseCase
 func (m *ReviewUseCase) GetReviewsBy(ctx context.Context, reviewer string) ([]domain.Review, error) {
 	args := m.Called(ctx, reviewer)
 
