@@ -8,25 +8,31 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func mapStudentURLs(h *studentHttp.StudentHandler, r *gin.Engine) {
-	r.GET("/student/:id", h.GetByID)
-	r.POST("/student", h.Create)
-	r.PUT("/student/:id", h.Update)
-	r.DELETE("/student/:id", h.Delete)
+func mapStudentURLs(m Middleware, h *studentHttp.StudentHandler, router *gin.Engine) {
+	authorized := router.Group("/api")
+	authorized.Use(m.AuthMiddleware())
+	authorized.GET("/student/:id", h.GetByID)
+	authorized.POST("/student", h.Create)
+	authorized.PUT("/student/:id", h.Update)
+	authorized.DELETE("/student/:id", h.Delete)
 }
 
-func mapSchoolURLs(h *schoolHttp.SchoolHandler, r *gin.Engine) {
-	r.GET("/school", h.SearchStudentSchool)
-	r.POST("/school/confirm", h.SendConfirmationMail)
-	r.GET("/school/confirmation", h.ConfirmSchoolRegistration)
+func mapSchoolURLs(m Middleware, h *schoolHttp.SchoolHandler, r *gin.Engine) {
+	r.GET("school/confirmation", h.ConfirmSchoolRegistration)
+	authorized := r.Group("/api")
+	authorized.Use(m.AuthMiddleware())
+	authorized.GET("/school", h.SearchStudentSchool)
+	authorized.POST("/school/confirm", h.SendConfirmationMail)
 }
 
 func mapTagURLs(h *tagHttp.TagHandler, r *gin.Engine) {
-	r.GET("/all-tags", h.GetAllTags)
+	r.GET("/api/all-tags", h.GetAllTags)
 }
 
-func mapReviewURLs(h *reviewHttp.ReviewHandler, r *gin.Engine) {
-	r.POST("/review/:reviewed", h.AddReview)
-	r.PUT("/review/:reviewed/update", h.EditReview)
-	r.GET("/reviews-by/:reviewer", h.GetReviewsBy)
+func mapReviewURLs(m Middleware, h *reviewHttp.ReviewHandler, r *gin.Engine) {
+	authorized := r.Group("/api")
+	authorized.Use(m.AuthMiddleware())
+	authorized.POST("/review/:reviewed", h.AddReview)
+	authorized.PUT("/review/:reviewed/update", h.EditReview)
+	authorized.GET("/reviews-by/:reviewer", h.GetReviewsBy)
 }

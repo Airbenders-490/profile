@@ -34,9 +34,17 @@ func (h *ReviewHandler) AddReview(c *gin.Context) {
 		return
 	}
 
+	loggedID, _ := c.Get("loggedID")
+	reviewer, _ := loggedID.(string)
+
+	var student domain.Student
+	err = c.ShouldBindJSON(&student)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid data"))
+		return
+	}
+
 	ctx := c.Request.Context()
-	// todo: get this from auth!
-	reviewer := "asda"
 	createdReview, err := h.u.AddReview(ctx, &review, reviewer)
 	if err != nil {
 		switch v := err.(type) {
@@ -69,8 +77,16 @@ func (h *ReviewHandler) EditReview(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	// todo: get this from auth!
-	reviewer := "asda"
+
+	var student domain.Student
+	err = c.ShouldBindJSON(&student)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid data"))
+		return
+	}
+	loggedID, _ := c.Get("loggedID")
+	reviewer, _ := loggedID.(string)
+
 	updatedReview, err := h.u.EditReview(ctx, &review, reviewer)
 	if err != nil {
 		switch v := err.(type) {
@@ -94,6 +110,21 @@ func (h *ReviewHandler) GetReviewsBy(c *gin.Context) {
 		return
 	}
 
+	loggedID, _ := c.Get("loggedID")
+	logged, _ := loggedID.(string)
+	if logged != reviewer {
+		c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError("not allowed to get reviews by others"))
+	}
+
+	var student domain.Student
+	err := c.ShouldBindJSON(&student)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid data"))
+		return
+	}
+	if loggedID != reviewer {
+		c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError("not authorized to edit this review"))
+	}
 	ctx := c.Request.Context()
 	reviews, err := h.u.GetReviewsBy(ctx, reviewer)
 	if err != nil {

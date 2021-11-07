@@ -110,7 +110,7 @@ func (s *schoolUseCase) SendConfirmation(c context.Context, st *domain.Student, 
 		return errors.NewInternalServerError(err.Error())
 	}
 
-	body := createEmailBody(st.FirstName, school.Name, url)
+	body := createEmailBody(student.FirstName, school.Name, url)
 	return s.mailer.SendSimpleMail(email, body)
 }
 

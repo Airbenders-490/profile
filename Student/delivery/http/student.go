@@ -42,12 +42,16 @@ func (h *StudentHandler) GetByID(c *gin.Context) {
 
 // Create is hit when the student first creates his account and is asked to set it up.
 func (h *StudentHandler) Create(c *gin.Context) {
+	key, _ := c.Get("loggedID")
+	loggedID, _ := key.(string)
+
 	var student domain.Student
 	err := c.ShouldBindJSON(&student)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid data"))
 		return
 	}
+	student.ID = loggedID
 
 	ctx := c.Request.Context()
 	err = h.UseCase.Create(ctx, &student)
@@ -70,6 +74,14 @@ func (h *StudentHandler) Update(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
 		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("id must be provided"))
+		return
+	}
+
+	key, _ := c.Get("loggedID")
+	loggedID, _ := key.(string)
+
+	if loggedID != id {
+		c.JSON(http.StatusBadRequest, errors.NewUnauthorizedError("Can only update for self"))
 		return
 	}
 
@@ -101,6 +113,14 @@ func (h *StudentHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
 		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("id must be provided"))
+		return
+	}
+
+	key, _ := c.Get("loggedID")
+	loggedID, _ := key.(string)
+
+	if loggedID != id {
+		c.JSON(http.StatusBadRequest, errors.NewUnauthorizedError("Can only delete for self"))
 		return
 	}
 

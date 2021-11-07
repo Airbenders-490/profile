@@ -11,15 +11,6 @@ type StudentRepositoryMock struct {
 	mock.Mock
 }
 
-/*
-type StudentRepository interface {
-	Create(ctx context.Context, id string, st *Student) error
-	GetByID(ctx context.Context, id string) (*Student, error)
-	Update(ctx context.Context, st *Student) error
-	Delete(ctx context.Context, id string) error
-}
-*/
-
 // Create -- StudentRepositoryMock
 func (m *StudentRepositoryMock) Create(ctx context.Context, id string, st *domain.Student) error {
 	args := m.Called(ctx, id, st)

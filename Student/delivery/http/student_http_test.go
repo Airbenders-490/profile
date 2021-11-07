@@ -22,7 +22,8 @@ import (
 func TestStudentHandler_GetByID(t *testing.T) {
 	mockUseCase := new(mocks.StudentUseCase)
 	h := http.NewStudentHandler(mockUseCase)
-	server := httptest.NewServer(app.Server(h, nil, nil, nil))
+	mw := new(mocks.MiddlewareMock)
+	server := httptest.NewServer(app.Server(h, nil, nil, nil, mw))
 	defer server.Close()
 
 	var mockStudent domain.Student
@@ -32,11 +33,11 @@ func TestStudentHandler_GetByID(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockUseCase.On("GetByID", mock.Anything, mock.AnythingOfType("string")).Return(&mockStudent, nil).Once()
 
-		response, err := server.Client().Get(fmt.Sprintf("%s/student/%s", server.URL, mockStudent.ID))
+		response, err := server.Client().Get(fmt.Sprintf("%s/api/student/%s", server.URL, mockStudent.ID))
 		assert.NoError(t, err)
 		defer response.Body.Close()
 
-		assert.Equal(t, response.StatusCode, 200)
+		assert.Equal(t,  200, response.StatusCode)
 		responseBody, err := ioutil.ReadAll(response.Body)
 		if err != nil {
 			assert.Fail(t, "failed to read from message")
@@ -55,11 +56,11 @@ func TestStudentHandler_GetByID(t *testing.T) {
 		mockUseCase.On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(nil, e.NewNotFoundError("student not found")).Once()
 
-		response, err := server.Client().Get(fmt.Sprintf("%s/student/%s", server.URL, mockStudent.ID))
+		response, err := server.Client().Get(fmt.Sprintf("%s/api/student/%s", server.URL, mockStudent.ID))
 		assert.NoError(t, err)
 		defer response.Body.Close()
 
-		assert.Equal(t, response.StatusCode, 404)
+		assert.Equal(t, 404, response.StatusCode)
 		responseBody, err := ioutil.ReadAll(response.Body)
 		if err != nil {
 			assert.Fail(t, "failed to read from message")
@@ -76,7 +77,7 @@ func TestStudentHandler_GetByID(t *testing.T) {
 		mockUseCase.On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(nil, defaultErr).Once()
 
-		response, err := server.Client().Get(fmt.Sprintf("%s/student/%s", server.URL, "asd"))
+		response, err := server.Client().Get(fmt.Sprintf("%s/api/student/%s", server.URL, "asd"))
 		assert.NoError(t, err)
 		defer response.Body.Close()
 
@@ -110,7 +111,8 @@ func TestStudentHandler_GetByID(t *testing.T) {
 func TestStudentHandler_Create(t *testing.T) {
 	mockUseCase := new(mocks.StudentUseCase)
 	h := &http.StudentHandler{UseCase: mockUseCase}
-	server := httptest.NewServer(app.Server(h, nil, nil, nil))
+	mw := new(mocks.MiddlewareMock)
+	server := httptest.NewServer(app.Server(h, nil, nil, nil, mw))
 	defer server.Close()
 	var mockStudent domain.Student
 	err := faker.FakeData(&mockStudent)
@@ -122,7 +124,7 @@ func TestStudentHandler_Create(t *testing.T) {
 		postBody, err := json.Marshal(mockStudent)
 		assert.NoError(t, err)
 		reader := strings.NewReader(string(postBody))
-		response, err := server.Client().Post(fmt.Sprintf("%s/student", server.URL), "application/JSON", reader)
+		response, err := server.Client().Post(fmt.Sprintf("%s/api/student", server.URL), "application/JSON", reader)
 		assert.NoError(t, err)
 		defer response.Body.Close()
 
@@ -132,7 +134,7 @@ func TestStudentHandler_Create(t *testing.T) {
 
 	t.Run("invalid-body", func(t *testing.T) {
 		reader := strings.NewReader("Invalid body")
-		response, err := server.Client().Post(fmt.Sprintf("%s/student", server.URL), "application/JSON", reader)
+		response, err := server.Client().Post(fmt.Sprintf("%s/api/student", server.URL), "application/JSON", reader)
 		assert.NoError(t, err)
 		defer response.Body.Close()
 
@@ -156,7 +158,7 @@ func TestStudentHandler_Create(t *testing.T) {
 		reader := strings.NewReader(string(postBody))
 		mockUseCase.On("Create", mock.Anything, mock.AnythingOfType("*domain.Student")).
 			Return(restErr).Once()
-		response, err := server.Client().Post(fmt.Sprintf("%s/student", server.URL), "application/JSON", reader)
+		response, err := server.Client().Post(fmt.Sprintf("%s/api/student", server.URL), "application/JSON", reader)
 		assert.NoError(t, err)
 		defer response.Body.Close()
 
@@ -181,7 +183,7 @@ func TestStudentHandler_Create(t *testing.T) {
 		mockUseCase.On("Create", mock.Anything, mock.AnythingOfType("*domain.Student")).
 			Return(defaultErr).Once()
 
-		response, err := server.Client().Post(fmt.Sprintf("%s/student", server.URL), "application/JSON", reader)
+		response, err := server.Client().Post(fmt.Sprintf("%s/api/student", server.URL), "application/JSON", reader)
 		assert.NoError(t, err)
 		defer response.Body.Close()
 
@@ -199,7 +201,8 @@ func TestStudentHandler_Create(t *testing.T) {
 func TestStudentHandler_Update(t *testing.T) {
 	mockUseCase := new(mocks.StudentUseCase)
 	h := &http.StudentHandler{UseCase: mockUseCase}
-	r := app.Server(h, nil, nil, nil)
+	mw := new(mocks.MiddlewareMock)
+	r := app.Server(h, nil, nil, nil, mw)
 	var mockStudent domain.Student
 	err := faker.FakeData(&mockStudent)
 	assert.NoError(t, err)
@@ -210,23 +213,17 @@ func TestStudentHandler_Update(t *testing.T) {
 		mockUseCase.On("Update", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("*domain.Student")).
 			Return(nil).Once()
 		reader := strings.NewReader(string(postBody))
-		reqFound := httptest.NewRequest("PUT", fmt.Sprintf("/student/%s", mockStudent.ID), reader)
+		reqFound := httptest.NewRequest("PUT", fmt.Sprintf("/api/student/%s", mockStudent.ID), reader)
+		reqFound.Header.Set("id", mockStudent.ID)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
 		assert.Equal(t, 200, w.Code)
 		mockUseCase.AssertExpectations(t)
 	})
 
-	t.Run("invalid-id", func(t *testing.T) {
-		reqFound := httptest.NewRequest("PUT", fmt.Sprintf("/student/%s", ""), nil)
-		w := httptest.NewRecorder()
-		r.ServeHTTP(w, reqFound)
-		assert.Equal(t, 400, w.Code)
-	})
-
 	t.Run("invalid-data-type", func(t *testing.T) {
 		reader := strings.NewReader("invalid body")
-		reqFound := httptest.NewRequest("PUT", fmt.Sprintf("/student/%s", mockStudent.ID), reader)
+		reqFound := httptest.NewRequest("PUT", fmt.Sprintf("/api/student/%s", mockStudent.ID), reader)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
 		assert.Equal(t, 400, w.Code)
@@ -240,7 +237,8 @@ func TestStudentHandler_Update(t *testing.T) {
 		mockUseCase.On("Update", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("*domain.Student")).
 			Return(restErr).Once()
 		reader := strings.NewReader(string(postBody))
-		reqFound := httptest.NewRequest("PUT", fmt.Sprintf("/student/%s", mockStudent.ID), reader)
+		reqFound := httptest.NewRequest("PUT", fmt.Sprintf("/api/student/%s", mockStudent.ID), reader)
+		reqFound.Header.Set("id", mockStudent.ID)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
 		assert.Equal(t, restErr.Code, w.Code)
@@ -253,7 +251,8 @@ func TestStudentHandler_Update(t *testing.T) {
 		mockUseCase.On("Update", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("*domain.Student")).
 			Return(errors.New("some error")).Once()
 		reader := strings.NewReader(string(postBody))
-		reqFound := httptest.NewRequest("PUT", fmt.Sprintf("/student/%s", mockStudent.ID), reader)
+		reqFound := httptest.NewRequest("PUT", fmt.Sprintf("/api/student/%s", mockStudent.ID), reader)
+		reqFound.Header.Set("id", mockStudent.ID)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
 		assert.Equal(t, 500, w.Code)
@@ -264,12 +263,14 @@ func TestStudentHandler_Update(t *testing.T) {
 func TestStudentHandler_Delete(t *testing.T) {
 	mockUseCase := new(mocks.StudentUseCase)
 	h := &http.StudentHandler{UseCase: mockUseCase}
-	r := app.Server(h, nil, nil, nil)
+	mw := new(mocks.MiddlewareMock)
+	r := app.Server(h, nil, nil, nil, mw)
 
 	t.Run("success", func(t *testing.T) {
 		mockUseCase.On("Delete", mock.Anything, mock.AnythingOfType("string")).
 			Return(nil).Once()
-		reqFound := httptest.NewRequest("DELETE", fmt.Sprintf("/student/%s", "asd"), nil)
+		reqFound := httptest.NewRequest("DELETE", fmt.Sprintf("/api/student/%s", "asd"), nil)
+		reqFound.Header.Set("id", "asd")
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
 		assert.Equal(t, 200, w.Code)
@@ -277,7 +278,7 @@ func TestStudentHandler_Delete(t *testing.T) {
 	})
 
 	t.Run("invalid-id", func(t *testing.T) {
-		reqFound := httptest.NewRequest("DELETE", fmt.Sprintf("/student/%s", ""), nil)
+		reqFound := httptest.NewRequest("DELETE", fmt.Sprintf("/api/student/%s", ""), nil)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
 		assert.Equal(t, 400, w.Code)
@@ -287,7 +288,8 @@ func TestStudentHandler_Delete(t *testing.T) {
 		restErr := e.NewConflictError("error occurred")
 		mockUseCase.On("Delete", mock.Anything, mock.AnythingOfType("string")).
 			Return(restErr).Once()
-		reqFound := httptest.NewRequest("DELETE", fmt.Sprintf("/student/%s", "asdasd"), nil)
+		reqFound := httptest.NewRequest("DELETE", fmt.Sprintf("/api/student/%s", "asdasd"), nil)
+		reqFound.Header.Set("id", "asdasd")
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
 		assert.Equal(t, restErr.Code, w.Code)
@@ -297,7 +299,8 @@ func TestStudentHandler_Delete(t *testing.T) {
 	t.Run("usecase-default-error", func(t *testing.T) {
 		mockUseCase.On("Delete", mock.Anything, mock.AnythingOfType("string")).
 			Return(errors.New("some error")).Once()
-		reqFound := httptest.NewRequest("DELETE", fmt.Sprintf("/student/%s", "asd"), nil)
+		reqFound := httptest.NewRequest("DELETE", fmt.Sprintf("/api/student/%s", "asd"), nil)
+		reqFound.Header.Set("id", "asd")
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
 		assert.Equal(t, 500, w.Code)
