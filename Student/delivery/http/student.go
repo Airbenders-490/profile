@@ -8,21 +8,23 @@ import (
 	"net/http"
 )
 
+// StudentHandler struct
 type StudentHandler struct {
 	UseCase domain.StudentUseCase
 }
 
+// NewStudentHandler is the constructor
 func NewStudentHandler(u domain.StudentUseCase) *StudentHandler {
 	return &StudentHandler{UseCase: u}
 }
 
+// GetByID returns the student's profile with that ID. If it doesn't exist, returns 404
 func (h *StudentHandler) GetByID(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
 		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("id must be provided"))
 		return
 	}
-
 	ctx := c.Request.Context()
 	student, err := h.UseCase.GetByID(ctx, id)
 	if err != nil {
@@ -38,6 +40,7 @@ func (h *StudentHandler) GetByID(c *gin.Context) {
 	c.JSON(200, student)
 }
 
+// Create is hit when the student first creates his account and is asked to set it up.
 func (h *StudentHandler) Create(c *gin.Context) {
 	var student domain.Student
 	err := c.ShouldBindJSON(&student)
@@ -62,6 +65,7 @@ func (h *StudentHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, httputils.NewResponse("student created"))
 }
 
+// Update changes the student record. Ensures the student is the same as logged in, and then makes changes as requested
 func (h *StudentHandler) Update(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
@@ -92,6 +96,7 @@ func (h *StudentHandler) Update(c *gin.Context) {
 	c.JSON(http.StatusOK, httputils.NewResponse("student updated"))
 }
 
+// Delete simply deletes the profile as requested
 func (h *StudentHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {

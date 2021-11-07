@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/utils/errors"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -12,6 +13,7 @@ type studentRepository struct {
 	db *pgxpool.Pool
 }
 
+// NewStudentRepository is the constructor
 func NewStudentRepository(db *pgxpool.Pool) domain.StudentRepository {
 	return &studentRepository{
 		db: db,
@@ -20,25 +22,27 @@ func NewStudentRepository(db *pgxpool.Pool) domain.StudentRepository {
 
 const (
 	insert = `INSERT INTO public.student(
-	id, first_name, last_name, email, general_info, school, created_at, updated_at)
-	VALUES ($1, $2, $3, $4, $5, $6, $7, $8);`
+	id, first_name, last_name, email, general_info, created_at, updated_at)
+	VALUES ($1, $2, $3, $4, $5, $6, $7);`
 	selectByID = `SELECT id, first_name, last_name, email, general_info, school, created_at, updated_at
 	FROM public.student WHERE id=$1;`
 	update = `UPDATE public.student
-	SET first_name=$2, last_name=$3, email=$4, general_info=$5, school=$6, created_at=$7, updated_at=$8
+	SET first_name=$2, last_name=$3, email=$4, general_info=$5, created_at=$6, updated_at=$7
 	WHERE id=$1;`
-	delete = `DELETE FROM public.student
+	deleteStudent = `DELETE FROM public.student
 	WHERE id=$1;`
 )
 
+// Create stores the student in the db. Returns err if unable to
 func (r *studentRepository) Create(ctx context.Context, id string, st *domain.Student) error {
+	fmt.Println(st)
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
 		return errors.NewInternalServerError(err.Error())
 	}
 	defer tx.Rollback(ctx)
 
-	_, err = tx.Exec(ctx, insert, id, st.FirstName, st.LastName, st.Email, st.GeneralInfo, st.School, st.CreatedAt, st.UpdatedAt)
+	_, err = tx.Exec(ctx, insert, id, st.FirstName, st.LastName, st.Email, st.GeneralInfo, st.CreatedAt, st.UpdatedAt)
 	if err != nil {
 		return errors.NewInternalServerError(err.Error())
 	}
@@ -50,6 +54,7 @@ func (r *studentRepository) Create(ctx context.Context, id string, st *domain.St
 	return nil
 }
 
+// GetByID returns either an empty student or valid student if it exsits. Returns nil and error if there's some db error
 func (r *studentRepository) GetByID(ctx context.Context, id string) (*domain.Student, error) {
 	rows, err := r.db.Query(ctx, selectByID, id)
 	if err != nil {
@@ -71,7 +76,9 @@ func (r *studentRepository) GetByID(ctx context.Context, id string) (*domain.Stu
 		student.LastName = values[2].(string)
 		student.Email = values[3].(string)
 		student.GeneralInfo = values[4].(string)
-		student.School = values[5].(string)
+		if values[5] != nil {
+			student.School = &domain.School{ID: values[5].(string)}
+		}
 		student.CreatedAt = values[6].(time.Time)
 		student.UpdatedAt = values[7].(time.Time)
 	}
@@ -79,6 +86,7 @@ func (r *studentRepository) GetByID(ctx context.Context, id string) (*domain.Stu
 	return &student, nil
 }
 
+// Update changes the record in the db. Returns err if isn't able to
 func (r *studentRepository) Update(ctx context.Context, st *domain.Student) error {
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -86,7 +94,7 @@ func (r *studentRepository) Update(ctx context.Context, st *domain.Student) erro
 	}
 	defer tx.Rollback(ctx)
 
-	_, err = tx.Exec(ctx, update, st.ID, st.FirstName, st.LastName, st.Email, st.GeneralInfo, st.School, st.CreatedAt, st.UpdatedAt)
+	_, err = tx.Exec(ctx, update, st.ID, st.FirstName, st.LastName, st.Email, st.GeneralInfo, st.CreatedAt, st.UpdatedAt)
 	if err != nil {
 		return errors.NewInternalServerError(err.Error())
 	}
@@ -98,6 +106,7 @@ func (r *studentRepository) Update(ctx context.Context, st *domain.Student) erro
 	return nil
 }
 
+// Delete deletes the record in the db. Returns err if isn't able to
 func (r *studentRepository) Delete(ctx context.Context, id string) error {
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
@@ -105,7 +114,7 @@ func (r *studentRepository) Delete(ctx context.Context, id string) error {
 	}
 	defer tx.Rollback(ctx)
 
-	_, err = tx.Exec(ctx, delete, id)
+	_, err = tx.Exec(ctx, deleteStudent, id)
 	if err != nil {
 		return errors.NewInternalServerError(err.Error())
 	}

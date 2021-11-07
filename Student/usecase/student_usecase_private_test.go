@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"github.com/airbenders/profile/domain"
+	"github.com/bxcodec/faker"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -9,13 +10,14 @@ import (
 
 func TestUpdateStudent(t *testing.T) {
 	now := time.Now()
+	var school domain.School
+	_ = faker.FakeData(&school)
 	existing := &domain.Student{
 		ID:          "asd",
 		FirstName:        "Sunny",
 		LastName:        "Moony",
 		Email:       "none@gmail.com",
 		GeneralInfo: "I like plants",
-		School:      "KGS",
 		CreatedAt:   now,
 		UpdatedAt:   now.Add(72 * time.Hour),
 	}
@@ -23,7 +25,6 @@ func TestUpdateStudent(t *testing.T) {
 		ID:          "",
 		Email:       "something@gmail.com",
 		GeneralInfo: "",
-		School:      "Concordia University",
 		CreatedAt:   now,
 		UpdatedAt:   now.Add(72 * time.Hour),
 	}
@@ -33,7 +34,6 @@ func TestUpdateStudent(t *testing.T) {
 		LastName:        "Moony",
 		Email:       "something@gmail.com",
 		GeneralInfo: "I like plants",
-		School:      "Concordia University",
 		CreatedAt:   now,
 		UpdatedAt:   time.Now(),
 	}
