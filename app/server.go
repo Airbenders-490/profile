@@ -2,6 +2,9 @@ package app
 
 import (
 	"context"
+	"log"
+	"time"
+
 	http4 "github.com/airbenders/profile/Review/delivery/http"
 	repository4 "github.com/airbenders/profile/Review/repository"
 	usecase4 "github.com/airbenders/profile/Review/usecase"
@@ -17,9 +20,6 @@ import (
 	"github.com/airbenders/profile/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"log"
-	"os"
-	"time"
 )
 
 // Server is a constructor. Returns the router after mapping all the urls
@@ -39,7 +39,9 @@ func Server(
 
 // Start runs the server
 func Start() {
-	pool, err := pgxpool.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	pool, err := pgxpool.Connect(context.Background(), "postgres://postgres:123456@localhost/course")
+
+	//	pool, err := pgxpool.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatalln(err)
 	}

@@ -2,10 +2,11 @@ package http
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/utils/errors"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 // ReviewHandler struct
@@ -36,6 +37,7 @@ func (h *ReviewHandler) AddReview(c *gin.Context) {
 
 	loggedID, _ := c.Get("loggedID")
 	reviewer, _ := loggedID.(string)
+	review.Reviewer.ID = reviewer
 
 	ctx := c.Request.Context()
 	createdReview, err := h.u.AddReview(ctx, &review, reviewer)
@@ -73,6 +75,7 @@ func (h *ReviewHandler) EditReview(c *gin.Context) {
 
 	loggedID, _ := c.Get("loggedID")
 	reviewer, _ := loggedID.(string)
+	review.Reviewer.ID = reviewer
 
 	updatedReview, err := h.u.EditReview(ctx, &review, reviewer)
 	if err != nil {
@@ -86,7 +89,7 @@ func (h *ReviewHandler) EditReview(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusCreated, updatedReview)
+	c.JSON(http.StatusOK, updatedReview)
 }
 
 // GetReviewsBy returns the reviews made by that student
@@ -108,6 +111,11 @@ func (h *ReviewHandler) GetReviewsBy(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError("not authorized to edit this review"))
 		return
 	}
+
+	if loggedID != reviewer {
+		c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError("not authorized to edit this review"))
+	}
+
 	ctx := c.Request.Context()
 	reviews, err := h.u.GetReviewsBy(ctx, reviewer)
 	if err != nil {

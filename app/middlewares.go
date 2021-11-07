@@ -58,6 +58,7 @@ func (h *middleware) AuthMiddleware() gin.HandlerFunc {
 			}
 			return response, nil
 		})
+
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error": "some error occurred while making a request",
@@ -67,19 +68,12 @@ func (h *middleware) AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": "some error occurred while confirming the token",
-			})
-			log.Println(err.Error())
-			c.Abort()
-			return
-		}
-
 		response, ok := cbResponse.(*http.Response)
 		if !ok {
 			c.JSON(http.StatusInternalServerError, errors.NewInternalServerError("some error occurred with cb"))
+			return
 		}
+
 		if response.StatusCode == 200 {
 			jwtToken := strings.Replace(c.Request.Header.Get("Authorization"), "Bearer ", "", 1)
 
