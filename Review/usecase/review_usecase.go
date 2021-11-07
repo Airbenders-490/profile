@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"fmt"
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/utils/errors"
 	"github.com/google/uuid"
@@ -27,10 +28,12 @@ func NewReviewUseCase(rr domain.ReviewRepository, sr domain.StudentRepository, t
 
 // AddReview first checks if the person being reviewed exists.
 func (u *reviewUseCase) AddReview(c context.Context, review *domain.Review, reviewerID string) (*domain.Review, error) {
+	fmt.Println("inside add review")
 	ctx, cancel := context.WithTimeout(c, u.timeout)
 	defer cancel()
-
+	fmt.Println("33")
 	student, err := u.sr.GetByID(ctx, review.Reviewed.ID)
+	fmt.Println(student, err)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +102,7 @@ func (u *reviewUseCase) GetReviewsBy(c context.Context, reviewer string) ([]doma
 	ctx, cancel := context.WithTimeout(c, u.timeout)
 	defer cancel()
 
-	reviews, err := u.rr.GetReviewsFor(ctx, reviewer)
+	reviews, err := u.rr.GetReviewsBy(ctx, reviewer)
 	if err != nil {
 		return nil, err
 	}
