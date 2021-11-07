@@ -14,15 +14,6 @@ import (
 	"time"
 )
 
-/*
-type StudentUseCase interface {
-	Create(ctx context.Context, st *Student) error
-	GetByID(ctx context.Context, id string) (*Student, error)
-	Update(ctx context.Context, st *Student) error
-	Delete(ctx context.Context, id string) error
-}
-*/
-
 func TestCreate(t *testing.T) {
 	mockStudentRepo := new(mocks.StudentRepositoryMock)
 	mockReviewRepo := new(mocks.ReviewRepositoryMock)
@@ -125,6 +116,7 @@ func TestGetByID(t *testing.T) {
 			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(&domain.Student{}, nil).
 			Once()
+
 		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
 
 		student, err := u.GetByID(context.TODO(), mockStudent.ID)
