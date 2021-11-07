@@ -101,10 +101,12 @@ func (h *ReviewHandler) GetReviewsBy(c *gin.Context) {
 	logged, _ := loggedID.(string)
 	if logged != reviewer {
 		c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError("not allowed to get reviews by others"))
+		return
 	}
 
 	if loggedID != reviewer {
 		c.JSON(http.StatusUnauthorized, errors.NewUnauthorizedError("not authorized to edit this review"))
+		return
 	}
 	ctx := c.Request.Context()
 	reviews, err := h.u.GetReviewsBy(ctx, reviewer)
