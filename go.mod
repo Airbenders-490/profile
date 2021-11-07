@@ -28,6 +28,7 @@ require (
 	github.com/jackc/pgx/v4 v4.13.0 // indirect
 	github.com/jackc/puddle v1.1.3 // indirect
 	github.com/json-iterator/go v1.1.9 // indirect
+	github.com/junhwi/gobco v0.0.0-20200104144416-c015e3f3de35 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
