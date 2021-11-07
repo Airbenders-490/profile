@@ -7,20 +7,12 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// ReviewRepositoryMock mock struct
 type ReviewRepositoryMock struct {
 	mock.Mock
 }
 
-/*
-type ReviewRepository interface {
-	GetReviewsFor(ctx context.Context, reviewed string) ([]Review, error)
-	GetReviewsBy(ctx context.Context, reviewer string) ([]Review, error)
-	GetReviewByAndFor(ctx context.Context, reviewer string, reviewed string) (*Review, error)
-	AddReview(ctx context.Context, review *Review) error
-	UpdateReviewTags(ctx context.Context, review *Review) error
-}
-*/
-
+// GetReviewsFor mock function
 func (m *ReviewRepositoryMock) GetReviewsFor(ctx context.Context, reviewed string) ([]domain.Review, error) {
 	args := m.Called(ctx, reviewed)
 
@@ -43,6 +35,7 @@ func (m *ReviewRepositoryMock) GetReviewsFor(ctx context.Context, reviewed strin
 	return r0, r1
 }
 
+// GetReviewsBy mock function
 func (m *ReviewRepositoryMock) GetReviewsBy(ctx context.Context, reviewer string) ([]domain.Review, error) {
 	args := m.Called(ctx, reviewer)
 
@@ -65,6 +58,7 @@ func (m *ReviewRepositoryMock) GetReviewsBy(ctx context.Context, reviewer string
 	return r0, r1
 }
 
+// GetReviewByAndFor mock funciton
 func (m *ReviewRepositoryMock) GetReviewByAndFor(ctx context.Context, reviewer string, reviewed string) (*domain.Review, error) {
 	args := m.Called(ctx, reviewer, reviewed)
 
@@ -87,6 +81,7 @@ func (m *ReviewRepositoryMock) GetReviewByAndFor(ctx context.Context, reviewer s
 	return r0, r1
 }
 
+// AddReview mock funciton
 func (m *ReviewRepositoryMock) AddReview(ctx context.Context, review *domain.Review) error {
 	args := m.Called(ctx, review)
 
@@ -102,6 +97,7 @@ func (m *ReviewRepositoryMock) AddReview(ctx context.Context, review *domain.Rev
 	return r0
 }
 
+// UpdateReviewTags mock function
 func (m *ReviewRepositoryMock) UpdateReviewTags(ctx context.Context, review *domain.Review) error {
 	args := m.Called(ctx, review)
 
