@@ -7,11 +7,11 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-// StudentRepositoryMock struct
+// TagRepositoryMock struct
 type TagRepositoryMock struct {
 	mock.Mock
 }
-
+// FetchAllTags -- TagRepositoryMock
 func (m *TagRepositoryMock) FetchAllTags(ctx context.Context) ([]domain.Tag, error) {
 	args := m.Called(ctx)
 
