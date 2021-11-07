@@ -8,7 +8,8 @@ import (
 // Student struct
 type Student struct {
 	ID          string `json:"id"` //uuid string
-	Name        string `json:"name"`
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
 	Email       string `json:"email"` //TODO: validate:required
 	GeneralInfo string `json:"general_info"`
 	School      string `json:"school"`
@@ -20,7 +21,7 @@ type Student struct {
 type StudentUseCase interface {
 	Create(ctx context.Context, st *Student) error
 	GetByID(ctx context.Context, id string) (*Student, error)
-	Update(ctx context.Context, st *Student) error
+	Update(ctx context.Context, id string, st *Student) error
 	Delete(ctx context.Context, id string) error
 }
 

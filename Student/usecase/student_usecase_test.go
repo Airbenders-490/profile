@@ -6,6 +6,7 @@ import (
 	"github.com/airbenders/profile/Student/usecase"
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/domain/mocks"
+	"github.com/bxcodec/faker"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"reflect"
@@ -24,15 +25,8 @@ type StudentUseCase interface {
 
 func TestCreate(t *testing.T) {
 	mockStudentRepo := new(mocks.StudentRepositoryMock)
-	mockStudent := &domain.Student{
-		ID:          "asd",
-		Name:        "Sunny",
-		Email:       "none@gmail.com",
-		GeneralInfo: "I like plants",
-		School:      "KGS",
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now().Add(72 * time.Hour),
-	}
+	var mockStudent domain.Student
+	faker.FakeData(&mockStudent)
 
 	t.Run("case success", func(t *testing.T) {
 		mockStudentRepo.
@@ -45,7 +39,7 @@ func TestCreate(t *testing.T) {
 			Once()
 		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
 
-		err := u.Create(context.TODO(), mockStudent)
+		err := u.Create(context.TODO(), &mockStudent)
 
 		assert.NoError(t, err)
 
@@ -63,7 +57,7 @@ func TestCreate(t *testing.T) {
 			Once()
 		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
 
-		err := u.Create(context.TODO(), mockStudent)
+		err := u.Create(context.TODO(), &mockStudent)
 
 		assert.Error(t, err)
 
@@ -73,11 +67,11 @@ func TestCreate(t *testing.T) {
 	t.Run("case error-already-exists", func(t *testing.T) {
 		mockStudentRepo.
 			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
-			Return(mockStudent, nil).
+			Return(&mockStudent, nil).
 			Once()
 		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
 
-		err := u.Create(context.TODO(), mockStudent)
+		err := u.Create(context.TODO(), &mockStudent)
 
 		assert.Error(t, err)
 
@@ -87,20 +81,13 @@ func TestCreate(t *testing.T) {
 
 func TestGetByID(t *testing.T) {
 	mockStudentRepo := new(mocks.StudentRepositoryMock)
-	mockStudent := &domain.Student{
-		ID:          "asd",
-		Name:        "Sunny",
-		Email:       "none@gmail.com",
-		GeneralInfo: "I like plants",
-		School:      "KGS",
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now().Add(72 * time.Hour),
-	}
+	var mockStudent domain.Student
+	faker.FakeData(&mockStudent)
 
 	t.Run("case success", func(t *testing.T) {
 		mockStudentRepo.
 			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
-			Return(mockStudent, nil).
+			Return(&mockStudent, nil).
 			Once()
 		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
 
@@ -145,20 +132,13 @@ func TestGetByID(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	mockStudentRepo := new(mocks.StudentRepositoryMock)
-	mockStudent := &domain.Student{
-		ID:          "asd",
-		Name:        "Sunny",
-		Email:       "none@gmail.com",
-		GeneralInfo: "I like plants",
-		School:      "KGS",
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now().Add(72 * time.Hour),
-	}
+	var mockStudent domain.Student
+	faker.FakeData(&mockStudent)
 
 	t.Run("success", func(t *testing.T) {
 		mockStudentRepo.
 			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
-			Return(mockStudent, nil).
+			Return(&mockStudent, nil).
 			Once()
 		mockStudentRepo.
 			On("Update", mock.Anything, mock.AnythingOfType("*domain.Student")).
@@ -166,7 +146,7 @@ func TestUpdate(t *testing.T) {
 			Once()
 
 		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
-		err := u.Update(context.TODO(), mockStudent)
+		err := u.Update(context.TODO(), mockStudent.ID, &mockStudent)
 
 		assert.NoError(t, err)
 
@@ -180,7 +160,7 @@ func TestUpdate(t *testing.T) {
 			Once()
 
 		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
-		err := u.Update(context.TODO(), mockStudent)
+		err := u.Update(context.TODO(), mockStudent.ID, &mockStudent)
 
 		assert.Error(t, err)
 
@@ -194,7 +174,7 @@ func TestUpdate(t *testing.T) {
 			Once()
 
 		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
-		err := u.Update(context.TODO(), mockStudent)
+		err := u.Update(context.TODO(), mockStudent.ID, &mockStudent)
 
 		assert.Error(t, err)
 
@@ -204,20 +184,13 @@ func TestUpdate(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	mockStudentRepo := new(mocks.StudentRepositoryMock)
-	mockStudent := &domain.Student{
-		ID:          "asd",
-		Name:        "Sunny",
-		Email:       "none@gmail.com",
-		GeneralInfo: "I like plants",
-		School:      "KGS",
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now().Add(72 * time.Hour),
-	}
+	var mockStudent domain.Student
+	faker.FakeData(&mockStudent)
 
 	t.Run("success", func(t *testing.T) {
 		mockStudentRepo.
 			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
-			Return(mockStudent, nil).
+			Return(&mockStudent, nil).
 			Once()
 		mockStudentRepo.
 			On("Delete", mock.Anything, mock.AnythingOfType("string")).

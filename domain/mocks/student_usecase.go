@@ -48,12 +48,12 @@ func (m *StudentUseCase) GetByID(ctx context.Context, id string) (*domain.Studen
 }
 
 // Update - StudentUseCaseMock
-func (m *StudentUseCase) Update(ctx context.Context, st *domain.Student) error {
-	args := m.Called(ctx, st)
+func (m *StudentUseCase) Update(ctx context.Context, id string, st *domain.Student) error {
+	args := m.Called(ctx, id, st)
 
 	var r0 error
-	if rf, ok := args.Get(0).(func(context.Context, *domain.Student) error); ok {
-		r0 = rf(ctx, st)
+	if rf, ok := args.Get(0).(func(context.Context, string, *domain.Student) error); ok {
+		r0 = rf(ctx, id, st)
 	} else {
 		r0 = args.Error(0)
 	}

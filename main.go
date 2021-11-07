@@ -1,5 +1,7 @@
 package main
 
-func main() {
+import "github.com/airbenders/profile/app"
 
+func main() {
+	app.Start()
 }
