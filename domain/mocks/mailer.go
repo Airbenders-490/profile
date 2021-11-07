@@ -4,10 +4,12 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// SimpleMail mock struct
 type SimpleMail struct {
 	mock.Mock
 }
 
+// SendSimpleMail mock function
 func (m SimpleMail) SendSimpleMail(to string, body []byte) error {
 	args := m.Called(to, body)
 
