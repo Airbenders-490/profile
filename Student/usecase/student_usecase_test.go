@@ -25,6 +25,7 @@ type StudentUseCase interface {
 
 func TestCreate(t *testing.T) {
 	mockStudentRepo := new(mocks.StudentRepositoryMock)
+	mockReviewRepo := new(mocks.ReviewRepositoryMock)
 	var mockStudent domain.Student
 	faker.FakeData(&mockStudent)
 
@@ -37,7 +38,7 @@ func TestCreate(t *testing.T) {
 			On("Create", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("*domain.Student")).
 			Return(nil).
 			Once()
-		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
+		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
 
 		err := u.Create(context.TODO(), &mockStudent)
 
@@ -55,7 +56,7 @@ func TestCreate(t *testing.T) {
 			On("Create", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("*domain.Student")).
 			Return(errors.New("error")).
 			Once()
-		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
+		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
 
 		err := u.Create(context.TODO(), &mockStudent)
 
@@ -69,7 +70,7 @@ func TestCreate(t *testing.T) {
 			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(&mockStudent, nil).
 			Once()
-		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
+		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
 
 		err := u.Create(context.TODO(), &mockStudent)
 
@@ -81,6 +82,7 @@ func TestCreate(t *testing.T) {
 
 func TestGetByID(t *testing.T) {
 	mockStudentRepo := new(mocks.StudentRepositoryMock)
+	mockReviewRepo := new(mocks.ReviewRepositoryMock)
 	var mockStudent domain.Student
 	faker.FakeData(&mockStudent)
 
@@ -89,7 +91,11 @@ func TestGetByID(t *testing.T) {
 			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(&mockStudent, nil).
 			Once()
-		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
+		mockReviewRepo.
+			On("GetReviewsFor", mock.Anything, mock.AnythingOfType("string")).
+			Return([]domain.Review{domain.Review{}, domain.Review{}}, nil).
+			Once()
+		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
 
 		student, err := u.GetByID(context.TODO(), mockStudent.ID)
 
@@ -104,7 +110,7 @@ func TestGetByID(t *testing.T) {
 			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(nil, errors.New("error")).
 			Once()
-		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
+		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
 
 		student, err := u.GetByID(context.TODO(), mockStudent.ID)
 
@@ -119,7 +125,7 @@ func TestGetByID(t *testing.T) {
 			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(&domain.Student{}, nil).
 			Once()
-		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
+		u := usecase.NewStudentUseCase(mockStudentRepo,mockReviewRepo, time.Second)
 
 		student, err := u.GetByID(context.TODO(), mockStudent.ID)
 
@@ -132,6 +138,7 @@ func TestGetByID(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	mockStudentRepo := new(mocks.StudentRepositoryMock)
+	mockReviewRepo := new(mocks.ReviewRepositoryMock)
 	var mockStudent domain.Student
 	faker.FakeData(&mockStudent)
 
@@ -145,7 +152,7 @@ func TestUpdate(t *testing.T) {
 			Return(nil).
 			Once()
 
-		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
+		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
 		err := u.Update(context.TODO(), mockStudent.ID, &mockStudent)
 
 		assert.NoError(t, err)
@@ -159,7 +166,7 @@ func TestUpdate(t *testing.T) {
 			Return(nil, errors.New("error")).
 			Once()
 
-		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
+		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
 		err := u.Update(context.TODO(), mockStudent.ID, &mockStudent)
 
 		assert.Error(t, err)
@@ -173,7 +180,7 @@ func TestUpdate(t *testing.T) {
 			Return(&domain.Student{}, nil).
 			Once()
 
-		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
+		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
 		err := u.Update(context.TODO(), mockStudent.ID, &mockStudent)
 
 		assert.Error(t, err)
@@ -184,6 +191,7 @@ func TestUpdate(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	mockStudentRepo := new(mocks.StudentRepositoryMock)
+	mockReviewRepo := new(mocks.ReviewRepositoryMock)
 	var mockStudent domain.Student
 	faker.FakeData(&mockStudent)
 
@@ -197,7 +205,7 @@ func TestDelete(t *testing.T) {
 			Return(nil).
 			Once()
 
-		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
+		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
 		err := u.Delete(context.TODO(), mockStudent.ID)
 
 		assert.NoError(t, err)
@@ -211,7 +219,7 @@ func TestDelete(t *testing.T) {
 			Return(nil, errors.New("error")).
 			Once()
 
-		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
+		u := usecase.NewStudentUseCase(mockStudentRepo,mockReviewRepo, time.Second)
 		err := u.Delete(context.TODO(), mockStudent.ID)
 
 		assert.Error(t, err)
@@ -225,7 +233,7 @@ func TestDelete(t *testing.T) {
 			Return(&domain.Student{}, nil).
 			Once()
 
-		u := usecase.NewStudentUseCase(mockStudentRepo, time.Second)
+		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
 		err := u.Delete(context.TODO(), mockStudent.ID)
 
 		assert.Error(t, err)

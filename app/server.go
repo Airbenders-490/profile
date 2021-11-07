@@ -27,13 +27,13 @@ func Server(
 	studentHandler *http.StudentHandler,
 	schoolHandler *http2.SchoolHandler,
 	tagHandler *http3.TagHandler,
-	reviewHandler *http4.ReviewHandler) *gin.Engine {
+	reviewHandler *http4.ReviewHandler,
+	mw Middleware) *gin.Engine {
 	router := gin.Default()
-	router.Use(AuthMiddleware())
-	mapStudentURLs(studentHandler, router)
-	mapSchoolURLs(schoolHandler, router)
+	mapStudentURLs(mw, studentHandler, router)
+	mapSchoolURLs(mw, schoolHandler, router)
 	mapTagURLs(tagHandler, router)
-	mapReviewURLs(reviewHandler, router)
+	mapReviewURLs(mw, reviewHandler, router)
 	return router
 }
 
@@ -61,6 +61,7 @@ func Start() {
 	reviewUseCase := usecase4.NewReviewUseCase(reviewRepository, studentRepository, time.Second)
 	reviewHandler := http4.NewReviewHandler(reviewUseCase)
 
-	router := Server(studentHandler, schoolHandler, tagHandler, reviewHandler)
+	mw := NewMiddleware()
+	router := Server(studentHandler, schoolHandler, tagHandler, reviewHandler, mw)
 	router.Run()
 }

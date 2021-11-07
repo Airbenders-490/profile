@@ -43,3 +43,11 @@ func NewBadRequestError(message string) *RestError {
 		Message: message,
 	}
 }
+
+// NewUnauthorizedError returns error with status code 401
+func NewUnauthorizedError(message string) *RestError {
+	return &RestError{
+		Code:    http.StatusUnauthorized,
+		Message: message,
+	}
+}

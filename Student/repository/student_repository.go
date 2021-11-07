@@ -6,6 +6,7 @@ import (
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/utils/errors"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"log"
 	"time"
 )
 
@@ -31,6 +32,7 @@ const (
 	WHERE id=$1;`
 	deleteStudent = `DELETE FROM public.student
 	WHERE id=$1;`
+	getSchoolName = `SELECT name FROM school WHERE ID=$1`
 )
 
 // Create stores the student in the db. Returns err if unable to
@@ -78,6 +80,13 @@ func (r *studentRepository) GetByID(ctx context.Context, id string) (*domain.Stu
 		student.GeneralInfo = values[4].(string)
 		if values[5] != nil {
 			student.School = &domain.School{ID: values[5].(string)}
+			row := r.db.QueryRow(ctx, getSchoolName, student.School.ID)
+			var name string
+			err = row.Scan(&name)
+			if err != nil {
+				log.Println("unable to get the school name")
+			}
+			student.School.Name = name
 		}
 		student.CreatedAt = values[6].(time.Time)
 		student.UpdatedAt = values[7].(time.Time)
