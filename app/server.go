@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"log"
+	"os"
 	"time"
 
 	http4 "github.com/airbenders/profile/Review/delivery/http"
@@ -39,9 +40,7 @@ func Server(
 
 // Start runs the server
 func Start() {
-	pool, err := pgxpool.Connect(context.Background(), "postgres://postgres:123456@localhost/course")
-
-	//	pool, err := pgxpool.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+		pool, err := pgxpool.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatalln(err)
 	}

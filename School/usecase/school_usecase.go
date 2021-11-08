@@ -121,7 +121,7 @@ func createEmailBody(name, school, url string) []byte {
 	}
 	var body bytes.Buffer
 	mimeHeaders := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
-	body.Write([]byte(fmt.Sprintf("Subject: Anonymous app confirmation email\n%s\n\n", mimeHeaders)))
+	body.Write([]byte(fmt.Sprintf("Subject: Smarties app confirmation\n%s\n\n", mimeHeaders)))
 	t.Execute(&body, struct {
 		Name   string
 		School string
