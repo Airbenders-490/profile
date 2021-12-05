@@ -11,10 +11,11 @@ import (
 func mapStudentURLs(m Middleware, h *studentHttp.StudentHandler, router *gin.Engine) {
 	authorized := router.Group("/api")
 	authorized.Use(m.AuthMiddleware())
-	authorized.GET("/student/:id", h.GetByID)
+	const studentidpath = "/student/:id"
+	authorized.GET(studentidpath, h.GetByID)
 	authorized.POST("/student", h.Create)
-	authorized.PUT("/student/:id", h.Update)
-	authorized.DELETE("/student/:id", h.Delete)
+	authorized.PUT(studentidpath, h.Update)
+	authorized.DELETE(studentidpath, h.Delete)
 }
 
 func mapSchoolURLs(m Middleware, h *schoolHttp.SchoolHandler, r *gin.Engine) {

@@ -18,11 +18,14 @@ func NewStudentHandler(u domain.StudentUseCase) *StudentHandler {
 	return &StudentHandler{UseCase: u}
 }
 
+const errorMessage = "id must be provided"
+
 // GetByID returns the student's profile with that ID. If it doesn't exist, returns 404
 func (h *StudentHandler) GetByID(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
-		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("id must be provided"))
+
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError(errorMessage))
 		return
 	}
 	ctx := c.Request.Context()
@@ -73,7 +76,7 @@ func (h *StudentHandler) Create(c *gin.Context) {
 func (h *StudentHandler) Update(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
-		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("id must be provided"))
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError(errorMessage))
 		return
 	}
 
@@ -112,7 +115,7 @@ func (h *StudentHandler) Update(c *gin.Context) {
 func (h *StudentHandler) Delete(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
-		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("id must be provided"))
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError(errorMessage))
 		return
 	}
 

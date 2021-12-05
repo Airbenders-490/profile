@@ -18,7 +18,7 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func TestTagHandler_GetAllTags(t *testing.T) {
+func TestTagHandlerGetAllTags(t *testing.T) {
 	mockUseCase := new(mocks.TagUseCase)
 	h := http.NewTagHandler(mockUseCase)
 	mw := new(mocks.MiddlewareMock)
