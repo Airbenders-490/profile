@@ -11,16 +11,20 @@ import (
 	e "github.com/airbenders/profile/utils/errors"
 	"github.com/airbenders/profile/utils/httputils"
 	"github.com/bxcodec/faker"
-	"io/ioutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"io/ioutil"
 	"net/http/httptest"
 	"strings"
 	"testing"
 )
 
+const failureMessage = "failed to read from message"
+const sapischoolconfirmemail = "%s/api/school/confirm?email=%s"
+const testemail = "adam.yafout@gmail.com"
+const applicationJSON = "application/JSON"
 
-func TestSchoolHandler_SearchStudentSchool(t *testing.T){
+func TestSchoolHandlerSearchStudentSchool(t *testing.T){
 	mockUseCase := new(mocks.SchoolUseCase)
 	h := http.NewSchoolHandler(mockUseCase)
 	middleware := new(mocks.MiddlewareMock)
@@ -61,7 +65,7 @@ func TestSchoolHandler_SearchStudentSchool(t *testing.T){
 
 		responseBody, err := ioutil.ReadAll(response.Body)
 		if err != nil {
-			assert.Fail(t, "failed to read from message")
+			assert.Fail(t, failureMessage)
 		}
 		var restError e.RestError
 		err = json.Unmarshal(responseBody, &restError)
@@ -91,7 +95,7 @@ func TestSchoolHandler_SearchStudentSchool(t *testing.T){
 	})
 }
 
-func TestSchoolHandler_ConfirmSchoolRegistration(t *testing.T) {
+func TestSchoolHandlerConfirmSchoolRegistration(t *testing.T) {
 	mockUseCase := new(mocks.SchoolUseCase)
 	h := http.NewSchoolHandler(mockUseCase)
 	middleware := new(mocks.MiddlewareMock)
@@ -121,7 +125,7 @@ func TestSchoolHandler_ConfirmSchoolRegistration(t *testing.T) {
 
 		responseBody, err := ioutil.ReadAll(response.Body)
 		if err != nil {
-			assert.Fail(t, "failed to read from message")
+			assert.Fail(t, failureMessage)
 		}
 		var restError e.RestError
 		err = json.Unmarshal(responseBody, &restError)
@@ -149,7 +153,7 @@ func TestSchoolHandler_ConfirmSchoolRegistration(t *testing.T) {
 }
 
 
-func TestSchoolHandler_SendConfirmationMail(t *testing.T){
+func TestSchoolHandlerSendConfirmationMail(t *testing.T){
 	mockUseCase := new(mocks.SchoolUseCase)
 	h := http.NewSchoolHandler(mockUseCase)
 	middleware := new(mocks.MiddlewareMock)
@@ -159,6 +163,7 @@ func TestSchoolHandler_SendConfirmationMail(t *testing.T){
 	err := faker.FakeData(&mockSchool)
 	assert.NoError(t, err)
 
+
 	t.Run("success", func(t *testing.T) {
 		mockUseCase.On("SendConfirmation", mock.Anything,
 			mock.AnythingOfType("*domain.Student"), mock.AnythingOfType("string"),
@@ -166,23 +171,23 @@ func TestSchoolHandler_SendConfirmationMail(t *testing.T){
 		postBody, err := json.Marshal(mockSchool)
 		assert.NoError(t, err)
 		reader := strings.NewReader(string(postBody))
-		response, err := server.Client().Post(fmt.Sprintf("%s/api/school/confirm?email=%s", server.URL, "adam.yafout@gmail.com"),
-			"application/JSON", reader)
+		response, err := server.Client().Post(fmt.Sprintf(sapischoolconfirmemail, server.URL, testemail),
+			applicationJSON, reader)
 		assert.NoError(t, err)
 		defer response.Body.Close()
 
 		assert.Equal(t, response.StatusCode, 200)
 		_, err = ioutil.ReadAll(response.Body)
 		if err != nil {
-			assert.Fail(t, "failed to read from message")
+			assert.Fail(t, failureMessage)
 		}
 		mockUseCase.AssertExpectations(t)
 	})
 
 	t.Run("invalid-body", func(t *testing.T) {
 		reader := strings.NewReader("Invalid body")
-		response, err := server.Client().Post(fmt.Sprintf("%s/api/school/confirm?email=%s", server.URL, "adam.yafout@gmail.com"),
-			"application/JSON", reader)
+		response, err := server.Client().Post(fmt.Sprintf(sapischoolconfirmemail, server.URL, testemail),
+			applicationJSON, reader)
 		assert.NoError(t, err)
 		defer response.Body.Close()
 
@@ -190,7 +195,7 @@ func TestSchoolHandler_SendConfirmationMail(t *testing.T){
 		var responseBody []byte
 		responseBody, err = ioutil.ReadAll(response.Body)
 		if err != nil {
-			assert.Fail(t, "failed to read from message")
+			assert.Fail(t, failureMessage)
 		}
 		var restError e.RestError
 		err = json.Unmarshal(responseBody, &restError)
@@ -216,15 +221,15 @@ func TestSchoolHandler_SendConfirmationMail(t *testing.T){
 		postBody, err := json.Marshal(mockSchool)
 		assert.NoError(t, err)
 		reader := strings.NewReader(string(postBody))
-		response, err := server.Client().Post(fmt.Sprintf("%s/api/school/confirm?email=%s", server.URL, "adam.yafout@gmail.com"),
-			"application/JSON", reader)
+		response, err := server.Client().Post(fmt.Sprintf(sapischoolconfirmemail, server.URL, testemail),
+			applicationJSON, reader)
 		assert.NoError(t, err)
 		defer response.Body.Close()
 
 		assert.Equal(t, response.StatusCode, 500)
 		_, err = ioutil.ReadAll(response.Body)
 		if err != nil {
-			assert.Fail(t, "failed to read from message")
+			assert.Fail(t, failureMessage)
 		}
 		mockUseCase.AssertExpectations(t)
 	})
