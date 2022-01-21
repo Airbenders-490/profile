@@ -19,11 +19,11 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-const stardomainreview = "*domain.Review"
-const sapireviews = "%s/api/review/%s"
+const reviewType = "*domain.Review"
+const postReviewPath = "%s/api/review/%s"
 const applicationJSON = "application/JSON"
-const failuremessage = "failed to read from message"
-const apireviewsupdate = "/api/review/%s/update"
+const failureMessage = "failed to read from message"
+const putReviewPath = "/api/review/%s/update"
 
 func TestReviewHandlerAddReview(t *testing.T) {
 	mockUseCase := new(mocks.ReviewUseCase)
@@ -41,7 +41,7 @@ func TestReviewHandlerAddReview(t *testing.T) {
 
 
 	t.Run("success", func(t *testing.T) {
-		mockUseCase.On("AddReview", mock.Anything, mock.AnythingOfType(stardomainreview), mock.AnythingOfType("string")).
+		mockUseCase.On("AddReview", mock.Anything, mock.AnythingOfType(reviewType), mock.AnythingOfType("string")).
 			Return(&mockReview, nil).
 			Once()
 
@@ -51,7 +51,7 @@ func TestReviewHandlerAddReview(t *testing.T) {
 		reader := strings.NewReader(string(postBody))
 
 		response, err := server.Client().Post(
-			fmt.Sprintf(sapireviews, server.URL, mockReview.Reviewer.ID),
+			fmt.Sprintf(postReviewPath, server.URL, mockReview.Reviewer.ID),
 			applicationJSON, reader)
 
 		assert.NoError(t, err)
@@ -61,7 +61,7 @@ func TestReviewHandlerAddReview(t *testing.T) {
 		responseBody, err := ioutil.ReadAll(response.Body)
 
 		if err != nil {
-			assert.Fail(t, failuremessage)
+			assert.Fail(t, failureMessage)
 		}
 
 		var receivedReview domain.Review
@@ -83,7 +83,7 @@ func TestReviewHandlerAddReview(t *testing.T) {
 		reader := strings.NewReader("Invalid body")
 
 		response, err := server.Client().Post(
-			(fmt.Sprintf(sapireviews, server.URL, mockReview.Reviewer.ID)),
+			(fmt.Sprintf(postReviewPath, server.URL, mockReview.Reviewer.ID)),
 			applicationJSON, reader)
 
 		assert.NoError(t, err)
@@ -93,7 +93,7 @@ func TestReviewHandlerAddReview(t *testing.T) {
 		var responseBody []byte
 		responseBody, err = ioutil.ReadAll(response.Body)
 		if err != nil {
-			assert.Fail(t, failuremessage)
+			assert.Fail(t, failureMessage)
 		}
 		var restError e.RestError
 		err = json.Unmarshal(responseBody, &restError)
@@ -104,7 +104,7 @@ func TestReviewHandlerAddReview(t *testing.T) {
 	})
 	t.Run("already exist", func(t *testing.T) {
 		restErr := e.NewConflictError("already exists")
-		mockUseCase.On("AddReview", mock.Anything, mock.AnythingOfType(stardomainreview), mock.AnythingOfType("string")).
+		mockUseCase.On("AddReview", mock.Anything, mock.AnythingOfType(reviewType), mock.AnythingOfType("string")).
 			Return(nil, restErr).
 			Once()
 		postBody, err := json.Marshal(&mockReview)
@@ -113,7 +113,7 @@ func TestReviewHandlerAddReview(t *testing.T) {
 		reader := strings.NewReader(string(postBody))
 
 		response, err := server.Client().Post(
-			(fmt.Sprintf(sapireviews, server.URL, mockReview.Reviewer.ID)),
+			(fmt.Sprintf(postReviewPath, server.URL, mockReview.Reviewer.ID)),
 			applicationJSON, reader)
 		assert.NoError(t, err)
 		defer response.Body.Close()
@@ -122,7 +122,7 @@ func TestReviewHandlerAddReview(t *testing.T) {
 		var responseBody []byte
 		responseBody, err = ioutil.ReadAll(response.Body)
 		if err != nil {
-			assert.Fail(t, failuremessage)
+			assert.Fail(t, failureMessage)
 		}
 		var receivedError e.RestError
 		err = json.Unmarshal(responseBody, &receivedError)
@@ -133,7 +133,7 @@ func TestReviewHandlerAddReview(t *testing.T) {
 
 	t.Run("some-internal-error", func(t *testing.T) {
 		defaultErr := errors.New("some error occurred")
-		mockUseCase.On("AddReview", mock.Anything, mock.AnythingOfType(stardomainreview), mock.AnythingOfType("string")).
+		mockUseCase.On("AddReview", mock.Anything, mock.AnythingOfType(reviewType), mock.AnythingOfType("string")).
 			Return(nil, defaultErr).
 			Once()
 		postBody, err := json.Marshal(&mockReview)
@@ -141,7 +141,7 @@ func TestReviewHandlerAddReview(t *testing.T) {
 		reader := strings.NewReader(string(postBody))
 
 		response, err := server.Client().Post(
-			(fmt.Sprintf(sapireviews, server.URL, mockReview.Reviewer.ID)),
+			(fmt.Sprintf(postReviewPath, server.URL, mockReview.Reviewer.ID)),
 			applicationJSON, reader)
 		assert.NoError(t, err)
 		defer response.Body.Close()
@@ -186,7 +186,7 @@ func TestReviewHandlerGetReviewsBy(t *testing.T) {
 		responseBody, err := ioutil.ReadAll(w.Body)
 
 		if err != nil {
-			assert.Fail(t, failuremessage)
+			assert.Fail(t, failureMessage)
 		}
 
 		var receivedReviews []domain.Review
@@ -215,11 +215,11 @@ func TestReviewHandlerEditReview(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		postBody, err := json.Marshal(mockReview)
 		assert.NoError(t, err)
-		mockUseCase.On("EditReview", mock.Anything, mock.AnythingOfType(stardomainreview), mock.AnythingOfType("string")).
+		mockUseCase.On("EditReview", mock.Anything, mock.AnythingOfType(reviewType), mock.AnythingOfType("string")).
 			Return(&mockReview, nil).
 			Once()
 		reader := strings.NewReader(string(postBody))
-		reqFound := httptest.NewRequest("PUT", fmt.Sprintf(apireviewsupdate, mockReview.Reviewer.ID),
+		reqFound := httptest.NewRequest("PUT", fmt.Sprintf(putReviewPath, mockReview.Reviewer.ID),
 			reader)
 		reqFound.Header.Set("id", mockReview.Reviewer.ID)
 		w := httptest.NewRecorder()
@@ -230,7 +230,7 @@ func TestReviewHandlerEditReview(t *testing.T) {
 
 	t.Run("invalid-data-type", func(t *testing.T) {
 		reader := strings.NewReader("invalid body")
-		reqFound := httptest.NewRequest("PUT", fmt.Sprintf(apireviewsupdate, mockReview.Reviewer.ID),
+		reqFound := httptest.NewRequest("PUT", fmt.Sprintf(putReviewPath, mockReview.Reviewer.ID),
 			reader)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
@@ -242,11 +242,11 @@ func TestReviewHandlerEditReview(t *testing.T) {
 		postBody, err := json.Marshal(mockReview)
 		restErr := e.NewConflictError("error occurred")
 		assert.NoError(t, err)
-		mockUseCase.On("EditReview", mock.Anything, mock.AnythingOfType(stardomainreview), mock.AnythingOfType("string")).
+		mockUseCase.On("EditReview", mock.Anything, mock.AnythingOfType(reviewType), mock.AnythingOfType("string")).
 			Return(nil, restErr).
 			Once()
 		reader := strings.NewReader(string(postBody))
-		reqFound := httptest.NewRequest("PUT", fmt.Sprintf(apireviewsupdate, mockReview.Reviewer.ID),
+		reqFound := httptest.NewRequest("PUT", fmt.Sprintf(putReviewPath, mockReview.Reviewer.ID),
 			reader)
 		reqFound.Header.Set("id", mockReview.Reviewer.ID)
 		w := httptest.NewRecorder()
@@ -263,7 +263,7 @@ func TestReviewHandlerEditReview(t *testing.T) {
 			Once()
 
 		reader := strings.NewReader(string(postBody))
-		reqFound := httptest.NewRequest("PUT", fmt.Sprintf(apireviewsupdate, mockReview.Reviewer.ID),
+		reqFound := httptest.NewRequest("PUT", fmt.Sprintf(putReviewPath, mockReview.Reviewer.ID),
 			reader)
 		reqFound.Header.Set("id", mockReview.Reviewer.ID)
 		w := httptest.NewRecorder()

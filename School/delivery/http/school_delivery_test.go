@@ -20,8 +20,8 @@ import (
 )
 
 const failureMessage = "failed to read from message"
-const sapischoolconfirmemail = "%s/api/school/confirm?email=%s"
-const testemail = "adam.yafout@gmail.com"
+const postSchoolEmailConfirmationPath = "%s/api/school/confirm?email=%s"
+const testEmail = "adam.yafout@gmail.com"
 const applicationJSON = "application/JSON"
 
 func TestSchoolHandlerSearchStudentSchool(t *testing.T){
@@ -171,7 +171,7 @@ func TestSchoolHandlerSendConfirmationMail(t *testing.T){
 		postBody, err := json.Marshal(mockSchool)
 		assert.NoError(t, err)
 		reader := strings.NewReader(string(postBody))
-		response, err := server.Client().Post(fmt.Sprintf(sapischoolconfirmemail, server.URL, testemail),
+		response, err := server.Client().Post(fmt.Sprintf(postSchoolEmailConfirmationPath, server.URL, testEmail),
 			applicationJSON, reader)
 		assert.NoError(t, err)
 		defer response.Body.Close()
@@ -186,7 +186,7 @@ func TestSchoolHandlerSendConfirmationMail(t *testing.T){
 
 	t.Run("invalid-body", func(t *testing.T) {
 		reader := strings.NewReader("Invalid body")
-		response, err := server.Client().Post(fmt.Sprintf(sapischoolconfirmemail, server.URL, testemail),
+		response, err := server.Client().Post(fmt.Sprintf(postSchoolEmailConfirmationPath, server.URL, testEmail),
 			applicationJSON, reader)
 		assert.NoError(t, err)
 		defer response.Body.Close()
@@ -221,7 +221,7 @@ func TestSchoolHandlerSendConfirmationMail(t *testing.T){
 		postBody, err := json.Marshal(mockSchool)
 		assert.NoError(t, err)
 		reader := strings.NewReader(string(postBody))
-		response, err := server.Client().Post(fmt.Sprintf(sapischoolconfirmemail, server.URL, testemail),
+		response, err := server.Client().Post(fmt.Sprintf(postSchoolEmailConfirmationPath, server.URL, testEmail),
 			applicationJSON, reader)
 		assert.NoError(t, err)
 		defer response.Body.Close()
