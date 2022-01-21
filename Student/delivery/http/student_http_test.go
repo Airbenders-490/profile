@@ -21,10 +21,10 @@ import (
 
 
 const failureMessage = "failed to read from message"
-const domaindotstudent = "*domain.Student"
-const apistudents = "/api/student/%s"
-const sapistudent = "%s/api/student/"
-const sapistudents = "%s/api/student/%s"
+const studentType = "*domain.Student"
+const putStudentPath = "/api/student/%s"
+const postStudentPath = "%s/api/student/"
+const getStudentPath = "%s/api/student/%s"
 
 func TestStudentHandlerGetByID(t *testing.T) {
 	mockUseCase := new(mocks.StudentUseCase)
@@ -42,7 +42,7 @@ func TestStudentHandlerGetByID(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockUseCase.On("GetByID", mock.Anything, mock.AnythingOfType("string")).Return(&mockStudent, nil).Once()
 
-		response, err := server.Client().Get(fmt.Sprintf(sapistudents, server.URL, mockStudent.ID))
+		response, err := server.Client().Get(fmt.Sprintf(getStudentPath, server.URL, mockStudent.ID))
 		assert.NoError(t, err)
 		defer response.Body.Close()
 
@@ -65,7 +65,7 @@ func TestStudentHandlerGetByID(t *testing.T) {
 		mockUseCase.On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(nil, e.NewNotFoundError("student not found")).Once()
 
-		response, err := server.Client().Get(fmt.Sprintf(sapistudents, server.URL, mockStudent.ID))
+		response, err := server.Client().Get(fmt.Sprintf(getStudentPath, server.URL, mockStudent.ID))
 		assert.NoError(t, err)
 		defer response.Body.Close()
 
@@ -86,7 +86,7 @@ func TestStudentHandlerGetByID(t *testing.T) {
 		mockUseCase.On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(nil, defaultErr).Once()
 
-		response, err := server.Client().Get(fmt.Sprintf(sapistudents, server.URL, "asd"))
+		response, err := server.Client().Get(fmt.Sprintf(getStudentPath, server.URL, "asd"))
 		assert.NoError(t, err)
 		defer response.Body.Close()
 
@@ -130,12 +130,12 @@ func TestStudentHandlerCreate(t *testing.T) {
 
 	const applicationJSON = "application/JSON"
 	t.Run("success", func(t *testing.T) {
-		mockUseCase.On("Create", mock.Anything, mock.AnythingOfType(domaindotstudent)).
+		mockUseCase.On("Create", mock.Anything, mock.AnythingOfType(studentType)).
 			Return(nil).Once()
 		postBody, err := json.Marshal(mockStudent)
 		assert.NoError(t, err)
 		reader := strings.NewReader(string(postBody))
-		response, err := server.Client().Post(fmt.Sprintf(sapistudent, server.URL), applicationJSON, reader)
+		response, err := server.Client().Post(fmt.Sprintf(postStudentPath, server.URL), applicationJSON, reader)
 			assert.NoError(t, err)
 		defer response.Body.Close()
 
@@ -145,7 +145,7 @@ func TestStudentHandlerCreate(t *testing.T) {
 
 	t.Run("invalid-body", func(t *testing.T) {
 		reader := strings.NewReader("Invalid body")
-		response, err := server.Client().Post(fmt.Sprintf(sapistudent, server.URL), applicationJSON, reader)
+		response, err := server.Client().Post(fmt.Sprintf(postStudentPath, server.URL), applicationJSON, reader)
 		assert.NoError(t, err)
 		defer response.Body.Close()
 
@@ -167,9 +167,9 @@ func TestStudentHandlerCreate(t *testing.T) {
 		restErr := e.NewConflictError("already exists")
 		assert.NoError(t, err)
 		reader := strings.NewReader(string(postBody))
-		mockUseCase.On("Create", mock.Anything, mock.AnythingOfType(domaindotstudent)).
+		mockUseCase.On("Create", mock.Anything, mock.AnythingOfType(studentType)).
 			Return(restErr).Once()
-		response, err := server.Client().Post(fmt.Sprintf(sapistudent, server.URL), applicationJSON, reader)
+		response, err := server.Client().Post(fmt.Sprintf(postStudentPath, server.URL), applicationJSON, reader)
 		assert.NoError(t, err)
 		defer response.Body.Close()
 
@@ -191,10 +191,10 @@ func TestStudentHandlerCreate(t *testing.T) {
 		postBody, err := json.Marshal(mockStudent)
 		assert.NoError(t, err)
 		reader := strings.NewReader(string(postBody))
-		mockUseCase.On("Create", mock.Anything, mock.AnythingOfType(domaindotstudent)).
+		mockUseCase.On("Create", mock.Anything, mock.AnythingOfType(studentType)).
 			Return(defaultErr).Once()
 
-		response, err := server.Client().Post(fmt.Sprintf(sapistudent, server.URL), applicationJSON, reader)
+		response, err := server.Client().Post(fmt.Sprintf(postStudentPath, server.URL), applicationJSON, reader)
 		assert.NoError(t, err)
 		defer response.Body.Close()
 
@@ -222,10 +222,10 @@ func TestStudentHandlerUpdate(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		postBody, err := json.Marshal(mockStudent)
 		assert.NoError(t, err)
-		mockUseCase.On("Update", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType(domaindotstudent)).
+		mockUseCase.On("Update", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType(studentType)).
 			Return(nil).Once()
 		reader := strings.NewReader(string(postBody))
-		reqFound := httptest.NewRequest("PUT", fmt.Sprintf(apistudents, mockStudent.ID), reader)
+		reqFound := httptest.NewRequest("PUT", fmt.Sprintf(putStudentPath, mockStudent.ID), reader)
 		reqFound.Header.Set("id", mockStudent.ID)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
@@ -235,7 +235,7 @@ func TestStudentHandlerUpdate(t *testing.T) {
 
 	t.Run("invalid-data-type", func(t *testing.T) {
 		reader := strings.NewReader("invalid body")
-		reqFound := httptest.NewRequest("PUT", fmt.Sprintf(apistudents, mockStudent.ID), reader)
+		reqFound := httptest.NewRequest("PUT", fmt.Sprintf(putStudentPath, mockStudent.ID), reader)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
 		assert.Equal(t, 400, w.Code)
@@ -246,10 +246,10 @@ func TestStudentHandlerUpdate(t *testing.T) {
 		postBody, err := json.Marshal(mockStudent)
 		restErr := e.NewConflictError("error occurred")
 		assert.NoError(t, err)
-		mockUseCase.On("Update", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType(domaindotstudent)).
+		mockUseCase.On("Update", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType(studentType)).
 			Return(restErr).Once()
 		reader := strings.NewReader(string(postBody))
-		reqFound := httptest.NewRequest("PUT", fmt.Sprintf(apistudents, mockStudent.ID), reader)
+		reqFound := httptest.NewRequest("PUT", fmt.Sprintf(putStudentPath, mockStudent.ID), reader)
 		reqFound.Header.Set("id", mockStudent.ID)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
@@ -260,10 +260,10 @@ func TestStudentHandlerUpdate(t *testing.T) {
 	t.Run("usecase-default-error", func(t *testing.T) {
 		postBody, err := json.Marshal(mockStudent)
 		assert.NoError(t, err)
-		mockUseCase.On("Update", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType(domaindotstudent)).
+		mockUseCase.On("Update", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType(studentType)).
 			Return(errors.New("some error")).Once()
 		reader := strings.NewReader(string(postBody))
-		reqFound := httptest.NewRequest("PUT", fmt.Sprintf(apistudents, mockStudent.ID), reader)
+		reqFound := httptest.NewRequest("PUT", fmt.Sprintf(putStudentPath, mockStudent.ID), reader)
 		reqFound.Header.Set("id", mockStudent.ID)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
@@ -281,7 +281,7 @@ func TestStudentHandlerDelete(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockUseCase.On("Delete", mock.Anything, mock.AnythingOfType("string")).
 			Return(nil).Once()
-		reqFound := httptest.NewRequest("DELETE", fmt.Sprintf(apistudents, "asd"), nil)
+		reqFound := httptest.NewRequest("DELETE", fmt.Sprintf(putStudentPath, "asd"), nil)
 		reqFound.Header.Set("id", "asd")
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
@@ -290,7 +290,7 @@ func TestStudentHandlerDelete(t *testing.T) {
 	})
 
 	t.Run("invalid-id", func(t *testing.T) {
-		reqFound := httptest.NewRequest("DELETE", fmt.Sprintf(apistudents, ""), nil)
+		reqFound := httptest.NewRequest("DELETE", fmt.Sprintf(putStudentPath, ""), nil)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
 		assert.Equal(t, 400, w.Code)
@@ -300,7 +300,7 @@ func TestStudentHandlerDelete(t *testing.T) {
 		restErr := e.NewConflictError("error occurred")
 		mockUseCase.On("Delete", mock.Anything, mock.AnythingOfType("string")).
 			Return(restErr).Once()
-		reqFound := httptest.NewRequest("DELETE", fmt.Sprintf(apistudents, "asdasd"), nil)
+		reqFound := httptest.NewRequest("DELETE", fmt.Sprintf(putStudentPath, "asdasd"), nil)
 		reqFound.Header.Set("id", "asdasd")
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
@@ -311,7 +311,7 @@ func TestStudentHandlerDelete(t *testing.T) {
 	t.Run("usecase-default-error", func(t *testing.T) {
 		mockUseCase.On("Delete", mock.Anything, mock.AnythingOfType("string")).
 			Return(errors.New("some error")).Once()
-		reqFound := httptest.NewRequest("DELETE", fmt.Sprintf(apistudents, "asd"), nil)
+		reqFound := httptest.NewRequest("DELETE", fmt.Sprintf(putStudentPath, "asd"), nil)
 		reqFound.Header.Set("id", "asd")
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
