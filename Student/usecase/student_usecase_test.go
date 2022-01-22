@@ -145,9 +145,10 @@ func TestUpdate(t *testing.T) {
 			Once()
 
 		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
-		_, err := u.Update(context.TODO(), mockStudent.ID, &mockStudent)
+		updatedStudent, err := u.Update(context.TODO(), mockStudent.ID, &mockStudent)
 
 		assert.NoError(t, err)
+		assert.EqualValues(t, mockStudent, *updatedStudent)
 
 		mockStudentRepo.AssertExpectations(t)
 	})
