@@ -115,8 +115,9 @@ func (s *schoolUseCase) SendConfirmation(c context.Context, st *domain.Student, 
 }
 
 func createEmailBody(name, school, url string) []byte {
-	t, err := template.ParseFiles("static/confirmation_template.html")
+	t, err := template.ParseFiles("../../static/confirmation_template.html")
 	if err != nil {
+		fmt.Println(os.Getwd())
 		log.Fatalln(err)
 	}
 	var body bytes.Buffer
