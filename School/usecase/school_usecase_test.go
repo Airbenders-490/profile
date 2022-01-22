@@ -3,6 +3,7 @@ package usecase_test
 import (
 	"context"
 	"errors"
+	"github.com/airbenders/profile/School/usecase"
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/domain/mocks"
 	"github.com/bxcodec/faker"
@@ -24,7 +25,7 @@ func TestSearchSchoolByDomain(t *testing.T) {
 			On("SearchByDomain", mock.Anything, mock.AnythingOfType("string")).
 			Return([]domain.School{}, nil).
 			Once()
-		u := NewSchoolUseCase(mockSchoolRepo, mockStudentRepo , nil , time.Second)
+		u := usecase.NewSchoolUseCase(mockSchoolRepo, mockStudentRepo , nil , time.Second)
 
 		school, err := u.SearchSchoolByDomain(context.TODO(), mockSchool.Name)
 
@@ -39,7 +40,7 @@ func TestSearchSchoolByDomain(t *testing.T) {
 			On("SearchByDomain", mock.Anything, mock.AnythingOfType("string")).
 			Return([]domain.School{domain.School{}}, nil).
 			Once()
-		u := NewSchoolUseCase(mockSchoolRepo, mockStudentRepo , nil , time.Second)
+		u := usecase.NewSchoolUseCase(mockSchoolRepo, mockStudentRepo , nil , time.Second)
 
 		school, err := u.SearchSchoolByDomain(context.TODO(), mockSchool.Name)
 
@@ -54,7 +55,7 @@ func TestSearchSchoolByDomain(t *testing.T) {
 			On("SearchByDomain", mock.Anything, mock.AnythingOfType("string")).
 			Return(nil, errors.New("error")).
 			Once()
-		u := NewSchoolUseCase(mockSchoolRepo, mockStudentRepo , nil , time.Second)
+		u := usecase.NewSchoolUseCase(mockSchoolRepo, mockStudentRepo , nil , time.Second)
 
 		school, err := u.SearchSchoolByDomain(context.TODO(), mockSchool.Name)
 
@@ -104,7 +105,7 @@ func TestSendConfirmation(t *testing.T) {
 		mockStudentRepo.
 			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(&mockStudent, nil).Once()
-		u := NewSchoolUseCase(mockSchoolRepo, mockStudentRepo, mockMailer, time.Second)
+		u := usecase.NewSchoolUseCase(mockSchoolRepo, mockStudentRepo, mockMailer, time.Second)
 
 		err := u.SendConfirmation(context.TODO(), &mockStudent, mockStudent.Email, &mockSchool)
 
@@ -117,7 +118,7 @@ func TestSendConfirmation(t *testing.T) {
 			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(&domain.Student{}, nil).Once()
 
-		u := NewSchoolUseCase(mockSchoolRepo, mockStudentRepo, mockMailer,time.Second)
+		u := usecase.NewSchoolUseCase(mockSchoolRepo, mockStudentRepo, mockMailer,time.Second)
 
 		err := u.SendConfirmation(context.TODO(), &mockStudent, mockStudent.Email, &mockSchool)
 		assert.Error(t, err)
@@ -133,8 +134,7 @@ func TestSendConfirmation(t *testing.T) {
 			On("SaveConfirmationToken", mock.Anything, mock.AnythingOfType("*domain.Confirmation")).
 			Return(errors.New("error")).
 			Once()
-		u := NewSchoolUseCase(mockSchoolRepo, mockStudentRepo, mockMailer, time.Second)
-
+		u := usecase.NewSchoolUseCase(mockSchoolRepo, mockStudentRepo, mockMailer, time.Second)
 		err := u.SendConfirmation(context.TODO(), &mockStudent, mockStudent.Email, &mockSchool)
 
 
@@ -147,11 +147,9 @@ func TestSendConfirmation(t *testing.T) {
 
 func TestConfirmSchoolEnrollment(t *testing.T) {
 	mockSchoolRepo := new(mocks.SchoolRepositoryMock)
-	//mockStudentRepo := new(mocks.StudentRepositoryMock)
 	var mockConfirmation domain.Confirmation
 	faker.FakeData(&mockConfirmation)
-	//var mockStudent domain.Student
-	//faker.FakeData(&mockStudent)
+
 
 	t.Run("case success", func(t *testing.T){
 		mockSchoolRepo.
@@ -160,7 +158,7 @@ func TestConfirmSchoolEnrollment(t *testing.T) {
 		mockSchoolRepo.
 			On("AddSchoolForStudent", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("string")).
 			Return(nil).Once()
-		u := NewSchoolUseCase(mockSchoolRepo, nil, nil, time.Second)
+		u := usecase.NewSchoolUseCase(mockSchoolRepo, nil, nil, time.Second)
 		err := u.ConfirmSchoolEnrollment(context.TODO(), mockConfirmation.Token)
 
 		assert.Nil(t, err)
@@ -171,7 +169,7 @@ func TestConfirmSchoolEnrollment(t *testing.T) {
 		mockSchoolRepo.
 			On("GetConfirmationByToken", mock.Anything, mock.AnythingOfType("string")).
 			Return(nil, errors.New("error no token")).Once()
-		u := NewSchoolUseCase(mockSchoolRepo, nil, nil, time.Second)
+		u := usecase.NewSchoolUseCase(mockSchoolRepo, nil, nil, time.Second)
 		err := u.ConfirmSchoolEnrollment(context.TODO(), mockConfirmation.Token)
 
 		assert.Error(t, err)
@@ -183,7 +181,7 @@ func TestConfirmSchoolEnrollment(t *testing.T) {
 		mockSchoolRepo.
 			On("GetConfirmationByToken", mock.Anything, mock.AnythingOfType("string")).
 			Return(&domain.Confirmation{}, nil).Once()
-		u := NewSchoolUseCase(mockSchoolRepo, nil, nil, time.Second)
+		u := usecase.NewSchoolUseCase(mockSchoolRepo, nil, nil, time.Second)
 		err := u.ConfirmSchoolEnrollment(context.TODO(), mockConfirmation.Token)
 
 		assert.Error(t, err)
@@ -196,7 +194,7 @@ func TestConfirmSchoolEnrollment(t *testing.T) {
 		mockSchoolRepo.
 			On("GetConfirmationByToken", mock.Anything, mock.AnythingOfType("string")).
 			Return(&domain.Confirmation{CreatedAt: then}, nil).Once()
-		u := NewSchoolUseCase(mockSchoolRepo, nil, nil, time.Second)
+		u := usecase.NewSchoolUseCase(mockSchoolRepo, nil, nil, time.Second)
 		err := u.ConfirmSchoolEnrollment(context.TODO(), mockConfirmation.Token)
 
 		assert.Error(t, err)

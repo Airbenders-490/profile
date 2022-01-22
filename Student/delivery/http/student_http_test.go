@@ -211,7 +211,7 @@ func TestStudentHandler_Update(t *testing.T) {
 		postBody, err := json.Marshal(mockStudent)
 		assert.NoError(t, err)
 		mockUseCase.On("Update", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("*domain.Student")).
-			Return(nil).Once()
+			Return(&mockStudent, nil).Once()
 		reader := strings.NewReader(string(postBody))
 		reqFound := httptest.NewRequest("PUT", fmt.Sprintf("/api/student/%s", mockStudent.ID), reader)
 		reqFound.Header.Set("id", mockStudent.ID)
@@ -235,7 +235,7 @@ func TestStudentHandler_Update(t *testing.T) {
 		restErr := e.NewConflictError("error occurred")
 		assert.NoError(t, err)
 		mockUseCase.On("Update", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("*domain.Student")).
-			Return(restErr).Once()
+			Return(nil, restErr).Once()
 		reader := strings.NewReader(string(postBody))
 		reqFound := httptest.NewRequest("PUT", fmt.Sprintf("/api/student/%s", mockStudent.ID), reader)
 		reqFound.Header.Set("id", mockStudent.ID)

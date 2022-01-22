@@ -48,17 +48,26 @@ func (m *StudentUseCase) GetByID(ctx context.Context, id string) (*domain.Studen
 }
 
 // Update - StudentUseCaseMock
-func (m *StudentUseCase) Update(ctx context.Context, id string, st *domain.Student) error {
+func (m *StudentUseCase) Update(ctx context.Context, id string, st *domain.Student) (*domain.Student, error) {
 	args := m.Called(ctx, id, st)
 
-	var r0 error
-	if rf, ok := args.Get(0).(func(context.Context, string, *domain.Student) error); ok {
-		r0 = rf(ctx, id, st)
+	var r0 *domain.Student
+	if rf, ok := args.Get(0).(func(context.Context, string, *domain.Student) *domain.Student); ok {
+	r0 = rf(ctx, id, st)
 	} else {
-		r0 = args.Error(0)
+	if args.Get(0) != nil {
+	r0 = args.Get(0).(*domain.Student)
+	}
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := args.Get(1).(func(context.Context, string, *domain.Student) error); ok {
+	r1 = rf(ctx, id, st)
+	} else {
+	r1 = args.Error(1)
+	}
+
+	return r0, r1
 }
 
 // Delete - StudentUseCaseMock
