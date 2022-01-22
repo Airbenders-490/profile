@@ -74,20 +74,20 @@ func (s *studentUseCase) GetByID(c context.Context, id string) (*domain.Student,
 }
 
 // Update checks if the student exists and updates if so. Otherwise, returns error
-func (s *studentUseCase) Update(c context.Context, id string, st *domain.Student) error {
+func (s *studentUseCase) Update(c context.Context, id string, st *domain.Student) (*domain.Student, error) {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
 	defer cancel()
 
 	st.ID = id
 	existingStudent, err := s.studentRepository.GetByID(ctx, id)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if reflect.DeepEqual(existingStudent, &domain.Student{}) {
-		return errors.NewNotFoundError(fmt.Sprintf("No such student with ID %s exists", st.ID))
+		return nil, errors.NewNotFoundError(fmt.Sprintf("No such student with ID %s exists", st.ID))
 	}
 	updateStudent(existingStudent, st)
-	return s.studentRepository.Update(ctx, existingStudent)
+	return existingStudent, s.studentRepository.Update(ctx, existingStudent)
 }
 
 func updateStudent(existing *domain.Student, toUpdate *domain.Student) {

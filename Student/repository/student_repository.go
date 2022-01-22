@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/utils/errors"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -37,7 +36,6 @@ const (
 
 // Create stores the student in the db. Returns err if unable to
 func (r *studentRepository) Create(ctx context.Context, id string, st *domain.Student) error {
-	fmt.Println(st)
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
 		return errors.NewInternalServerError(err.Error())

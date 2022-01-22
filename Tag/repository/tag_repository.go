@@ -18,7 +18,7 @@ func NewTagRepository(db *pgxpool.Pool) domain.TagRepository {
 }
 
 const (
-	fetchAll = `SELECT * FROM tags`
+	fetchAll = `SELECT * FROM tag`
 )
 
 // FetchAllTags returns all the tags

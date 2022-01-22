@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<link href='https://fonts.googleapis.com/css?family=Allan' rel='stylesheet'>
 <html>
 <body>
 <br>
@@ -23,11 +22,11 @@
                     <td style="height: 109px;">
                         <p style="padding: 0px 100px;">Hello {{.Name}} ! Confirm your registration in {{.School}} for Smarties, a smart app for smart students!</p>
                         <p style="padding: 0px 100px;">&nbsp;</p>
-                        <p style="padding: 0px 100px;"><em>If you didn't register, please ignore this email.</em></p>
+                        <p style="padding: 0px 100px;"><em>If you didn't register</a>, please ignore this email.</em></p>
                     </td>
                 </tr>
                 <tr style="height: 86px;">
-                    <td style="height: 86px;"><button style="margin: 10px 0px 30px 0px; border-radius: 4px; padding: 10px 20px; border: 0; color: #fff; background-color: #ff7a5a;">Verify Email address</button></td>
+                    <td style="height: 86px;"><a href="{{.Email}}"><button style="margin: 10px 0px 30px 0px; border-radius: 4px; padding: 10px 20px; border: 0; color: #fff; background-color: #ff7a5a;">Verify Email address</button></a></td>
                 </tr>
                 </tbody>
             </table>
@@ -35,5 +34,4 @@
     </tr>
 </table>
 </body>
-
 </html>
