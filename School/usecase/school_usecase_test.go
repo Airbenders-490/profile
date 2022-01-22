@@ -3,6 +3,7 @@ package usecase_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/airbenders/profile/School/usecase"
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/domain/mocks"
@@ -76,9 +77,9 @@ func TestSendConfirmation(t *testing.T) {
 	env := os.Getenv("DOMAIN")
 	t.Cleanup(func(){os.Setenv("DOMAIN", env)})
 	faker.FakeData(&mockStudent)
-	/*
+	fmt.Println(mockStudent.School.ID)
+
 	t.Run("case-success", func(t *testing.T){
-		//mockMailer := mocks.SimpleMail{}
 		faker.FakeData(&mockMailer)
 		mockStudent.School = nil
 		mockStudentRepo.
@@ -86,22 +87,20 @@ func TestSendConfirmation(t *testing.T) {
 			Return(&mockStudent, nil).Once()
 		mockSchoolRepo.
 			On("SaveConfirmationToken", mock.Anything, mock.AnythingOfType("*domain.Confirmation")).
-			Return(nil).
-			Once()
+			Return(nil).Once()
 		mockMailer.On("SendSimpleMail", mock.AnythingOfType("string"), mock.Anything).
 			Return(nil).Once()
-		u := NewSchoolUseCase(mockSchoolRepo, mockStudentRepo, mockMailer, time.Second)
+		u := usecase.NewSchoolUseCase(mockSchoolRepo, mockStudentRepo, mockMailer, time.Second)
 
 		err := u.SendConfirmation(context.TODO(), &mockStudent, mockStudent.Email, &mockSchool)
-
 
 		assert.NoError(t, err)
 		mockStudentRepo.AssertExpectations(t)
 		mockSchoolRepo.AssertExpectations(t)
 	})
-	*/
-	t.Run("case error: School-already-confirmed", func(t *testing.T){
 
+	t.Run("case error: School-already-confirmed", func(t *testing.T){
+		faker.FakeData(&mockStudent)
 		mockStudentRepo.
 			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(&mockStudent, nil).Once()
@@ -109,7 +108,6 @@ func TestSendConfirmation(t *testing.T) {
 
 		err := u.SendConfirmation(context.TODO(), &mockStudent, mockStudent.Email, &mockSchool)
 
-		//assert.True(t, reflect.ValueOf())
 		assert.Error(t, err)
 	})
 
@@ -132,11 +130,11 @@ func TestSendConfirmation(t *testing.T) {
 			Return(&mockStudent, nil).Once()
 		mockSchoolRepo.
 			On("SaveConfirmationToken", mock.Anything, mock.AnythingOfType("*domain.Confirmation")).
-			Return(errors.New("error")).
-			Once()
+			Return(errors.New("error")).Once()
+		mockMailer.On("SendSimpleMail", mock.AnythingOfType("string"), mock.Anything).
+			Return(nil).Once()
 		u := usecase.NewSchoolUseCase(mockSchoolRepo, mockStudentRepo, mockMailer, time.Second)
 		err := u.SendConfirmation(context.TODO(), &mockStudent, mockStudent.Email, &mockSchool)
-
 
 		assert.Error(t, err)
 		mockStudentRepo.AssertExpectations(t)

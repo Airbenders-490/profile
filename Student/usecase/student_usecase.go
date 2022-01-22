@@ -89,7 +89,7 @@ func (s *studentUseCase) Update(c context.Context, id string, st *domain.Student
 		return nil, err
 	}
 	if reflect.DeepEqual(existingStudent, &domain.Student{}) {
-		return errors.NewNotFoundError(fmt.Sprintf(errorMessage, st.ID))
+		return nil, errors.NewNotFoundError(fmt.Sprintf(errorMessage, st.ID))
 	}
 	updateStudent(existingStudent, st)
 	return existingStudent, s.studentRepository.Update(ctx, existingStudent)
