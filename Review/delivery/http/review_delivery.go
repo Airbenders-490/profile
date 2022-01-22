@@ -29,8 +29,8 @@ func (h *ReviewHandler) AddReview(c *gin.Context) {
 
 	var review domain.Review
 	err := c.ShouldBindJSON(&review)
-	if err != nil || review.Reviewed.ID == "" || review.Tags == nil {
-		fmt.Println(review, err.Error())
+	// make sure you have some tags for a review
+	if err != nil || review.Reviewed.ID == "" || review.Tags == nil || len(review.Tags) == 0 {
 		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid review body"))
 		return
 	}

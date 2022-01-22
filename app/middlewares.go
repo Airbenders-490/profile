@@ -7,6 +7,7 @@ import (
 	"github.com/sony/gobreaker"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 )
@@ -35,7 +36,7 @@ func (h *middleware) AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 		client := &http.Client{}
-		url := "http://localhost:3000/api/validate"
+		url := os.Getenv("AUTH_URL")
 		circuitBeakerSettings := gobreaker.Settings{
 			Name:          "auth",
 			MaxRequests:   5,

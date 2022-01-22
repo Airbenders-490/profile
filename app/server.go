@@ -19,6 +19,7 @@ import (
 	repository3 "github.com/airbenders/profile/Tag/repository"
 	usecase3 "github.com/airbenders/profile/Tag/usecase"
 	"github.com/airbenders/profile/utils"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v4/pgxpool"
 )
@@ -31,6 +32,7 @@ func Server(
 	reviewHandler *http4.ReviewHandler,
 	mw Middleware) *gin.Engine {
 	router := gin.Default()
+	router.Use(cors.Default())
 	mapStudentURLs(mw, studentHandler, router)
 	mapSchoolURLs(mw, schoolHandler, router)
 	mapTagURLs(tagHandler, router)
@@ -42,7 +44,8 @@ func Server(
 func Start() {
 		pool, err := pgxpool.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(os.Getenv("DATABASE_URL"))
+		log.Fatalln("db failed", err)
 	}
 
 	studentRepository := repository.NewStudentRepository(pool)
@@ -63,6 +66,7 @@ func Start() {
 	reviewHandler := http4.NewReviewHandler(reviewUseCase)
 
 	mw := NewMiddleware()
+
 	router := Server(studentHandler, schoolHandler, tagHandler, reviewHandler, mw)
 	router.Run()
 }

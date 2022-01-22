@@ -93,7 +93,7 @@ func (h *StudentHandler) Update(c *gin.Context) {
 	}
 
 	ctx := c.Request.Context()
-	err = h.UseCase.Update(ctx, id, &student)
+	updatedStudent, err := h.UseCase.Update(ctx, id, &student)
 	if err != nil {
 		switch v := err.(type) {
 		case *errors.RestError:
@@ -105,7 +105,7 @@ func (h *StudentHandler) Update(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, httputils.NewResponse("student updated"))
+	c.JSON(http.StatusOK, updatedStudent)
 }
 
 // Delete simply deletes the profile as requested

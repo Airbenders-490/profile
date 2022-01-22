@@ -1,0 +1,371 @@
+@startuml
+namespace app {
+    interface Middleware  {
+        + AuthMiddleware() gin.HandlerFunc
+
+    }
+    class middleware << (S,Aquamarine) >> {
+        + AuthMiddleware() gin.HandlerFunc
+
+    }
+}
+
+"app.Middleware" <|-- "app.middleware"
+
+
+namespace domain {
+    class Confirmation << (S,Aquamarine) >> {
+        + Token string
+        + School School
+        + Student Student
+        + CreatedAt time.Time
+
+    }
+    class Review << (S,Aquamarine) >> {
+        + ID string
+        + Reviewed Student
+        + Reviewer Student
+        + CreatedAt time.Time
+        + Tags []Tag
+
+    }
+    interface ReviewRepository  {
+        + GetReviewsFor(ctx context.Context, reviewed string) ([]Review, error)
+        + GetReviewsBy(ctx context.Context, reviewer string) ([]Review, error)
+        + GetReviewByAndFor(ctx context.Context, reviewer string, reviewed string) (*Review, error)
+        + AddReview(ctx context.Context, review *Review) error
+        + UpdateReviewTags(ctx context.Context, review *Review) error
+
+    }
+    interface ReviewUseCase  {
+        + AddReview(ctx context.Context, review *Review, reviewerID string) (*Review, error)
+        + EditReview(ctx context.Context, review *Review, reviewerID string) (*Review, error)
+        + GetReviewsBy(ctx context.Context, reviewer string) ([]Review, error)
+
+    }
+    class School << (S,Aquamarine) >> {
+        + ID string
+        + Name string
+        + Country string
+        + Domains []string
+
+    }
+    interface SchoolRepository  {
+        + SearchByDomain(ctx context.Context, name string) ([]School, error)
+        + SaveConfirmationToken(ctx context.Context, confirmation *Confirmation) error
+        + GetConfirmationByToken(ctx context.Context, token string) (*Confirmation, error)
+        + AddSchoolForStudent(ctx context.Context, stID string, scID string) error
+
+    }
+    interface SchoolUseCase  {
+        + SearchSchoolByDomain(ctx context.Context, domainName string) ([]School, error)
+        + SendConfirmation(ctx context.Context, st *Student, email string, school *School) error
+        + ConfirmSchoolEnrollment(ctx context.Context, token string) error
+
+    }
+    class Student << (S,Aquamarine) >> {
+        + ID string
+        + FirstName string
+        + LastName string
+        + Email string
+        + GeneralInfo string
+        + School *School
+        + CreatedAt time.Time
+        + UpdatedAt time.Time
+        + Reviews []Review
+
+    }
+    interface StudentRepository  {
+        + Create(ctx context.Context, id string, st *Student) error
+        + GetByID(ctx context.Context, id string) (*Student, error)
+        + Update(ctx context.Context, st *Student) error
+        + Delete(ctx context.Context, id string) error
+
+    }
+    interface StudentUseCase  {
+        + Create(ctx context.Context, st *Student) error
+        + GetByID(ctx context.Context, id string) (*Student, error)
+        + Update(ctx context.Context, id string, st *Student) error
+        + Delete(ctx context.Context, id string) error
+
+    }
+    class Tag << (S,Aquamarine) >> {
+        + Name string
+        + Positive bool
+
+    }
+    interface TagRepository  {
+        + FetchAllTags(ctx context.Context) ([]Tag, error)
+
+    }
+    interface TagUseCase  {
+        + GetAllTags(ctx context.Context) ([]Tag, error)
+
+    }
+}
+
+
+"domain.Confirmation" o-- "domain.School"
+"domain.Confirmation" o-- "domain.Student"
+"domain.Confirmation" o-- "time.Time"
+"domain.Review" o-- "domain.Student"
+"domain.Review" o-- "domain.Tag"
+"domain.Review" o-- "time.Time"
+"domain.Student" o-- "domain.Review"
+"domain.Student" o-- "domain.School"
+"domain.Student" o-- "time.Time"
+
+namespace errors {
+    class RestError << (S,Aquamarine) >> {
+        + Code int
+        + Message string
+
+        + Error() string
+
+    }
+}
+
+
+
+namespace http {
+    class ReviewHandler << (S,Aquamarine) >> {
+        - u domain.ReviewUseCase
+
+        + AddReview(c *gin.Context) 
+        + EditReview(c *gin.Context) 
+        + GetReviewsBy(c *gin.Context) 
+
+    }
+    class SchoolHandler << (S,Aquamarine) >> {
+        - u domain.SchoolUseCase
+
+        + SearchStudentSchool(c *gin.Context) 
+        + SendConfirmationMail(c *gin.Context) 
+        + ConfirmSchoolRegistration(c *gin.Context) 
+
+    }
+    class StudentHandler << (S,Aquamarine) >> {
+        + UseCase domain.StudentUseCase
+
+        + GetByID(c *gin.Context) 
+        + Create(c *gin.Context) 
+        + Update(c *gin.Context) 
+        + Delete(c *gin.Context) 
+
+    }
+    class TagHandler << (S,Aquamarine) >> {
+        - u domain.TagUseCase
+
+        + GetAllTags(c *gin.Context) 
+
+    }
+}
+
+
+"http.StudentHandler" o-- "domain.StudentUseCase"
+
+namespace httputils {
+    class ValidResponse << (S,Aquamarine) >> {
+        + Message string
+
+    }
+}
+
+
+
+namespace mocks {
+    class MiddlewareMock << (S,Aquamarine) >> {
+        + AuthMiddleware() gin.HandlerFunc
+
+    }
+    class ReviewRepositoryMock << (S,Aquamarine) >> {
+        + GetReviewsFor(ctx context.Context, reviewed string) ([]domain.Review, error)
+        + GetReviewsBy(ctx context.Context, reviewer string) ([]domain.Review, error)
+        + GetReviewByAndFor(ctx context.Context, reviewer string, reviewed string) (*domain.Review, error)
+        + AddReview(ctx context.Context, review *domain.Review) error
+        + UpdateReviewTags(ctx context.Context, review *domain.Review) error
+
+    }
+    class ReviewUseCase << (S,Aquamarine) >> {
+        + AddReview(ctx context.Context, review *domain.Review, reviewerID string) (*domain.Review, error)
+        + EditReview(ctx context.Context, review *domain.Review, reviewerID string) (*domain.Review, error)
+        + GetReviewsBy(ctx context.Context, reviewer string) ([]domain.Review, error)
+
+    }
+    class SchoolRepositoryMock << (S,Aquamarine) >> {
+        + SearchByDomain(ctx context.Context, name string) ([]domain.School, error)
+        + SaveConfirmationToken(ctx context.Context, confirmation *domain.Confirmation) error
+        + GetConfirmationByToken(ctx context.Context, token string) (*domain.Confirmation, error)
+        + AddSchoolForStudent(ctx context.Context, stID string, scID string) error
+
+    }
+    class SchoolUseCase << (S,Aquamarine) >> {
+        + SearchSchoolByDomain(c context.Context, domainName string) ([]domain.School, error)
+        + SendConfirmation(c context.Context, st *domain.Student, email string, school *domain.School) error
+        + ConfirmSchoolEnrollment(c context.Context, token string) error
+
+    }
+    class SimpleMail << (S,Aquamarine) >> {
+        + SendSimpleMail(to string, body []byte) error
+
+    }
+    class StudentRepositoryMock << (S,Aquamarine) >> {
+        + Create(ctx context.Context, id string, st *domain.Student) error
+        + GetByID(ctx context.Context, id string) (*domain.Student, error)
+        + Update(ctx context.Context, st *domain.Student) error
+        + Delete(ctx context.Context, id string) error
+
+    }
+    class StudentUseCase << (S,Aquamarine) >> {
+        + Create(ctx context.Context, st *domain.Student) error
+        + GetByID(ctx context.Context, id string) (*domain.Student, error)
+        + Update(ctx context.Context, id string, st *domain.Student) error
+        + Delete(ctx context.Context, id string) error
+
+    }
+    class TagRepositoryMock << (S,Aquamarine) >> {
+        + FetchAllTags(ctx context.Context) ([]domain.Tag, error)
+
+    }
+    class TagUseCase << (S,Aquamarine) >> {
+        + GetAllTags(ctx context.Context) ([]domain.Tag, error)
+
+    }
+}
+"mock.Mock" *-- "mocks.MiddlewareMock"
+"mock.Mock" *-- "mocks.ReviewRepositoryMock"
+"mock.Mock" *-- "mocks.ReviewUseCase"
+"mock.Mock" *-- "mocks.SchoolRepositoryMock"
+"mock.Mock" *-- "mocks.SchoolUseCase"
+"mock.Mock" *-- "mocks.SimpleMail"
+"mock.Mock" *-- "mocks.StudentRepositoryMock"
+"mock.Mock" *-- "mocks.StudentUseCase"
+"mock.Mock" *-- "mocks.TagRepositoryMock"
+"mock.Mock" *-- "mocks.TagUseCase"
+
+"app.Middleware" <|-- "mocks.MiddlewareMock"
+"domain.ReviewRepository" <|-- "mocks.ReviewRepositoryMock"
+"domain.ReviewUseCase" <|-- "mocks.ReviewUseCase"
+"domain.SchoolRepository" <|-- "mocks.SchoolRepositoryMock"
+"domain.SchoolUseCase" <|-- "mocks.SchoolUseCase"
+"utils.Mailer" <|-- "mocks.SimpleMail"
+"domain.StudentRepository" <|-- "mocks.StudentRepositoryMock"
+"domain.StudentUseCase" <|-- "mocks.StudentUseCase"
+"domain.TagRepository" <|-- "mocks.TagRepositoryMock"
+"domain.TagUseCase" <|-- "mocks.TagUseCase"
+
+
+namespace repository {
+    class reviewRepository << (S,Aquamarine) >> {
+        - db *pgxpool.Pool
+
+        - addTags(ctx context.Context, review *domain.Review) error
+        - getTagsFor(ctx context.Context, review *domain.Review) error
+
+        + AddReview(ctx context.Context, review *domain.Review) error
+        + GetReviewByAndFor(ctx context.Context, reviewer string, reviewed string) (*domain.Review, error)
+        + UpdateReviewTags(ctx context.Context, review *domain.Review) error
+        + GetReviewsFor(ctx context.Context, reviewed string) ([]domain.Review, error)
+        + GetReviewsBy(ctx context.Context, reviewer string) ([]domain.Review, error)
+
+    }
+    class schoolRepository << (S,Aquamarine) >> {
+        - db *pgxpool.Pool
+
+        + SearchByDomain(ctx context.Context, domainName string) ([]domain.School, error)
+        + SaveConfirmationToken(ctx context.Context, confirmation *domain.Confirmation) error
+        + GetConfirmationByToken(ctx context.Context, token string) (*domain.Confirmation, error)
+        + AddSchoolForStudent(ctx context.Context, stID string, scID string) error
+
+    }
+    class studentRepository << (S,Aquamarine) >> {
+        - db *pgxpool.Pool
+
+        + Create(ctx context.Context, id string, st *domain.Student) error
+        + GetByID(ctx context.Context, id string) (*domain.Student, error)
+        + Update(ctx context.Context, st *domain.Student) error
+        + Delete(ctx context.Context, id string) error
+
+    }
+    class tagRepository << (S,Aquamarine) >> {
+        - db *pgxpool.Pool
+
+        + FetchAllTags(ctx context.Context) ([]domain.Tag, error)
+
+    }
+}
+
+"domain.ReviewRepository" <|-- "repository.reviewRepository"
+"domain.SchoolRepository" <|-- "repository.schoolRepository"
+"domain.StudentRepository" <|-- "repository.studentRepository"
+"domain.TagRepository" <|-- "repository.tagRepository"
+
+
+namespace usecase {
+    class reviewUseCase << (S,Aquamarine) >> {
+        - rr domain.ReviewRepository
+        - sr domain.StudentRepository
+        - timeout time.Duration
+
+        + AddReview(c context.Context, review *domain.Review, reviewerID string) (*domain.Review, error)
+        + EditReview(c context.Context, review *domain.Review, reviewerID string) (*domain.Review, error)
+        + GetReviewsBy(c context.Context, reviewer string) ([]domain.Review, error)
+
+    }
+    class schoolUseCase << (S,Aquamarine) >> {
+        - r domain.SchoolRepository
+        - str domain.StudentRepository
+        - mailer utils.Mailer
+        - timeout time.Duration
+
+        + SearchSchoolByDomain(c context.Context, domainName string) ([]domain.School, error)
+        + SendConfirmation(c context.Context, st *domain.Student, email string, school *domain.School) error
+        + ConfirmSchoolEnrollment(c context.Context, token string) error
+
+    }
+    class studentUseCase << (S,Aquamarine) >> {
+        - studentRepository domain.StudentRepository
+        - reviewRepository domain.ReviewRepository
+        - contextTimeout time.Duration
+
+        + Create(c context.Context, st *domain.Student) error
+        + GetByID(c context.Context, id string) (*domain.Student, error)
+        + Update(c context.Context, id string, st *domain.Student) error
+        + Delete(c context.Context, id string) error
+
+    }
+    class tagUseCase << (S,Aquamarine) >> {
+        - r domain.TagRepository
+        - timeout time.Duration
+
+        + GetAllTags(c context.Context) ([]domain.Tag, error)
+
+    }
+}
+
+"domain.ReviewUseCase" <|-- "usecase.reviewUseCase"
+"domain.SchoolUseCase" <|-- "usecase.schoolUseCase"
+"domain.StudentUseCase" <|-- "usecase.studentUseCase"
+"domain.TagUseCase" <|-- "usecase.tagUseCase"
+
+
+namespace utils {
+    interface Mailer  {
+        + SendSimpleMail(to string, body []byte) error
+
+    }
+    class simpleMail << (S,Aquamarine) >> {
+        - from string
+        - password string
+        - smtpHost string
+        - smtpPort string
+
+        + SendSimpleMail(to string, body []byte) error
+
+    }
+}
+
+"utils.Mailer" <|-- "utils.simpleMail"
+
+
+@enduml

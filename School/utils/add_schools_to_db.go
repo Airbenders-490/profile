@@ -6,6 +6,7 @@ package utils
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/airbenders/profile/domain"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
@@ -23,6 +24,7 @@ func init() {
 }
 
 func addSchoolsToDB() {
+	fmt.Println("creating schools")
 	pool, err := pgxpool.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatalln(err)
@@ -35,7 +37,7 @@ func addSchoolsToDB() {
 	defer tx.Rollback(context.Background())
 
 	var schools []domain.School
-	resp, _ := http.Get("https://raw.githubusercontent.com/Hipo/university-domains-list/master/world_universities_and_domains.JSON")
+	resp, _ := http.Get("https://raw.githubusercontent.com/Hipo/university-domains-list/master/world_universities_and_domains.json")
 	schoolJSON, _ := ioutil.ReadAll(resp.Body)
 	_ = json.Unmarshal(schoolJSON, &schools)
 
