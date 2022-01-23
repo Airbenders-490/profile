@@ -1,5 +1,5 @@
 -- creates tags table
-CREATE TABLE tag (
+CREATE TABLE IF NOT EXISTS tag (
     name text Primary Key,
     positive bool
 );

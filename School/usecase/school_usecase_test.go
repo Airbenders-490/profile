@@ -20,6 +20,7 @@ func TestSearchSchoolByDomain(t *testing.T) {
 	mockStudentRepo := new(mocks.StudentRepositoryMock)
 	var mockSchool domain.School
 	faker.FakeData(&mockSchool)
+	mockSchool.Name = "ocw.mit.edu"
 
 	t.Run("case failure empty slice", func(t *testing.T) {
 		mockSchoolRepo.

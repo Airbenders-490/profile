@@ -4,21 +4,21 @@ import (
 	"context"
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/utils/errors"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/driftprogramming/pgxpoolmock"
 )
 
 // tagRepository struct
 type tagRepository struct {
-	db *pgxpool.Pool
+	db pgxpoolmock.PgxPool
 }
 
 // NewTagRepository is a constructor for TagRepository
-func NewTagRepository(db *pgxpool.Pool) domain.TagRepository {
+func NewTagRepository(db pgxpoolmock.PgxPool) domain.TagRepository {
 	return &tagRepository{db: db}
 }
 
 const (
-	fetchAll = `SELECT * FROM tag`
+	fetchAll = "SELECT name, positive FROM tag"
 )
 
 // FetchAllTags returns all the tags
@@ -27,17 +27,15 @@ func (u *tagRepository) FetchAllTags(ctx context.Context) ([]domain.Tag, error) 
 	if err != nil {
 		return nil, errors.NewInternalServerError(err.Error())
 	}
+	defer rows.Close()
 
 	var tags []domain.Tag
 	for rows.Next() {
-		value, err := rows.Values()
+		var tag domain.Tag
+		err = rows.Scan(&tag.Name, &tag.Positive)
 		if err != nil {
 			return nil, errors.NewInternalServerError(err.Error())
 		}
-
-		var tag domain.Tag
-		tag.Name = value[0].(string)
-		tag.Positive = value[1].(bool)
 
 		tags = append(tags, tag)
 	}
