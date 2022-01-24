@@ -9,4 +9,9 @@ CREATE TABLE IF NOT EXISTS public.student
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     CONSTRAINT student_pkey PRIMARY KEY (id)
-)
+);
+
+INSERT INTO public.student (id, first_name, last_name, email, general_info, created_at, updated_at)
+VALUES ('234', 'Also Zubair', 'Nurie', 'mzznurie@msn.com', 'ballerr', now(), now());
+INSERT INTO public.student (id, first_name, last_name, email, general_info, created_at, updated_at)
+VALUES ('123', 'Zubair', 'Nurie', 'mznurie@msn.com', 'baller', now(), now());
