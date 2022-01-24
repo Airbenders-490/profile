@@ -19,7 +19,7 @@ func TestFetchAllTags(t *testing.T) {
 
 	mockPool := pgxpoolmock.NewMockPgxPool(ctrl)
 	columns := []string{"name", "positive"}
-	pgxRows := pgxpoolmock.NewRows(columns).AddRow( "1", true).AddRow("2", false).ToPgxRows()
+	pgxRows := pgxpoolmock.NewRows(columns).AddRow("1", true).AddRow("2", false).ToPgxRows()
 
 	t.Run("success", func(t *testing.T) {
 		mockPool.EXPECT().Query(gomock.Any(), gomock.Any()).Return(pgxRows, nil)

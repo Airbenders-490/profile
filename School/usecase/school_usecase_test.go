@@ -27,7 +27,7 @@ func TestSearchSchoolByDomain(t *testing.T) {
 			On("SearchByDomain", mock.Anything, mock.AnythingOfType("string")).
 			Return([]domain.School{}, nil).
 			Once()
-		u := usecase.NewSchoolUseCase(mockSchoolRepo, mockStudentRepo , nil , time.Second)
+		u := usecase.NewSchoolUseCase(mockSchoolRepo, mockStudentRepo, nil, time.Second)
 
 		school, err := u.SearchSchoolByDomain(context.TODO(), mockSchool.Name)
 
@@ -42,7 +42,7 @@ func TestSearchSchoolByDomain(t *testing.T) {
 			On("SearchByDomain", mock.Anything, mock.AnythingOfType("string")).
 			Return([]domain.School{domain.School{}}, nil).
 			Once()
-		u := usecase.NewSchoolUseCase(mockSchoolRepo, mockStudentRepo , nil , time.Second)
+		u := usecase.NewSchoolUseCase(mockSchoolRepo, mockStudentRepo, nil, time.Second)
 
 		school, err := u.SearchSchoolByDomain(context.TODO(), mockSchool.Name)
 
@@ -57,7 +57,7 @@ func TestSearchSchoolByDomain(t *testing.T) {
 			On("SearchByDomain", mock.Anything, mock.AnythingOfType("string")).
 			Return(nil, errors.New("error")).
 			Once()
-		u := usecase.NewSchoolUseCase(mockSchoolRepo, mockStudentRepo , nil , time.Second)
+		u := usecase.NewSchoolUseCase(mockSchoolRepo, mockStudentRepo, nil, time.Second)
 
 		school, err := u.SearchSchoolByDomain(context.TODO(), mockSchool.Name)
 
@@ -76,11 +76,11 @@ func TestSendConfirmation(t *testing.T) {
 	var mockMailer mocks.SimpleMail
 	os.Setenv("DOMAIN", "localhost")
 	env := os.Getenv("DOMAIN")
-	t.Cleanup(func(){os.Setenv("DOMAIN", env)})
+	t.Cleanup(func() { os.Setenv("DOMAIN", env) })
 	faker.FakeData(&mockStudent)
 	fmt.Println(mockStudent.School.ID)
 
-	t.Run("case-success", func(t *testing.T){
+	t.Run("case-success", func(t *testing.T) {
 		faker.FakeData(&mockMailer)
 		mockStudent.School = nil
 		mockStudentRepo.
@@ -100,7 +100,7 @@ func TestSendConfirmation(t *testing.T) {
 		mockSchoolRepo.AssertExpectations(t)
 	})
 
-	t.Run("case error: School-already-confirmed", func(t *testing.T){
+	t.Run("case error: School-already-confirmed", func(t *testing.T) {
 		faker.FakeData(&mockStudent)
 		mockStudentRepo.
 			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
@@ -112,19 +112,19 @@ func TestSendConfirmation(t *testing.T) {
 		assert.Error(t, err)
 	})
 
-	t.Run("case error-empty-student", func(t *testing.T){
+	t.Run("case error-empty-student", func(t *testing.T) {
 		mockStudentRepo.
 			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(&domain.Student{}, nil).Once()
 
-		u := usecase.NewSchoolUseCase(mockSchoolRepo, mockStudentRepo, mockMailer,time.Second)
+		u := usecase.NewSchoolUseCase(mockSchoolRepo, mockStudentRepo, mockMailer, time.Second)
 
 		err := u.SendConfirmation(context.TODO(), &mockStudent, mockStudent.Email, &mockSchool)
 		assert.Error(t, err)
 		mockStudentRepo.AssertExpectations(t)
 	})
 
-	t.Run("case error-save-confirmation", func(t *testing.T){
+	t.Run("case error-save-confirmation", func(t *testing.T) {
 		mockStudent.School = nil
 		mockStudentRepo.
 			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
@@ -143,14 +143,12 @@ func TestSendConfirmation(t *testing.T) {
 	})
 }
 
-
 func TestConfirmSchoolEnrollment(t *testing.T) {
 	mockSchoolRepo := new(mocks.SchoolRepositoryMock)
 	var mockConfirmation domain.Confirmation
 	faker.FakeData(&mockConfirmation)
 
-
-	t.Run("case success", func(t *testing.T){
+	t.Run("case success", func(t *testing.T) {
 		mockSchoolRepo.
 			On("GetConfirmationByToken", mock.Anything, mock.AnythingOfType("string")).
 			Return(&mockConfirmation, nil).Once()
@@ -164,7 +162,7 @@ func TestConfirmSchoolEnrollment(t *testing.T) {
 		mockSchoolRepo.AssertExpectations(t)
 	})
 
-	t.Run("case error-can't-find-token", func(t *testing.T){
+	t.Run("case error-can't-find-token", func(t *testing.T) {
 		mockSchoolRepo.
 			On("GetConfirmationByToken", mock.Anything, mock.AnythingOfType("string")).
 			Return(nil, errors.New("error no token")).Once()
@@ -175,7 +173,7 @@ func TestConfirmSchoolEnrollment(t *testing.T) {
 		mockSchoolRepo.AssertExpectations(t)
 	})
 
-	t.Run("case error-invalid-token", func(t *testing.T){
+	t.Run("case error-invalid-token", func(t *testing.T) {
 
 		mockSchoolRepo.
 			On("GetConfirmationByToken", mock.Anything, mock.AnythingOfType("string")).
@@ -187,9 +185,9 @@ func TestConfirmSchoolEnrollment(t *testing.T) {
 		mockSchoolRepo.AssertExpectations(t)
 	})
 
-	t.Run("case error-expired-token", func(t *testing.T){
+	t.Run("case error-expired-token", func(t *testing.T) {
 		now := time.Now()
-		then := now.Add(-25*time.Hour)
+		then := now.Add(-25 * time.Hour)
 		mockSchoolRepo.
 			On("GetConfirmationByToken", mock.Anything, mock.AnythingOfType("string")).
 			Return(&domain.Confirmation{CreatedAt: then}, nil).Once()
@@ -201,4 +199,3 @@ func TestConfirmSchoolEnrollment(t *testing.T) {
 	})
 
 }
-

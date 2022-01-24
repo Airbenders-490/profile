@@ -42,7 +42,7 @@ func Server(
 
 // Start runs the server
 func Start() {
-		pool, err := pgxpool.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	pool, err := pgxpool.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Println(os.Getenv("DATABASE_URL"))
 		log.Fatalln("db failed", err)

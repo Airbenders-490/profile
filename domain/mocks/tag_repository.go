@@ -11,6 +11,7 @@ import (
 type TagRepositoryMock struct {
 	mock.Mock
 }
+
 // FetchAllTags -- TagRepositoryMock
 func (m *TagRepositoryMock) FetchAllTags(ctx context.Context) ([]domain.Tag, error) {
 	args := m.Called(ctx)

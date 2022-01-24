@@ -1,18 +1,18 @@
 package repository_test
 
 import (
-"context"
-"errors"
-"github.com/airbenders/profile/Student/repository"
-"github.com/airbenders/profile/domain"
-"github.com/airbenders/profile/utils/pgxmocks"
-"github.com/driftprogramming/pgxpoolmock"
-"github.com/golang/mock/gomock"
-"github.com/jackc/pgconn"
-"github.com/stretchr/testify/assert"
-"github.com/stretchr/testify/mock"
-"testing"
-"time"
+	"context"
+	"errors"
+	"github.com/airbenders/profile/Student/repository"
+	"github.com/airbenders/profile/domain"
+	"github.com/airbenders/profile/utils/pgxmocks"
+	"github.com/driftprogramming/pgxpoolmock"
+	"github.com/golang/mock/gomock"
+	"github.com/jackc/pgconn"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"testing"
+	"time"
 )
 
 func TestGetByID(t *testing.T) {
