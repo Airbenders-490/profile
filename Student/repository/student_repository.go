@@ -4,17 +4,15 @@ import (
 	"context"
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/utils/errors"
-	"github.com/jackc/pgx/v4/pgxpool"
-	"log"
-	"time"
+	"github.com/driftprogramming/pgxpoolmock"
 )
 
 type studentRepository struct {
-	db *pgxpool.Pool
+	db pgxpoolmock.PgxPool
 }
 
 // NewStudentRepository is the constructor
-func NewStudentRepository(db *pgxpool.Pool) domain.StudentRepository {
+func NewStudentRepository(db pgxpoolmock.PgxPool) domain.StudentRepository {
 	return &studentRepository{
 		db: db,
 	}
@@ -65,29 +63,40 @@ func (r *studentRepository) GetByID(ctx context.Context, id string) (*domain.Stu
 
 	var student domain.Student
 	for rows.Next() {
-		values, err := rows.Values()
+		// todo: remove dead code after confirming new one works
+		//values, err := rows.Values()
+		//if err != nil {
+		//	err = errors.NewInternalServerError(err.Error())
+		//	return nil, err
+		//}
+		//
+		//student.ID = values[0].(string)
+		//student.FirstName = values[1].(string)
+		//student.LastName = values[2].(string)
+		//student.Email = values[3].(string)
+		//student.GeneralInfo = values[4].(string)
+		//if values[5] != nil {
+		//	student.School = &domain.School{ID: values[5].(string)}
+		//	row := r.db.QueryRow(ctx, getSchoolName, student.School.ID)
+		//	var name string
+		//	err = row.Scan(&name)
+		//	if err != nil {
+		//		log.Println("unable to get the school name")
+		//	}
+		//	student.School.Name = name
+		//}
+		//student.CreatedAt = values[6].(time.Time)
+		//student.UpdatedAt = values[7].(time.Time)
+		var school domain.School
+		err = rows.Scan(&student.ID, &student.FirstName, &student.LastName, &student.Email, &student.GeneralInfo,
+			&school.ID, &student.CreatedAt, &student.UpdatedAt)
 		if err != nil {
 			err = errors.NewInternalServerError(err.Error())
 			return nil, err
 		}
-
-		student.ID = values[0].(string)
-		student.FirstName = values[1].(string)
-		student.LastName = values[2].(string)
-		student.Email = values[3].(string)
-		student.GeneralInfo = values[4].(string)
-		if values[5] != nil {
-			student.School = &domain.School{ID: values[5].(string)}
-			row := r.db.QueryRow(ctx, getSchoolName, student.School.ID)
-			var name string
-			err = row.Scan(&name)
-			if err != nil {
-				log.Println("unable to get the school name")
-			}
-			student.School.Name = name
+		if school.ID != "" {
+			student.School = &school
 		}
-		student.CreatedAt = values[6].(time.Time)
-		student.UpdatedAt = values[7].(time.Time)
 	}
 
 	return &student, nil
