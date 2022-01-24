@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// TxMock mocks Tx to be able to test the repo layer
 type TxMock struct {
 	mock.Mock
 }
@@ -52,20 +53,32 @@ func (tx *TxMock) Rollback(ctx context.Context) error {
 	return r0
 }
 
+// CopyFrom mock function. We don't have to impl this since we aren't using them but still needs to be impl for
+// the interface
 func (tx *TxMock) CopyFrom(ctx context.Context, tableName pgx.Identifier, columnNames []string, rowSrc pgx.CopyFromSource) (int64, error) {
 	panic("not impl")
 }
+
+// SendBatch mock function. We don't have to impl this since we aren't using them but still needs to be impl for
+// the interface
 func (tx *TxMock) SendBatch(ctx context.Context, b *pgx.Batch) pgx.BatchResults {
 	panic("not impl")
 }
+
+// LargeObjects mock function. We don't have to impl this since we aren't using them but still needs to be impl for
+//// the interface
 func (tx *TxMock) LargeObjects() pgx.LargeObjects {
 	panic("not impl")
 }
 
+// Prepare mock function. We don't have to impl this since we aren't using them but still needs to be impl for
+// the interface
 func (tx *TxMock) Prepare(ctx context.Context, name, sql string) (*pgconn.StatementDescription, error) {
 	panic("not impl")
 }
 
+// Exec mock function. We don't have to impl this since we aren't using them but still needs to be impl for
+// the interface
 func (tx *TxMock) Exec(ctx context.Context, sql string, arguments ...interface{}) (commandTag pgconn.CommandTag, err error) {
 	args := tx.Called(ctx, sql, arguments)
 
@@ -79,12 +92,21 @@ func (tx *TxMock) Exec(ctx context.Context, sql string, arguments ...interface{}
 	}
 	return r0, r1
 }
+
+// Query mock function. We don't have to impl this since we aren't using them but still needs to be impl for
+// the interface
 func (tx *TxMock) Query(ctx context.Context, sql string, args ...interface{}) (pgx.Rows, error) {
 	panic("not impl")
 }
+
+// QueryRow mock function. We don't have to impl this since we aren't using them but still needs to be impl for
+//the interface
 func (tx *TxMock) QueryRow(ctx context.Context, sql string, args ...interface{}) pgx.Row {
 	panic("not impl")
 }
+
+// QueryFunc mock function. We don't have to impl this since we aren't using them but still needs to be impl for
+//the interface
 func (tx *TxMock) QueryFunc(ctx context.Context, sql string, args []interface{}, scans []interface{}, f func(pgx.QueryFuncRow) error) (pgconn.CommandTag, error) {
 	panic("not impl")
 }

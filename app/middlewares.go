@@ -40,7 +40,7 @@ func (h *middleware) AuthMiddleware() gin.HandlerFunc {
 		circuitBeakerSettings := gobreaker.Settings{
 			Name:          "auth",
 			MaxRequests:   5,
-			Interval:      time.Millisecond*50,
+			Interval:      time.Millisecond * 50,
 			Timeout:       time.Second,
 			ReadyToTrip:   nil,
 			OnStateChange: nil,

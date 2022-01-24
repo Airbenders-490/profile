@@ -53,18 +53,18 @@ func (m *StudentUseCase) Update(ctx context.Context, id string, st *domain.Stude
 
 	var r0 *domain.Student
 	if rf, ok := args.Get(0).(func(context.Context, string, *domain.Student) *domain.Student); ok {
-	r0 = rf(ctx, id, st)
+		r0 = rf(ctx, id, st)
 	} else {
-	if args.Get(0) != nil {
-	r0 = args.Get(0).(*domain.Student)
-	}
+		if args.Get(0) != nil {
+			r0 = args.Get(0).(*domain.Student)
+		}
 	}
 
 	var r1 error
 	if rf, ok := args.Get(1).(func(context.Context, string, *domain.Student) error); ok {
-	r1 = rf(ctx, id, st)
+		r1 = rf(ctx, id, st)
 	} else {
-	r1 = args.Error(1)
+		r1 = args.Error(1)
 	}
 
 	return r0, r1

@@ -12,14 +12,14 @@ type SchoolUseCase struct {
 }
 
 // SearchSchoolByDomain - SchoolUseCase
-func (m *SchoolUseCase) SearchSchoolByDomain(c context.Context, domainName string) ([]domain.School, error){
+func (m *SchoolUseCase) SearchSchoolByDomain(c context.Context, domainName string) ([]domain.School, error) {
 	args := m.Called(c, domainName)
 
 	var r0 []domain.School
-	if rf, ok := args.Get(0).(func(context.Context, string) []domain.School); ok{
+	if rf, ok := args.Get(0).(func(context.Context, string) []domain.School); ok {
 		r0 = rf(c, domainName)
-	}else{
-		if args.Get(0) != nil{
+	} else {
+		if args.Get(0) != nil {
 			r0 = args.Get(0).([]domain.School)
 		}
 	}
@@ -37,7 +37,7 @@ func (m *SchoolUseCase) SendConfirmation(c context.Context, st *domain.Student, 
 	args := m.Called(c, st, email, school)
 
 	var r0 error
-	if rf, ok := args.Get(0).(func(context.Context, *domain.Student, string, *domain.School) error); ok{
+	if rf, ok := args.Get(0).(func(context.Context, *domain.Student, string, *domain.School) error); ok {
 		r0 = rf(c, st, email, school)
 	} else {
 		r0 = args.Error(0)
@@ -50,7 +50,7 @@ func (m *SchoolUseCase) ConfirmSchoolEnrollment(c context.Context, token string)
 	args := m.Called(c, token)
 
 	var r0 error
-	if rf, ok := args.Get(0).(func(context.Context, string) error); ok{
+	if rf, ok := args.Get(0).(func(context.Context, string) error); ok {
 		r0 = rf(c, token)
 	} else {
 		r0 = args.Error(0)

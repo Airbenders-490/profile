@@ -36,7 +36,7 @@ func TestSchoolHandlerSearchStudentSchool(t *testing.T){
 	err := faker.FakeData(&mockSchool)
 	assert.NoError(t, err)
 
-	t.Run("case success", func(t *testing.T){
+	t.Run("case success", func(t *testing.T) {
 		mockUseCase.
 			On("SearchSchoolByDomain", mock.Anything, mock.AnythingOfType("string")).
 			Return(arrMockSchool, nil).
@@ -47,7 +47,7 @@ func TestSchoolHandlerSearchStudentSchool(t *testing.T){
 		assert.Equal(t, 200, response.StatusCode)
 
 		responseBody, err := ioutil.ReadAll(response.Body)
-		if err !=nil{
+		if err != nil {
 			assert.Fail(t, "failed to read response")
 		}
 		var receivedSchools []domain.School
@@ -57,7 +57,7 @@ func TestSchoolHandlerSearchStudentSchool(t *testing.T){
 		mockUseCase.AssertExpectations(t)
 	})
 
-	t.Run("case no domain", func(t *testing.T){
+	t.Run("case no domain", func(t *testing.T) {
 		response, err := server.Client().Get(fmt.Sprintf("%s/api/school/?domain=", server.URL))
 		assert.NoError(t, err)
 		defer response.Body.Close()
@@ -74,7 +74,7 @@ func TestSchoolHandlerSearchStudentSchool(t *testing.T){
 		mockUseCase.AssertExpectations(t)
 	})
 
-	t.Run("case internal error", func(t *testing.T){
+	t.Run("case internal error", func(t *testing.T) {
 		mockUseCase.
 			On("SearchSchoolByDomain", mock.Anything, mock.AnythingOfType("string")).
 			Return(nil, errors.New("error")).
@@ -106,7 +106,7 @@ func TestSchoolHandlerConfirmSchoolRegistration(t *testing.T) {
 	err := faker.FakeData(&mockSchool)
 	assert.NoError(t, err)
 
-	t.Run("case success", func(t *testing.T){
+	t.Run("case success", func(t *testing.T) {
 		mockUseCase.
 			On("ConfirmSchoolEnrollment", mock.Anything, mock.AnythingOfType("string")).
 			Return(nil).Once()
@@ -116,7 +116,7 @@ func TestSchoolHandlerConfirmSchoolRegistration(t *testing.T) {
 
 		assert.Equal(t, 200, response.StatusCode)
 	})
-	t.Run("case error: no token", func(t *testing.T){
+	t.Run("case error: no token", func(t *testing.T) {
 		response, err := server.Client().Get(fmt.Sprintf("%s/school/confirmation/?token=", server.URL))
 		assert.NoError(t, err)
 		defer response.Body.Close()
@@ -132,7 +132,7 @@ func TestSchoolHandlerConfirmSchoolRegistration(t *testing.T) {
 		assert.NoError(t, err)
 		assert.EqualValues(t, restError, e.RestError{Code: 400, Message: "must provide a valid email"})
 	})
-	t.Run("case error internal error", func(t *testing.T){
+	t.Run("case error internal error", func(t *testing.T) {
 		mockUseCase.
 			On("ConfirmSchoolEnrollment", mock.Anything, mock.AnythingOfType("string")).
 			Return(errors.New("error")).Once()
@@ -152,7 +152,6 @@ func TestSchoolHandlerConfirmSchoolRegistration(t *testing.T) {
 	})
 }
 
-
 func TestSchoolHandlerSendConfirmationMail(t *testing.T){
 	mockUseCase := new(mocks.SchoolUseCase)
 	h := http.NewSchoolHandler(mockUseCase)
@@ -167,7 +166,7 @@ func TestSchoolHandlerSendConfirmationMail(t *testing.T){
 	t.Run("success", func(t *testing.T) {
 		mockUseCase.On("SendConfirmation", mock.Anything,
 			mock.AnythingOfType("*domain.Student"), mock.AnythingOfType("string"),
-		mock.AnythingOfType("*domain.School")).Return(nil).Once()
+			mock.AnythingOfType("*domain.School")).Return(nil).Once()
 		postBody, err := json.Marshal(mockSchool)
 		assert.NoError(t, err)
 		reader := strings.NewReader(string(postBody))
@@ -233,7 +232,4 @@ func TestSchoolHandlerSendConfirmationMail(t *testing.T){
 		}
 		mockUseCase.AssertExpectations(t)
 	})
-
-
 }
-
