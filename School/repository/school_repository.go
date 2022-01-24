@@ -4,16 +4,15 @@ import (
 	"context"
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/utils/errors"
-	"github.com/jackc/pgx/v4/pgxpool"
-	"time"
+	"github.com/driftprogramming/pgxpoolmock"
 )
 
 type schoolRepository struct {
-	db *pgxpool.Pool
+	db pgxpoolmock.PgxPool
 }
 
 // NewSchoolRepository returns an instance of school repository
-func NewSchoolRepository(db *pgxpool.Pool) domain.SchoolRepository {
+func NewSchoolRepository(db pgxpoolmock.PgxPool) domain.SchoolRepository {
 	return &schoolRepository{
 		db: db,
 	}
@@ -30,7 +29,7 @@ const (
 	SET school=$1 WHERE id=$2;`
 )
 
-// SearchByDomain finds the schools matching the domain name pattern. Otherwise returns an empty slice
+// SearchByDomain finds the schools matching the domain name pattern. Otherwise, returns an empty slice
 func (r *schoolRepository) SearchByDomain(ctx context.Context, domainName string) ([]domain.School, error) {
 	rows, err := r.db.Query(ctx, findByDomain, domainName)
 	if err != nil {
@@ -42,15 +41,11 @@ func (r *schoolRepository) SearchByDomain(ctx context.Context, domainName string
 	var schools []domain.School
 	for rows.Next() {
 		var school domain.School
-		values, err := rows.Values()
+		err = rows.Scan(&school.ID, &school.Name, &school.Country)
 		if err != nil {
 			err = errors.NewInternalServerError(err.Error())
 			return nil, err
 		}
-
-		school.ID = values[0].(string)
-		school.Name = values[1].(string)
-		school.Country = values[2].(string)
 
 		schools = append(schools, school)
 	}
@@ -91,16 +86,11 @@ func (r *schoolRepository) GetConfirmationByToken(ctx context.Context, token str
 
 	var confirmation domain.Confirmation
 	for rows.Next() {
-		values, err := rows.Values()
+		err = rows.Scan(&confirmation.Token, &confirmation.School.ID, &confirmation.Student.ID, &confirmation.CreatedAt)
 		if err != nil {
 			err = errors.NewInternalServerError(err.Error())
 			return nil, err
 		}
-
-		confirmation.Token = values[0].(string)
-		confirmation.School.ID = values[1].(string)
-		confirmation.Student.ID = values[2].(string)
-		confirmation.CreatedAt = values[3].(time.Time)
 	}
 
 	return &confirmation, nil
