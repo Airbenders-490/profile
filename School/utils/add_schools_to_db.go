@@ -8,11 +8,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/airbenders/profile/domain"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 )
@@ -37,12 +35,11 @@ func addSchoolsToDB() {
 	defer tx.Rollback(context.Background())
 
 	var schools []domain.School
-	resp, _ := http.Get("https://raw.githubusercontent.com/Hipo/university-domains-list/master/world_universities_and_domains.json")
-	schoolJSON, _ := ioutil.ReadAll(resp.Body)
+	jsonFile, _ := os.Open("school.json")
+	schoolJSON, _ := ioutil.ReadAll(jsonFile)
 	_ = json.Unmarshal(schoolJSON, &schools)
 
 	for _, school := range schools {
-		school.ID = uuid.New().String()
 		_, err = tx.Exec(context.Background(), insert, school.ID, school.Name, school.Country, school.Domains)
 		if err != nil {
 			log.Fatalln(err)
