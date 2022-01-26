@@ -42,18 +42,14 @@ func (h *ReviewHandler) AddReview(c *gin.Context) {
 	ctx := c.Request.Context()
 	createdReview, err := h.u.AddReview(ctx, &review, reviewer)
 	if err != nil {
-		switch v := err.(type) {
-		case *errors.RestError:
-			c.JSON(v.Code, v)
+		errors.SetRESTError(c, err)
 			return
-		default:
-			c.JSON(http.StatusInternalServerError, errors.NewInternalServerError(err.Error()))
-			return
-		}
 	}
 
 	c.JSON(http.StatusCreated, createdReview)
 }
+
+
 
 // EditReview alters the tags for the review
 func (h *ReviewHandler) EditReview(c *gin.Context) {

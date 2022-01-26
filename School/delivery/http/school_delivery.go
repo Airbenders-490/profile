@@ -30,14 +30,8 @@ func (h *SchoolHandler) SearchStudentSchool(c *gin.Context) {
 	ctx := c.Request.Context()
 	schools, err := h.u.SearchSchoolByDomain(ctx, domainName)
 	if err != nil {
-		switch v := err.(type) {
-		case *errors.RestError:
-			c.JSON(v.Code, v)
-			return
-		default:
-			c.JSON(http.StatusInternalServerError, errors.NewInternalServerError(err.Error()))
-			return
-		}
+		errors.SetRESTError(c, err)
+		return
 	}
 
 	c.JSON(http.StatusOK, schools)

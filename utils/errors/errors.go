@@ -1,6 +1,9 @@
 package errors
 
-import "net/http"
+import (
+	"github.com/gin-gonic/gin"
+	"net/http"
+)
 
 // RestError struct. Has a status code and a custom message
 type RestError struct {
@@ -50,4 +53,16 @@ func NewUnauthorizedError(message string) *RestError {
 		Code:    http.StatusUnauthorized,
 		Message: message,
 	}
+}
+
+func SetRESTError(c *gin.Context, err error) bool {
+	switch v := err.(type) {
+	case RestError:
+		c.JSON(v.Code, v)
+		return true
+	default:
+		c.JSON(http.StatusInternalServerError, NewInternalServerError(err.Error()))
+		return true
+	}
+	return false
 }

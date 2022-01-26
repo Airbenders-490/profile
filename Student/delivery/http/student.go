@@ -31,14 +31,8 @@ func (h *StudentHandler) GetByID(c *gin.Context) {
 	ctx := c.Request.Context()
 	student, err := h.UseCase.GetByID(ctx, id)
 	if err != nil {
-		switch v := err.(type) {
-		case *errors.RestError:
-			c.JSON(v.Code, v)
-			return
-		default:
-			c.JSON(http.StatusInternalServerError, errors.NewInternalServerError(err.Error()))
-			return
-		}
+		errors.SetRESTError(c, err)
+		return
 	}
 	c.JSON(200, student)
 }
