@@ -12,6 +12,7 @@ import (
 
 
 const errorMessage = "No such student with ID %s exists"
+const existingStudentError = "Student with ID %s already exists"
 
 type studentUseCase struct {
 	studentRepository domain.StudentRepository
@@ -38,7 +39,7 @@ func (s *studentUseCase) Create(c context.Context, st *domain.Student) error {
 		existingStudent, err := s.studentRepository.GetByID(ctx, st.ID)
 		if err == nil {
 			if !reflect.DeepEqual(*existingStudent, domain.Student{}) {
-				return errors.NewConflictError(fmt.Sprintf(errorMessage, st.ID))
+				return errors.NewConflictError(fmt.Sprintf(existingStudentError, st.ID))
 			}
 		}
 	} else {
