@@ -10,9 +10,13 @@ import (
 	"time"
 )
 
+
+const errorMessage = "No such student with ID %s exists"
+const existingStudentError = "Student with ID %s already exists"
+
 type studentUseCase struct {
 	studentRepository domain.StudentRepository
-	//TODO: add review and possibly tag repositories to fetch their data too
+	// add review and possibly tag repositories to fetch their data too
 	reviewRepository domain.ReviewRepository
 	contextTimeout   time.Duration
 }
@@ -35,7 +39,7 @@ func (s *studentUseCase) Create(c context.Context, st *domain.Student) error {
 		existingStudent, err := s.studentRepository.GetByID(ctx, st.ID)
 		if err == nil {
 			if !reflect.DeepEqual(*existingStudent, domain.Student{}) {
-				return errors.NewConflictError(fmt.Sprintf("Student with ID %s already exists", st.ID))
+				return errors.NewConflictError(fmt.Sprintf(existingStudentError, st.ID))
 			}
 		}
 	} else {
@@ -61,7 +65,8 @@ func (s *studentUseCase) GetByID(c context.Context, id string) (*domain.Student,
 		return nil, err
 	}
 	if reflect.DeepEqual(student, &domain.Student{}) {
-		return nil, errors.NewNotFoundError(fmt.Sprintf("No such student with ID %s exists", id))
+
+		return nil, errors.NewNotFoundError(fmt.Sprintf(errorMessage, id))
 	}
 
 	reviews, err := s.reviewRepository.GetReviewsFor(ctx, student.ID)
@@ -84,7 +89,7 @@ func (s *studentUseCase) Update(c context.Context, id string, st *domain.Student
 		return nil, err
 	}
 	if reflect.DeepEqual(existingStudent, &domain.Student{}) {
-		return nil, errors.NewNotFoundError(fmt.Sprintf("No such student with ID %s exists", st.ID))
+		return errors.NewNotFoundError(fmt.Sprintf(errorMessage, st.ID))
 	}
 	updateStudent(existingStudent, st)
 	return existingStudent, s.studentRepository.Update(ctx, existingStudent)
@@ -116,7 +121,7 @@ func (s *studentUseCase) Delete(c context.Context, id string) error {
 		return err
 	}
 	if reflect.DeepEqual(existingStudent, &domain.Student{}) {
-		return errors.NewNotFoundError(fmt.Sprintf("No such student with ID %s exists", id))
+		return errors.NewNotFoundError(fmt.Sprintf(errorMessage, id))
 	}
 
 	return s.studentRepository.Delete(ctx, id)

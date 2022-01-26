@@ -20,13 +20,14 @@ func TestCreate(t *testing.T) {
 	var mockStudent domain.Student
 	faker.FakeData(&mockStudent)
 
+	const studentType = "*domain.Student"
 	t.Run("case success", func(t *testing.T) {
 		mockStudentRepo.
 			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(nil, errors.New("error")).
 			Once()
 		mockStudentRepo.
-			On("Create", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("*domain.Student")).
+			On("Create", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType(studentType)).
 			Return(nil).
 			Once()
 		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
@@ -44,7 +45,7 @@ func TestCreate(t *testing.T) {
 			Return(nil, errors.New("error")).
 			Once()
 		mockStudentRepo.
-			On("Create", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType("*domain.Student")).
+			On("Create", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType(studentType)).
 			Return(errors.New("error")).
 			Once()
 		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)

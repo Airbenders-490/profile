@@ -14,6 +14,8 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+const caseSuccess = "case success"
+const reviewType = "*domain.Review"
 // TestEditReviewsBy function
 func TestEditReviewsBy(t *testing.T) {
 	mockStudentRepo := new(mocks.StudentRepositoryMock)
@@ -22,7 +24,9 @@ func TestEditReviewsBy(t *testing.T) {
 	faker.FakeData(&mockStudent)
 	var mockReview domain.Review
 	faker.FakeData(&mockReview)
-	t.Run("case success", func(t *testing.T) {
+
+
+	t.Run(caseSuccess, func(t *testing.T) {
 
 		mockStudentRepo.
 			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
@@ -33,7 +37,7 @@ func TestEditReviewsBy(t *testing.T) {
 			Return(&mockReview, nil).
 			Once()
 		mockReviewRepo.
-			On("UpdateReviewTags", mock.Anything, mock.AnythingOfType("*domain.Review")).
+			On("UpdateReviewTags", mock.Anything, mock.AnythingOfType(reviewType)).
 			Return(nil).
 			Once()
 		u := usecase.NewReviewUseCase(mockReviewRepo, mockStudentRepo, time.Second)
@@ -86,7 +90,7 @@ func TestEditReviewsBy(t *testing.T) {
 			Return(&mockReview, nil).
 			Once()
 		mockReviewRepo.
-			On("UpdateReviewTags", mock.Anything, mock.AnythingOfType("*domain.Review")).
+			On("UpdateReviewTags", mock.Anything, mock.AnythingOfType(reviewType)).
 			Return(errors.New("error")).
 			Once()
 		u := usecase.NewReviewUseCase(mockReviewRepo, mockStudentRepo, time.Second)
@@ -107,7 +111,7 @@ func TestGetReviewsBy(t *testing.T) {
 	var mockReviews []domain.Review
 	faker.FakeData(&mockReviews)
 
-	t.Run("case success", func(t *testing.T) {
+	t.Run(caseSuccess, func(t *testing.T) {
 		mockReviewRepo.
 			On("GetReviewsBy", mock.Anything, mock.AnythingOfType("string")).
 			Return(mockReviews, nil).
@@ -145,7 +149,7 @@ func TestAddReview(t *testing.T) {
 	var mockReview domain.Review
 	faker.FakeData(mockReview)
 
-	t.Run("case success", func(t *testing.T) {
+	t.Run(caseSuccess, func(t *testing.T) {
 		mockStudentRepo.
 			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
 			Return(&mockStudent, nil).
@@ -155,7 +159,7 @@ func TestAddReview(t *testing.T) {
 			Return(nil, nil).
 			Once()
 		mockReviewRepo.
-			On("AddReview", mock.Anything, mock.AnythingOfType("*domain.Review")).
+			On("AddReview", mock.Anything, mock.AnythingOfType(reviewType)).
 			Return(nil).
 			Once()
 
