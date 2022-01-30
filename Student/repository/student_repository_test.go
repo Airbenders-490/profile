@@ -24,7 +24,7 @@ func TestGetByID(t *testing.T) {
 	columns := []string{"id", "first_name", "last_name", "email", "general_info", "school", "current_classes", "classes_taken", "created_at", "updated_at"}
 
 	t.Run("success-with-nil-school", func(t *testing.T) {
-		expectedStudent := domain.Student{
+		expectedStudent := &domain.Student{
 			ID:          "a",
 			FirstName:   "b",
 			LastName:    "c",
@@ -47,13 +47,14 @@ func TestGetByID(t *testing.T) {
 			expectedStudent.CurrentClasses,
 			expectedStudent.ClassesTaken,
 			expectedStudent.CreatedAt,
-			expectedStudent.UpdatedAt).ToPgxRows()
+			expectedStudent.UpdatedAt,
+			).ToPgxRows()
 		mockPool.EXPECT().Query(gomock.Any(), gomock.Any(), gomock.AssignableToTypeOf("string")).Return(pgxRows, nil)
 		sr := repository.NewStudentRepository(mockPool)
 		student, err := sr.GetByID(context.Background(), "a")
 
 		assert.NoError(t, err)
-		assert.EqualValues(t, expectedStudent, *student)
+		assert.EqualValues(t, expectedStudent, student)
 	})
 
 	t.Run("success-with-some-school", func(t *testing.T) {
@@ -76,12 +77,12 @@ func TestGetByID(t *testing.T) {
 			expectedStudent.LastName,
 			expectedStudent.Email,
 			expectedStudent.GeneralInfo,
-			expectedStudent.School.ID,
+			&expectedStudent.School.ID,
 			expectedStudent.CurrentClasses,
 			expectedStudent.ClassesTaken,
 			expectedStudent.CreatedAt,
 			expectedStudent.UpdatedAt).ToPgxRows()
-		mockPool.EXPECT().Query(gomock.Any(), gomock.Any(), gomock.AssignableToTypeOf("string")).Return(pgxRows, nil)
+		mockPool.EXPECT().Query(gomock.Any(), gomock.Any(), gomock.Any()).Return(pgxRows, nil)
 		sr := repository.NewStudentRepository(mockPool)
 		student, err := sr.GetByID(context.Background(), "a")
 

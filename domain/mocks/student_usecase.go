@@ -11,6 +11,18 @@ type StudentUseCase struct {
 	mock.Mock
 }
 
+func (m *StudentUseCase) UpdateStudentTopic() {
+	panic("implement me")
+}
+
+func (m *StudentUseCase) DeleteStudentTopic() {
+	panic("implement me")
+}
+
+func (m *StudentUseCase) CreateStudentTopic() {
+	panic("implement me")
+}
+
 // Create - StudentUseCaseMock
 func (m *StudentUseCase) Create(ctx context.Context, st *domain.Student) error {
 	args := m.Called(ctx, st)

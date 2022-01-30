@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-// TxMock mocks Tx to be able to test the repo layer
+// TxMock channelmocks Tx to be able to test the repo layer
 type TxMock struct {
 	mock.Mock
 }

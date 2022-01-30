@@ -11,9 +11,11 @@ require (
 	github.com/gin-gonic/gin v1.7.4
 	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.3.0
+	github.com/jackc/pgconn v1.10.1
 	github.com/jackc/pgx/v4 v4.14.1
 	github.com/pkg/errors v0.8.1
 	github.com/sony/gobreaker v0.5.0
+	github.com/streadway/amqp v0.0.0-20190827072141-edfb9018d271
 	github.com/stretchr/testify v1.7.0
 )
 
@@ -25,7 +27,6 @@ require (
 	github.com/go-playground/validator/v10 v10.9.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
-	github.com/jackc/pgconn v1.10.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgproto3/v2 v2.2.0 // indirect

@@ -65,15 +65,17 @@ func (r *studentRepository) GetByID(ctx context.Context, id string) (*domain.Stu
 
 	var student domain.Student
 	for rows.Next() {
-		var school domain.School
+		var schoolID *string
 		err = rows.Scan(&student.ID, &student.FirstName, &student.LastName, &student.Email, &student.GeneralInfo,
-			&school.ID, &student.CurrentClasses, &student.ClassesTaken, &student.CreatedAt, &student.UpdatedAt)
+			&schoolID, &student.CurrentClasses, &student.ClassesTaken, &student.CreatedAt, &student.UpdatedAt)
 		if err != nil {
 			err = errors.NewInternalServerError(err.Error())
 			return nil, err
 		}
-		if school.ID != "" {
-			student.School = &school
+		if schoolID != nil {
+			student.School = &domain.School{
+				ID: *schoolID,
+			}
 		}
 	}
 

@@ -5,7 +5,7 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-// MiddlewareMock mocks the middleware for testing
+// MiddlewareMock channelmocks the middleware for testing
 type MiddlewareMock struct {
 	mock.Mock
 }

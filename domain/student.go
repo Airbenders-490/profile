@@ -29,6 +29,9 @@ type StudentUseCase interface {
 	AddClasses(c context.Context, id string, st *Student) error
 	RemoveClasses(c context.Context, id string, st *Student) error
 	CompleteClass(c context.Context, id string, st *Student) error
+	CreateStudentTopic()
+	UpdateStudentTopic()
+	DeleteStudentTopic()
 }
 
 // StudentRepository interface defines the functions all studentRepositories should have
