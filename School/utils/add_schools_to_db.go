@@ -11,6 +11,7 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 )
@@ -35,9 +36,17 @@ func addSchoolsToDB() {
 	defer tx.Rollback(context.Background())
 
 	var schools []domain.School
-	createJSONFile()
-	jsonFile, _ := os.Open("school.json")
-	schoolJSON, _ := ioutil.ReadAll(jsonFile)
+	resp, _ := http.Get("https://raw.githubusercontent.com/Hipo/university-domains-list/master/world_universities_and_domains.json")
+	schoolJSON, _ := ioutil.ReadAll(resp.Body)
+	// The os.Create creates or truncates the named file. If the file already exists, it is truncated.
+	jsonFile,_ := os.Create("school.json")
+	data := []byte(schoolJSON)
+	_, err2 := jsonFile.Write(data)
+	if err2 != nil {
+		log.Fatal(err2)
+	}
+	jsonFile, _ = os.Open("school.json")
+	schoolJSON, _ = ioutil.ReadAll(jsonFile)
 	_ = json.Unmarshal(schoolJSON, &schools)
 
 	for _, school := range schools {
