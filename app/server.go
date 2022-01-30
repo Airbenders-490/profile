@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"github.com/streadway/amqp"
 	"log"
 	"os"
 	"time"
@@ -40,19 +41,47 @@ func Server(
 	return router
 }
 
+
+func failOnError(err error, msg string) {
+	if err != nil {
+		log.Fatalf("%s: %s", msg, err)
+	}
+}
+
 // Start runs the server
+// todo: refactor and breakdown
 func Start() {
 	pool, err := pgxpool.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Println(os.Getenv("DATABASE_URL"))
 		log.Fatalln("db failed", err)
 	}
+	conn, err := amqp.Dial(os.Getenv("RABBIT_URL"))
+	failOnError(err, "can't connect")
+	defer conn.Close()
 
+	ch, err := conn.Channel()
+	failOnError(err, "failed to open channel")
+	defer ch.Close()
+
+	err = ch.ExchangeDeclare(
+		"profile", // name
+		"topic",      // type
+		true,         // durable
+		false,        // auto-deleted
+		false,        // internal
+		false,        // no-wait
+		nil,          // arguments
+	)
+	failOnError(err, "can't create exchange")
+	mm := usecase.NewMessagingManager(ch)
 	studentRepository := repository.NewStudentRepository(pool)
 	reviewRepository := repository4.NewReviewRepository(pool)
-	studentUseCase := usecase.NewStudentUseCase(studentRepository, reviewRepository, time.Second)
+	studentUseCase := usecase.NewStudentUseCase(mm, studentRepository, reviewRepository, time.Second)
 	studentHandler := http.NewStudentHandler(studentUseCase)
-
+	go studentUseCase.CreateStudentTopic()
+	go studentUseCase.UpdateStudentTopic()
+	go studentUseCase.DeleteStudentTopic()
 	schoolRepository := repository2.NewSchoolRepository(pool)
 	mail := utils.NewSimpleMail()
 	schoolUseCase := usecase2.NewSchoolUseCase(schoolRepository, studentRepository, mail, time.Second)

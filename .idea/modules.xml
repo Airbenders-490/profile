@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/profile.iml" filepath="$PROJECT_DIR$/.idea/profile.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../../nuzurie/testAMQP/.idea/testAMQP.iml" filepath="$PROJECT_DIR$/../../nuzurie/testAMQP/.idea/testAMQP.iml" />
     </modules>
   </component>
 </project>
