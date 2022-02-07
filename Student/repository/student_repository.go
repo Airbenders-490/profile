@@ -25,7 +25,7 @@ const (
 	selectByID = `SELECT id, first_name, last_name, email, general_info, school, created_at, updated_at
 	FROM public.student WHERE id=$1;`
 	update = `UPDATE public.student
-	SET first_name=$2, last_name=$3, email=$4, general_info=$5, created_at=$6, updated_at=$7
+	SET first_name=$2, last_name=$3, email=$4, general_info=$5,ClassesTaken=$6,CurrentClasses=$7, created_at=$8, updated_at=$9
 	WHERE id=$1;`
 	deleteStudent = `DELETE FROM public.student
 	WHERE id=$1;`
@@ -110,7 +110,7 @@ func (r *studentRepository) Update(ctx context.Context, st *domain.Student) erro
 	}
 	defer tx.Rollback(ctx)
 
-	_, err = tx.Exec(ctx, update, st.ID, st.FirstName, st.LastName, st.Email, st.GeneralInfo, st.CreatedAt, st.UpdatedAt)
+	_, err = tx.Exec(ctx, update, st.ID, st.FirstName, st.LastName, st.Email, st.GeneralInfo,st.CurrentClasses,st.ClassesTaken, st.CreatedAt, st.UpdatedAt)
 	if err != nil {
 		return errors.NewInternalServerError(err.Error())
 	}
