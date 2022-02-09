@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS public.student
     general_info character varying(1024) COLLATE pg_catalog."default",
     school character varying(64) COLLATE pg_catalog."default",
     classes_taken character varying(1024) COLLATE pg_catalog."default",
-    classes_taken character varying(1024) COLLATE pg_catalog."default",
+    current_classes character varying(1024) COLLATE pg_catalog."default",
     created_at timestamp without time zone,
     updated_at timestamp without time zone,
     CONSTRAINT student_pkey PRIMARY KEY (id)
