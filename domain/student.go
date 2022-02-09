@@ -17,7 +17,7 @@ type Student struct {
 	UpdatedAt   time.Time
 	Reviews     []Review `json:"reviews" faker:"-"`
 	ClassesTaken []string  `json:"classes_taken" faker:"-"`
-	CurrentClasses []string  `json:"classes_taken" faker:"-"`
+	CurrentClasses []string  `json:" current_classes" faker:"-"`
 }
 
 // StudentUseCase interface defines the functions all studentUseCases should have
