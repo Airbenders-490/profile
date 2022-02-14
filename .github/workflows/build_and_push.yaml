@@ -1,0 +1,70 @@
+name: Build and push to dockerhub
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches: 
+      - main
+      - develop
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/upload-artifact@master
+        with:
+          name: source
+          path: .
+
+  build:
+    needs: fetch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@master
+        with:
+          name: source
+          path: .
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+      - name: Mod download
+        run: go mod download
+      - name: Build
+        run: go build
+      - name: Create directory for binary
+        run: mkdir bin
+      - name: Copy binary
+        run: cp ./profile bin/profile
+      - uses: actions/upload-artifact@master
+        with:
+          name: binary
+          path: bin/
+
+  push_to_registry:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    needs: [ build ]
+    steps:
+      - uses: actions/download-artifact@master
+        with:
+          name: binary
+          path: .
+      - name: Check directory
+        run: ls
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build a Docker image based on your repo's Dockerfile; push the image to Docker Hub, and apply a tag to the image
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: airbenders/profile:latest
+          file: Dockerfile
