@@ -126,3 +126,107 @@ func (s *studentUseCase) Delete(c context.Context, id string) error {
 
 	return s.studentRepository.Delete(ctx, id)
 }
+
+func (s *studentUseCase) AddCurrentClass(c context.Context, id string, st *domain.Student) error {
+	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
+	defer cancel()
+
+	st.ID = id
+	existingStudent, err := s.studentRepository.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if reflect.DeepEqual(existingStudent, &domain.Student{}) {
+		return errors.NewNotFoundError(fmt.Sprintf(errorMessage, id))
+	}
+
+	st.CurrentClasses = append(existingStudent.CurrentClasses, st.CurrentClasses...)
+
+	return s.studentRepository.UpdateCurrentClass(ctx, st)
+
+}
+
+func (s *studentUseCase) AddClassesTaken(c context.Context, id string, st *domain.Student) error {
+	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
+	defer cancel()
+
+	st.ID = id
+	existingStudent, err := s.studentRepository.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+	if reflect.DeepEqual(existingStudent, &domain.Student{}) {
+		return errors.NewNotFoundError(fmt.Sprintf(errorMessage, id))
+	}
+
+	st.ClassesTaken = append(existingStudent.ClassesTaken, st.ClassesTaken...)
+
+
+	return s.studentRepository.UpdateClassesTaken(ctx, st)
+}
+
+func (s *studentUseCase) RemoveCurrentClass(c context.Context, id string, st *domain.Student) error {
+	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
+	defer cancel()
+
+	st.ID = id
+	existingStudent, err := s.studentRepository.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if reflect.DeepEqual(existingStudent, &domain.Student{}) {
+		return errors.NewNotFoundError(fmt.Sprintf(errorMessage, id))
+	}
+	st.CurrentClasses = removeClasses(existingStudent.CurrentClasses, st.CurrentClasses)
+	return s.studentRepository.UpdateCurrentClass(ctx, st)
+}
+
+func (s *studentUseCase) RemoveClassesTaken(c context.Context, id string, st *domain.Student) error {
+	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
+	defer cancel()
+
+	st.ID = id
+	existingStudent, err := s.studentRepository.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if reflect.DeepEqual(existingStudent, &domain.Student{}) {
+		return errors.NewNotFoundError(fmt.Sprintf(errorMessage, id))
+	}
+	st.CurrentClasses = removeClasses(existingStudent.CurrentClasses, st.CurrentClasses)
+	return s.studentRepository.UpdateClassesTaken(ctx, st)
+}
+
+func removeClasses(existingClasses, classesToRemove []string) []string {
+	classRemove := make(map[string]struct{}, len(classesToRemove))
+	for _, x := range classesToRemove {
+		classRemove[x] = struct{}{}
+	}
+	var remainingClasses []string
+	for _, i := range existingClasses{
+		if _, found := classRemove[i]; !found {
+			remainingClasses = append(remainingClasses, i)
+		}
+	}
+	return remainingClasses
+}
+
+func (s *studentUseCase) CompleteClass(c context.Context, id string, st *domain.Student) error {
+	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
+	defer cancel()
+
+	st.ID = id
+	existingStudent, err := s.studentRepository.GetByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if reflect.DeepEqual(existingStudent, &domain.Student{}) {
+		return errors.NewNotFoundError(fmt.Sprintf(errorMessage, id))
+	}
+	st.CurrentClasses = removeClasses(existingStudent.CurrentClasses, st.CurrentClasses)
+	st.ClassesTaken = append(existingStudent.ClassesTaken, st.CurrentClasses...)
+	return s.studentRepository.CompleteClass(ctx, st)
+}

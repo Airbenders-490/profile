@@ -142,3 +142,193 @@ func (h *StudentHandler) Delete(c *gin.Context) {
 
 	c.JSON(http.StatusOK, httputils.NewResponse("student deleted"))
 }
+
+func (h *StudentHandler) AddCurrentClass(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError(errorMessage))
+		return
+	}
+
+	key, _ := c.Get("loggedID")
+	loggedID, _ := key.(string)
+
+	if loggedID != id {
+		c.JSON(http.StatusBadRequest, errors.NewUnauthorizedError("Can only update for self"))
+		return
+	}
+
+	var student domain.Student
+	err := c.ShouldBindJSON(&student)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid data"))
+		return
+	}
+
+	ctx := c.Request.Context()
+	err = h.UseCase.AddCurrentClass(ctx, id, &student)
+	if err != nil {
+		switch v := err.(type) {
+		case *errors.RestError:
+			c.JSON(v.Code, v)
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, errors.NewInternalServerError(err.Error()))
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, httputils.NewResponse("student updated"))
+}
+
+func (h *StudentHandler) AddClassesTaken(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError(errorMessage))
+		return
+	}
+
+	key, _ := c.Get("loggedID")
+	loggedID, _ := key.(string)
+
+	if loggedID != id {
+		c.JSON(http.StatusBadRequest, errors.NewUnauthorizedError("Can only update for self"))
+		return
+	}
+
+	var student domain.Student
+	err := c.ShouldBindJSON(&student)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid data"))
+		return
+	}
+
+	ctx := c.Request.Context()
+	err = h.UseCase.AddClassesTaken(ctx, id, &student)
+	if err != nil {
+		switch v := err.(type) {
+		case *errors.RestError:
+			c.JSON(v.Code, v)
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, errors.NewInternalServerError(err.Error()))
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, httputils.NewResponse("student updated"))
+}
+
+func (h *StudentHandler) RemoveClassesTaken(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError(errorMessage))
+		return
+	}
+
+	key, _ := c.Get("loggedID")
+	loggedID, _ := key.(string)
+
+	if loggedID != id {
+		c.JSON(http.StatusBadRequest, errors.NewUnauthorizedError("Can only update for self"))
+		return
+	}
+
+	var student domain.Student
+	err := c.ShouldBindJSON(&student)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid data"))
+		return
+	}
+
+	ctx := c.Request.Context()
+	err = h.UseCase.RemoveClassesTaken(ctx, id, &student)
+	if err != nil {
+		switch v := err.(type) {
+		case *errors.RestError:
+			c.JSON(v.Code, v)
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, errors.NewInternalServerError(err.Error()))
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, httputils.NewResponse("student updated"))
+}
+
+func (h *StudentHandler) RemoveCurrentClasses(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError(errorMessage))
+		return
+	}
+
+	key, _ := c.Get("loggedID")
+	loggedID, _ := key.(string)
+
+	if loggedID != id {
+		c.JSON(http.StatusBadRequest, errors.NewUnauthorizedError("Can only update for self"))
+		return
+	}
+
+	var student domain.Student
+	err := c.ShouldBindJSON(&student)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid data"))
+		return
+	}
+
+	ctx := c.Request.Context()
+	err = h.UseCase.RemoveCurrentClass(ctx, id, &student)
+	if err != nil {
+		switch v := err.(type) {
+		case *errors.RestError:
+			c.JSON(v.Code, v)
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, errors.NewInternalServerError(err.Error()))
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, httputils.NewResponse("student updated"))
+}
+
+func (h *StudentHandler) CompleteClass(c *gin.Context) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError(errorMessage))
+		return
+	}
+
+	key, _ := c.Get("loggedID")
+	loggedID, _ := key.(string)
+
+	if loggedID != id {
+		c.JSON(http.StatusBadRequest, errors.NewUnauthorizedError("Can only update for self"))
+		return
+	}
+
+	var student domain.Student
+	err := c.ShouldBindJSON(&student)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid data"))
+		return
+	}
+
+	ctx := c.Request.Context()
+	err = h.UseCase.CompleteClass(ctx, id, &student)
+	if err != nil {
+		switch v := err.(type) {
+		case *errors.RestError:
+			c.JSON(v.Code, v)
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, errors.NewInternalServerError(err.Error()))
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, httputils.NewResponse("student updated"))
+}

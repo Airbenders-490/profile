@@ -5,6 +5,7 @@ import (
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/utils/errors"
 	"github.com/driftprogramming/pgxpoolmock"
+	"time"
 )
 
 type studentRepository struct {
@@ -30,6 +31,9 @@ const (
 	deleteStudent = `DELETE FROM public.student
 	WHERE id=$1;`
 	getSchoolName = `SELECT name FROM school WHERE ID=$1`
+	//addEnrolledClass = `UPDATE public.student SET current_classes=array_append(current_classes, $1), updated_at=$2 WHERE id=$3;`
+	updateCurrentClasses = `UPDATE public.student SET current_classes=$1, updated_at=$2 WHERE id = $3;`
+	updateClassesTaken = `UPDATE public.student SET classes_taken=$1, updated_at=$2 WHERE id=$3;`
 )
 
 // Create stores the student in the db. Returns err if unable to
@@ -139,5 +143,55 @@ func (r *studentRepository) Delete(ctx context.Context, id string) error {
 	if err != nil {
 		return errors.NewInternalServerError(err.Error())
 	}
+	return nil
+}
+
+func (r *studentRepository) AddCurrentClass(ctx context.Context, st *domain.Student) error {
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	defer tx.Rollback(ctx)
+
+	_, err = tx.Exec(ctx, updateCurrentClasses, st.CurrentClasses, time.Now(), st.ID)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+
+	return nil
+}
+
+func (r *studentRepository) AddClassesTaken(ctx context.Context, st *domain.Student) error {
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	defer tx.Rollback(ctx)
+
+	_, err = tx.Exec(ctx, updateClassesTaken, st.ID, time.Now(), st.ID)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+
+	return nil
+}
+
+func (r *studentRepository) CompleteClass(ctx context.Context, st *domain.Student) error {
+	tx, err := r.db.Begin(ctx)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	defer tx.Rollback(ctx)
+
+	_, err = tx.Exec(ctx, updateClassesTaken, st.ID, time.Now(), st.ID)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+
+	_, err = tx.Exec(ctx, updateCurrentClasses, st.ID, time.Now(), st.ID)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+
 	return nil
 }
