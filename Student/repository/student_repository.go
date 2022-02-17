@@ -23,7 +23,7 @@ const (
 	insert = `INSERT INTO public.student(
 	id, first_name, last_name, email, general_info, created_at, updated_at)
 	VALUES ($1, $2, $3, $4, $5, $6, $7);`
-	selectByID = `SELECT id, first_name, last_name, email, general_info, school, created_at, updated_at
+	selectByID = `SELECT id, first_name, last_name, email, general_info, school, current_classes, classes_taken, created_at, updated_at
 	FROM public.student WHERE id=$1;`
 	update = `UPDATE public.student
 	SET first_name=$2, last_name=$3, email=$4, general_info=$5, created_at=$6, updated_at=$7
@@ -152,8 +152,11 @@ func (r *studentRepository) UpdateCurrentClass(ctx context.Context, st *domain.S
 		return errors.NewInternalServerError(err.Error())
 	}
 	defer tx.Rollback(ctx)
-
-	_, err = tx.Exec(ctx, updateCurrentClasses, st.CurrentClasses, time.Now(), st.ID)
+	_, err = tx.Exec(ctx, updateCurrentClasses, st.CurrentClasses , time.Now(), st.ID)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	err = tx.Commit(ctx)
 	if err != nil {
 		return errors.NewInternalServerError(err.Error())
 	}
@@ -168,11 +171,14 @@ func (r *studentRepository) UpdateClassesTaken(ctx context.Context, st *domain.S
 	}
 	defer tx.Rollback(ctx)
 
-	_, err = tx.Exec(ctx, updateClassesTaken, st.ID, time.Now(), st.ID)
+	_, err = tx.Exec(ctx, updateClassesTaken, st.ClassesTaken, time.Now(), st.ID)
 	if err != nil {
 		return errors.NewInternalServerError(err.Error())
 	}
-
+	err = tx.Commit(ctx)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
 	return nil
 }
 
@@ -183,12 +189,16 @@ func (r *studentRepository) CompleteClass(ctx context.Context, st *domain.Studen
 	}
 	defer tx.Rollback(ctx)
 
-	_, err = tx.Exec(ctx, updateClassesTaken, st.ID, time.Now(), st.ID)
+	_, err = tx.Exec(ctx, updateClassesTaken, st.ClassesTaken, time.Now(), st.ID)
 	if err != nil {
 		return errors.NewInternalServerError(err.Error())
 	}
 
-	_, err = tx.Exec(ctx, updateCurrentClasses, st.ID, time.Now(), st.ID)
+	_, err = tx.Exec(ctx, updateCurrentClasses, st.CurrentClasses, time.Now(), st.ID)
+	if err != nil {
+		return errors.NewInternalServerError(err.Error())
+	}
+	err = tx.Commit(ctx)
 	if err != nil {
 		return errors.NewInternalServerError(err.Error())
 	}

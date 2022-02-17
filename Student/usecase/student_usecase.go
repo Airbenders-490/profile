@@ -226,7 +226,8 @@ func (s *studentUseCase) CompleteClass(c context.Context, id string, st *domain.
 	if reflect.DeepEqual(existingStudent, &domain.Student{}) {
 		return errors.NewNotFoundError(fmt.Sprintf(errorMessage, id))
 	}
+	completedClasses := st.CurrentClasses
 	st.CurrentClasses = removeClasses(existingStudent.CurrentClasses, st.CurrentClasses)
-	st.ClassesTaken = append(existingStudent.ClassesTaken, st.CurrentClasses...)
+	st.ClassesTaken = append(existingStudent.ClassesTaken, completedClasses...)
 	return s.studentRepository.CompleteClass(ctx, st)
 }
