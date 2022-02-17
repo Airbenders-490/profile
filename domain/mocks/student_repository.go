@@ -73,3 +73,45 @@ func (m *StudentRepositoryMock) Delete(ctx context.Context, id string) error {
 	}
 	return r0
 }
+
+// CompleteClass provides a mock function with given fields: c, st
+func (m *StudentRepositoryMock) CompleteClass(c context.Context, st *domain.Student) error {
+	ret := m.Called(c, st)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.Student) error); ok {
+		r0 = rf(c, st)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UpdateClassesTaken provides a mock function with given fields: ctx, st
+func (m *StudentRepositoryMock) UpdateClassesTaken(ctx context.Context, st *domain.Student) error {
+	ret := m.Called(ctx, st)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.Student) error); ok {
+		r0 = rf(ctx, st)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UpdateCurrentClass provides a mock function with given fields: ctx, st
+func (m *StudentRepositoryMock) UpdateCurrentClass(ctx context.Context, st *domain.Student) error {
+	ret := m.Called(ctx, st)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.Student) error); ok {
+		r0 = rf(ctx, st)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
