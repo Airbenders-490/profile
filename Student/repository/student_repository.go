@@ -93,7 +93,7 @@ func (r *studentRepository) GetByID(ctx context.Context, id string) (*domain.Stu
 		//student.UpdatedAt = values[7].(time.Time)
 		var school domain.School
 		err = rows.Scan(&student.ID, &student.FirstName, &student.LastName, &student.Email, &student.GeneralInfo,
-			&school.ID, &student.CreatedAt, &student.UpdatedAt)
+			&school.ID, &student.CurrentClasses, &student.ClassesTaken, &student.CreatedAt, &student.UpdatedAt)
 		if err != nil {
 			err = errors.NewInternalServerError(err.Error())
 			return nil, err
@@ -146,7 +146,7 @@ func (r *studentRepository) Delete(ctx context.Context, id string) error {
 	return nil
 }
 
-func (r *studentRepository) AddCurrentClass(ctx context.Context, st *domain.Student) error {
+func (r *studentRepository) UpdateCurrentClass(ctx context.Context, st *domain.Student) error {
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
 		return errors.NewInternalServerError(err.Error())
@@ -161,7 +161,7 @@ func (r *studentRepository) AddCurrentClass(ctx context.Context, st *domain.Stud
 	return nil
 }
 
-func (r *studentRepository) AddClassesTaken(ctx context.Context, st *domain.Student) error {
+func (r *studentRepository) UpdateClassesTaken(ctx context.Context, st *domain.Student) error {
 	tx, err := r.db.Begin(ctx)
 	if err != nil {
 		return errors.NewInternalServerError(err.Error())
