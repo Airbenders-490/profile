@@ -83,22 +83,7 @@ func (m *StudentUseCase) Delete(ctx context.Context, id string) error {
 	return r0
 }
 
-// AddClassesTaken provides a mock function with given fields: c, id, st
-func (m *StudentUseCase) AddClassesTaken(c context.Context, id string, st *domain.Student) error {
-	ret := m.Called(c, id, st)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, *domain.Student) error); ok {
-		r0 = rf(c, id, st)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// AddCurrentClass provides a mock function with given fields: c, id, st
-func (m *StudentUseCase) AddCurrentClass(c context.Context, id string, st *domain.Student) error {
+func (m *StudentUseCase) AddClasses(c context.Context, id string, st *domain.Student) error {
 	ret := m.Called(c, id, st)
 
 	var r0 error
@@ -124,22 +109,8 @@ func (m *StudentUseCase) CompleteClass(c context.Context, id string, st *domain.
 
 	return r0
 }
-// RemoveClassesTaken provides a mock function with given fields: c, id, st
-func (m *StudentUseCase) RemoveClassesTaken(c context.Context, id string, st *domain.Student) error {
-	ret := m.Called(c, id, st)
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, *domain.Student) error); ok {
-		r0 = rf(c, id, st)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// RemoveCurrentClass provides a mock function with given fields: c, id, st
-func (m *StudentUseCase) RemoveCurrentClass(c context.Context, id string, st *domain.Student) error {
+func (m *StudentUseCase) RemoveClasses(c context.Context, id string, st *domain.Student) error {
 	ret := m.Called(c, id, st)
 
 	var r0 error

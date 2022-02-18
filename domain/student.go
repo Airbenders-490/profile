@@ -26,10 +26,8 @@ type StudentUseCase interface {
 	GetByID(ctx context.Context, id string) (*Student, error)
 	Update(ctx context.Context, id string, st *Student) (*Student, error)
 	Delete(ctx context.Context, id string) error
-	AddCurrentClass(c context.Context, id string, st *Student) error
-	AddClassesTaken(c context.Context, id string, st *Student) error
-	RemoveCurrentClass(c context.Context, id string, st *Student) error
-	RemoveClassesTaken(c context.Context, id string, st *Student) error
+	AddClasses(c context.Context, id string, st *Student) error
+	RemoveClasses(c context.Context, id string, st *Student) error
 	CompleteClass(c context.Context, id string, st *Student) error
 }
 
@@ -39,9 +37,5 @@ type StudentRepository interface {
 	GetByID(ctx context.Context, id string) (*Student, error)
 	Update(ctx context.Context, st *Student) error
 	Delete(ctx context.Context, id string) error
-	UpdateCurrentClass(ctx context.Context, st *Student) error
-	UpdateClassesTaken(ctx context.Context, st *Student) error
-	//RemoveCurrentClass(c context.Context, st *Student) error
-	//RemoveClassesTaken(c context.Context, st *Student) error
-	CompleteClass(c context.Context, st *Student) error
+	UpdateClasses(ctx context.Context, st *Student) error
 }
