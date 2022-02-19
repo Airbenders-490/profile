@@ -74,24 +74,8 @@ func (h *StudentHandler) Create(c *gin.Context) {
 
 // Update changes the student record. Ensures the student is the same as logged in, and then makes changes as requested
 func (h *StudentHandler) Update(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
-		c.JSON(http.StatusBadRequest, errors.NewBadRequestError(errorMessage))
-		return
-	}
-
-	key, _ := c.Get("loggedID")
-	loggedID, _ := key.(string)
-
-	if loggedID != id {
-		c.JSON(http.StatusBadRequest, errors.NewUnauthorizedError("Can only update for self"))
-		return
-	}
-
-	var student domain.Student
-	err := c.ShouldBindJSON(&student)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid data"))
+	id, student, err, done := isLoggedIDAuthorized(c)
+	if done {
 		return
 	}
 
@@ -144,24 +128,8 @@ func (h *StudentHandler) Delete(c *gin.Context) {
 }
 
 func (h *StudentHandler) AddClasses(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
-		c.JSON(http.StatusBadRequest, errors.NewBadRequestError(errorMessage))
-		return
-	}
-
-	key, _ := c.Get("loggedID")
-	loggedID, _ := key.(string)
-
-	if loggedID != id {
-		c.JSON(http.StatusBadRequest, errors.NewUnauthorizedError("Can only update for self"))
-		return
-	}
-
-	var student domain.Student
-	err := c.ShouldBindJSON(&student)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid data"))
+	id, student, err, done := isLoggedIDAuthorized(c)
+	if done {
 		return
 	}
 
@@ -178,28 +146,12 @@ func (h *StudentHandler) AddClasses(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, httputils.NewResponse("student updated"))
+	c.JSON(http.StatusOK, httputils.NewResponse("Added classes to current classes/classes taken"))
 }
 
 func (h *StudentHandler) RemoveClasses(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
-		c.JSON(http.StatusBadRequest, errors.NewBadRequestError(errorMessage))
-		return
-	}
-
-	key, _ := c.Get("loggedID")
-	loggedID, _ := key.(string)
-
-	if loggedID != id {
-		c.JSON(http.StatusBadRequest, errors.NewUnauthorizedError("Can only update for self"))
-		return
-	}
-
-	var student domain.Student
-	err := c.ShouldBindJSON(&student)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid data"))
+	id, student, err, done := isLoggedIDAuthorized(c)
+	if done {
 		return
 	}
 
@@ -216,28 +168,12 @@ func (h *StudentHandler) RemoveClasses(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, httputils.NewResponse("student updated"))
+	c.JSON(http.StatusOK, httputils.NewResponse("Removed classes from current classes/classes taken"))
 }
 
-func (h *StudentHandler) CompleteClass(c *gin.Context) {
-	id := c.Param("id")
-	if id == "" {
-		c.JSON(http.StatusBadRequest, errors.NewBadRequestError(errorMessage))
-		return
-	}
-
-	key, _ := c.Get("loggedID")
-	loggedID, _ := key.(string)
-
-	if loggedID != id {
-		c.JSON(http.StatusBadRequest, errors.NewUnauthorizedError("Can only update for self"))
-		return
-	}
-
-	var student domain.Student
-	err := c.ShouldBindJSON(&student)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid data"))
+func (h *StudentHandler) CompleteAllClasses(c *gin.Context) {
+	id, student, err, done := isLoggedIDAuthorized(c)
+	if done {
 		return
 	}
 
@@ -254,5 +190,29 @@ func (h *StudentHandler) CompleteClass(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, httputils.NewResponse("student updated"))
+	c.JSON(http.StatusOK, httputils.NewResponse("Added classes to Completed Classes"))
+}
+
+func isLoggedIDAuthorized(c *gin.Context) (string, domain.Student, error, bool) {
+	id := c.Param("id")
+	if id == "" {
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError(errorMessage))
+		return "", domain.Student{}, nil, true
+	}
+
+	key, _ := c.Get("loggedID")
+	loggedID, _ := key.(string)
+
+	if loggedID != id {
+		c.JSON(http.StatusBadRequest, errors.NewUnauthorizedError("Can only update for self"))
+		return "", domain.Student{}, nil, true
+	}
+
+	var student domain.Student
+	err := c.ShouldBindJSON(&student)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("invalid data"))
+		return "", domain.Student{}, nil, true
+	}
+	return id, student, err, false
 }
