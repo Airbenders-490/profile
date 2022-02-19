@@ -31,9 +31,6 @@ const (
 	deleteStudent = `DELETE FROM public.student
 	WHERE id=$1;`
 	getSchoolName = `SELECT name FROM school WHERE ID=$1`
-	//addEnrolledClass = `UPDATE public.student SET current_classes=array_append(current_classes, $1), updated_at=$2 WHERE id=$3;`
-	//updateCurrentClasses = `UPDATE public.student SET current_classes=$1, updated_at=$2 WHERE id = $3;`
-	//updateClassesTaken = `UPDATE public.student SET classes_taken=$1, updated_at=$2 WHERE id=$3;`
 	updateClasses = `UPDATE public.student SET current_classes=$1, classes_taken=$2, updated_at=$3 WHERE id = $4;`
 )
 
@@ -68,30 +65,6 @@ func (r *studentRepository) GetByID(ctx context.Context, id string) (*domain.Stu
 
 	var student domain.Student
 	for rows.Next() {
-		// todo: remove dead code after confirming new one works
-		//values, err := rows.Values()
-		//if err != nil {
-		//	err = errors.NewInternalServerError(err.Error())
-		//	return nil, err
-		//}
-		//
-		//student.ID = values[0].(string)
-		//student.FirstName = values[1].(string)
-		//student.LastName = values[2].(string)
-		//student.Email = values[3].(string)
-		//student.GeneralInfo = values[4].(string)
-		//if values[5] != nil {
-		//	student.School = &domain.School{ID: values[5].(string)}
-		//	row := r.db.QueryRow(ctx, getSchoolName, student.School.ID)
-		//	var name string
-		//	err = row.Scan(&name)
-		//	if err != nil {
-		//		log.Println("unable to get the school name")
-		//	}
-		//	student.School.Name = name
-		//}
-		//student.CreatedAt = values[6].(time.Time)
-		//student.UpdatedAt = values[7].(time.Time)
 		var school domain.School
 		err = rows.Scan(&student.ID, &student.FirstName, &student.LastName, &student.Email, &student.GeneralInfo,
 			&school.ID, &student.CurrentClasses, &student.ClassesTaken, &student.CreatedAt, &student.UpdatedAt)
