@@ -459,7 +459,7 @@ func TestStudentHandlerCompleteClass(t *testing.T)  {
 		mockUseCase.On("CompleteClass", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType(studentType)).
 			Return(nil).Once()
 		reader := strings.NewReader(string(postBody))
-		reqFound := httptest.NewRequest("PUT", fmt.Sprintf("/api/completeClass/%s", mockStudent.ID), reader)
+		reqFound := httptest.NewRequest("PUT", fmt.Sprintf("/api/completeClasses/%s", mockStudent.ID), reader)
 		reqFound.Header.Set("id", mockStudent.ID)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
@@ -469,7 +469,7 @@ func TestStudentHandlerCompleteClass(t *testing.T)  {
 
 	t.Run("invalid-data-type", func(t *testing.T) {
 		reader := strings.NewReader("invalid body")
-		reqFound := httptest.NewRequest("PUT", fmt.Sprintf("/api/completeClass/%s", mockStudent.ID), reader)
+		reqFound := httptest.NewRequest("PUT", fmt.Sprintf("/api/completeClasses/%s", mockStudent.ID), reader)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
 		assert.Equal(t, 400, w.Code)
@@ -483,7 +483,7 @@ func TestStudentHandlerCompleteClass(t *testing.T)  {
 		mockUseCase.On("CompleteClass", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType(studentType)).
 			Return(restErr).Once()
 		reader := strings.NewReader(string(postBody))
-		reqFound := httptest.NewRequest("PUT", fmt.Sprintf("/api/completeClass/%s", mockStudent.ID), reader)
+		reqFound := httptest.NewRequest("PUT", fmt.Sprintf("/api/completeClasses/%s", mockStudent.ID), reader)
 		reqFound.Header.Set("id", mockStudent.ID)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
@@ -497,7 +497,7 @@ func TestStudentHandlerCompleteClass(t *testing.T)  {
 		mockUseCase.On("CompleteClass", mock.Anything, mock.AnythingOfType("string"), mock.AnythingOfType(studentType)).
 			Return(errors.New("error")).Once()
 		reader := strings.NewReader(string(postBody))
-		reqFound := httptest.NewRequest("PUT", fmt.Sprintf("/api/completeClass/%s", mockStudent.ID), reader)
+		reqFound := httptest.NewRequest("PUT", fmt.Sprintf("/api/completeClasses/%s", mockStudent.ID), reader)
 		reqFound.Header.Set("id", mockStudent.ID)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
