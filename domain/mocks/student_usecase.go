@@ -82,3 +82,43 @@ func (m *StudentUseCase) Delete(ctx context.Context, id string) error {
 	}
 	return r0
 }
+
+func (m *StudentUseCase) AddClasses(c context.Context, id string, st *domain.Student) error {
+	ret := m.Called(c, id, st)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, *domain.Student) error); ok {
+		r0 = rf(c, id, st)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// CompleteClass provides a mock function with given fields: c, id, st
+func (m *StudentUseCase) CompleteClass(c context.Context, id string, st *domain.Student) error {
+	ret := m.Called(c, id, st)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, *domain.Student) error); ok {
+		r0 = rf(c, id, st)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+func (m *StudentUseCase) RemoveClasses(c context.Context, id string, st *domain.Student) error {
+	ret := m.Called(c, id, st)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, *domain.Student) error); ok {
+		r0 = rf(c, id, st)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}

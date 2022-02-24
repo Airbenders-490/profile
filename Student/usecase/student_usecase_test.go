@@ -235,3 +235,162 @@ func TestDelete(t *testing.T) {
 		mockStudentRepo.AssertExpectations(t)
 	})
 }
+
+func TestAddClasses(t *testing.T) {
+	mockStudentRepo := new(mocks.StudentRepositoryMock)
+	mockReviewRepo := new(mocks.ReviewRepositoryMock)
+	var mockStudent domain.Student
+	faker.FakeData(&mockStudent)
+
+	t.Run("success", func(t *testing.T) {
+		mockStudentRepo.
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
+			Return(&mockStudent, nil).
+			Once()
+		mockStudentRepo.
+			On("UpdateClasses", mock.Anything, mock.AnythingOfType("*domain.Student")).
+			Return(nil).
+			Once()
+
+		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
+		err := u.AddClasses(context.TODO(), mockStudent.ID, &mockStudent)
+
+		assert.NoError(t, err)
+
+		mockStudentRepo.AssertExpectations(t)
+	})
+
+	t.Run("err-no-student-exists", func(t *testing.T) {
+		mockStudentRepo.
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
+			Return(nil, errors.New("error")).
+			Once()
+
+		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
+		err := u.AddClasses(context.TODO(), mockStudent.ID, &mockStudent)
+
+		assert.Error(t, err)
+
+		mockStudentRepo.AssertExpectations(t)
+	})
+
+	t.Run("err-empty-student", func(t *testing.T) {
+		mockStudentRepo.
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
+			Return(&domain.Student{}, nil).
+			Once()
+
+		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
+		err := u.AddClasses(context.TODO(), mockStudent.ID, &mockStudent)
+
+		assert.Error(t, err)
+
+		mockStudentRepo.AssertExpectations(t)
+	})
+}
+
+func TestRemoveClasses (t *testing.T) {
+	mockStudentRepo := new(mocks.StudentRepositoryMock)
+	mockReviewRepo := new(mocks.ReviewRepositoryMock)
+	var mockStudent domain.Student
+	faker.FakeData(&mockStudent)
+
+	t.Run("success", func(t *testing.T) {
+		mockStudentRepo.
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
+			Return(&mockStudent, nil).
+			Once()
+		mockStudentRepo.
+			On("UpdateClasses", mock.Anything, mock.AnythingOfType("*domain.Student")).
+			Return(nil).
+			Once()
+
+		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
+		err := u.RemoveClasses(context.TODO(), mockStudent.ID, &mockStudent)
+
+		assert.NoError(t, err)
+
+		mockStudentRepo.AssertExpectations(t)
+	})
+
+	t.Run("err-no-student-exists", func(t *testing.T) {
+		mockStudentRepo.
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
+			Return(nil, errors.New("error")).
+			Once()
+
+		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
+		err := u.RemoveClasses(context.TODO(), mockStudent.ID, &mockStudent)
+
+		assert.Error(t, err)
+
+		mockStudentRepo.AssertExpectations(t)
+	})
+
+	t.Run("err-empty-student", func(t *testing.T) {
+		mockStudentRepo.
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
+			Return(&domain.Student{}, nil).
+			Once()
+
+		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
+		err := u.RemoveClasses(context.TODO(), mockStudent.ID, &mockStudent)
+
+		assert.Error(t, err)
+
+		mockStudentRepo.AssertExpectations(t)
+	})
+}
+
+func TestCompleteClass (t *testing.T) {
+	mockStudentRepo := new(mocks.StudentRepositoryMock)
+	mockReviewRepo := new(mocks.ReviewRepositoryMock)
+	var mockStudent domain.Student
+	faker.FakeData(&mockStudent)
+
+	t.Run("success", func(t *testing.T) {
+		mockStudentRepo.
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
+			Return(&mockStudent, nil).
+			Once()
+		mockStudentRepo.
+			On("UpdateClasses", mock.Anything, mock.AnythingOfType("*domain.Student")).
+			Return(nil).
+			Once()
+
+		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
+		err := u.CompleteClass(context.TODO(), mockStudent.ID, &mockStudent)
+
+		assert.NoError(t, err)
+
+		mockStudentRepo.AssertExpectations(t)
+	})
+
+	t.Run("err-no-student-exists", func(t *testing.T) {
+		mockStudentRepo.
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
+			Return(nil, errors.New("error")).
+			Once()
+
+		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
+		err := u.CompleteClass(context.TODO(), mockStudent.ID, &mockStudent)
+
+		assert.Error(t, err)
+
+		mockStudentRepo.AssertExpectations(t)
+	})
+
+	t.Run("err-empty-student", func(t *testing.T) {
+		mockStudentRepo.
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
+			Return(&domain.Student{}, nil).
+			Once()
+
+		u := usecase.NewStudentUseCase(mockStudentRepo, mockReviewRepo, time.Second)
+		err := u.CompleteClass(context.TODO(), mockStudent.ID, &mockStudent)
+
+		assert.Error(t, err)
+
+		mockStudentRepo.AssertExpectations(t)
+	})
+}

@@ -21,7 +21,7 @@ func TestGetByID(t *testing.T) {
 	defer ctrl.Finish()
 
 	mockPool := pgxpoolmock.NewMockPgxPool(ctrl)
-	columns := []string{"id", "first_name", "last_name", "email", "general_info", "school", "created_at", "updated_at"}
+	columns := []string{"id", "first_name", "last_name", "email", "general_info", "school", "current_classes", "classes_taken", "created_at", "updated_at"}
 
 	t.Run("success-with-nil-school", func(t *testing.T) {
 		expectedStudent := domain.Student{
@@ -31,6 +31,8 @@ func TestGetByID(t *testing.T) {
 			Email:       "d",
 			GeneralInfo: "e",
 			School:      nil,
+			CurrentClasses: nil,
+			ClassesTaken: nil,
 			CreatedAt:   time.Now(),
 			UpdatedAt:   time.Now(),
 			Reviews:     nil,
@@ -42,6 +44,8 @@ func TestGetByID(t *testing.T) {
 			expectedStudent.Email,
 			expectedStudent.GeneralInfo,
 			nil,
+			expectedStudent.CurrentClasses,
+			expectedStudent.ClassesTaken,
 			expectedStudent.CreatedAt,
 			expectedStudent.UpdatedAt).ToPgxRows()
 		mockPool.EXPECT().Query(gomock.Any(), gomock.Any(), gomock.AssignableToTypeOf("string")).Return(pgxRows, nil)
@@ -60,6 +64,8 @@ func TestGetByID(t *testing.T) {
 			Email:       "d",
 			GeneralInfo: "e",
 			School:      &domain.School{ID: "something"},
+			CurrentClasses: nil,
+			ClassesTaken: nil,
 			CreatedAt:   time.Now(),
 			UpdatedAt:   time.Now(),
 			Reviews:     nil,
@@ -71,6 +77,8 @@ func TestGetByID(t *testing.T) {
 			expectedStudent.Email,
 			expectedStudent.GeneralInfo,
 			expectedStudent.School.ID,
+			expectedStudent.CurrentClasses,
+			expectedStudent.ClassesTaken,
 			expectedStudent.CreatedAt,
 			expectedStudent.UpdatedAt).ToPgxRows()
 		mockPool.EXPECT().Query(gomock.Any(), gomock.Any(), gomock.AssignableToTypeOf("string")).Return(pgxRows, nil)

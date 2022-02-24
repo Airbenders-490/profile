@@ -73,3 +73,16 @@ func (m *StudentRepositoryMock) Delete(ctx context.Context, id string) error {
 	}
 	return r0
 }
+
+func (m *StudentRepositoryMock) UpdateClasses(c context.Context, st *domain.Student) error {
+	ret := m.Called(c, st)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.Student) error); ok {
+		r0 = rf(c, st)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}

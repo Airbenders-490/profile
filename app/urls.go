@@ -16,6 +16,9 @@ func mapStudentURLs(m Middleware, h *studentHttp.StudentHandler, router *gin.Eng
 	authorized.POST("/student", h.Create)
 	authorized.PUT(pathStudentID, h.Update)
 	authorized.DELETE(pathStudentID, h.Delete)
+	authorized.PUT("/addClasses/:id", h.AddClasses)
+	authorized.PUT("/removeClasses/:id", h.RemoveClasses)
+	authorized.PUT("/completeClasses/:id", h.CompleteAllClasses)
 }
 
 func mapSchoolURLs(m Middleware, h *schoolHttp.SchoolHandler, r *gin.Engine) {
