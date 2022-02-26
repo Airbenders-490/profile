@@ -247,10 +247,25 @@ func (s *studentUseCase) AddClasses(c context.Context, id string, st *domain.Stu
 		return errors.NewNotFoundError(fmt.Sprintf(errorMessage, id))
 	}
 
-	st.CurrentClasses = append(existingStudent.CurrentClasses, st.CurrentClasses...)
-	st.ClassesTaken = append(existingStudent.ClassesTaken, st.ClassesTaken...)
+	st.CurrentClasses = removeDuplicates(append(existingStudent.CurrentClasses, st.CurrentClasses...))
+	st.ClassesTaken = removeDuplicates(append(existingStudent.ClassesTaken, st.ClassesTaken...))
 	return s.studentRepository.UpdateClasses(ctx, st)
 }
+
+func removeDuplicates(slice []string) []string {
+	uniques := make(map[string]bool)
+	ret := []string{}
+
+	for _, el := range slice {
+		if _, value := uniques[el]; !value {
+			uniques[el] = true
+			ret = append(ret, el)
+		}
+	}
+
+	return ret
+}
+
 func (s *studentUseCase) RemoveClasses(c context.Context, id string, st *domain.Student) error {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
 	defer cancel()
@@ -298,6 +313,6 @@ func (s *studentUseCase) CompleteClass(c context.Context, id string, st *domain.
 	}
 	completedClasses := st.CurrentClasses
 	st.CurrentClasses = removeClasses(existingStudent.CurrentClasses, st.CurrentClasses)
-	st.ClassesTaken = append(existingStudent.ClassesTaken, completedClasses...)
+	st.ClassesTaken = removeDuplicates(append(existingStudent.ClassesTaken, completedClasses...))
 	return s.studentRepository.UpdateClasses(ctx, st)
 }
