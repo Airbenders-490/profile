@@ -301,3 +301,16 @@ func (s *studentUseCase) CompleteClass(c context.Context, id string, st *domain.
 	st.ClassesTaken = append(existingStudent.ClassesTaken, completedClasses...)
 	return s.studentRepository.UpdateClasses(ctx, st)
 }
+
+func (s *studentUseCase) SearchStudents(c context.Context, st *domain.Student) ([]domain.Student, error) {
+	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
+	defer cancel()
+
+	retrievedStudents, err := s.studentRepository.SearchStudents(ctx, st)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return retrievedStudents, nil
+}

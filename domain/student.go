@@ -29,6 +29,7 @@ type StudentUseCase interface {
 	AddClasses(c context.Context, id string, st *Student) error
 	RemoveClasses(c context.Context, id string, st *Student) error
 	CompleteClass(c context.Context, id string, st *Student) error
+	SearchStudents(ctx context.Context, st *Student) ([]Student, error)
 	CreateStudentTopic()
 	UpdateStudentTopic()
 	DeleteStudentTopic()
@@ -41,4 +42,5 @@ type StudentRepository interface {
 	Update(ctx context.Context, st *Student) error
 	Delete(ctx context.Context, id string) error
 	UpdateClasses(ctx context.Context, st *Student) error
+	SearchStudents(ctx context.Context, st *Student) ([]Student, error)
 }

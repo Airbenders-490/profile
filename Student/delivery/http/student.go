@@ -216,3 +216,24 @@ func isLoggedIDAuthorized(c *gin.Context) (string, domain.Student, error, bool) 
 	}
 	return id, student, err, false
 }
+
+func (h *StudentHandler) SearchStudents(c *gin.Context) {
+	ctx := c.Request.Context()
+	var student domain.Student
+	student.FirstName = c.Query("firstName")
+	student.LastName= c.Query("lastName")
+	student.CurrentClasses = c.QueryArray("classes")
+
+	students, err := h.UseCase.SearchStudents(ctx, &student)
+	if err != nil {
+		switch v := err.(type) {
+		case *errors.RestError:
+			c.JSON(v.Code, v)
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, errors.NewInternalServerError(err.Error()))
+			return
+		}
+	}
+	c.JSON(200, students)
+}

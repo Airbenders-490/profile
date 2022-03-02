@@ -134,3 +134,24 @@ func (m *StudentUseCase) RemoveClasses(c context.Context, id string, st *domain.
 
 	return r0
 }
+func (m *StudentUseCase) SearchStudents(ctx context.Context, st *domain.Student) ([]domain.Student, error) {
+	ret := m.Called(ctx, st)
+
+	var r0 []domain.Student
+	if rf, ok := ret.Get(0).(func(context.Context, *domain.Student) []domain.Student); ok {
+		r0 = rf(ctx, st)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]domain.Student)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, *domain.Student) error); ok {
+		r1 = rf(ctx, st)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
