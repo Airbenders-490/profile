@@ -93,7 +93,7 @@ func (s *studentUseCase) CreateStudentTopic() {
 		}
 		err = s.messagingManager.Ch.Publish(
 			"profile",
-			"profile.Created",
+			"profile.created",
 			false,
 			false,
 			amqp.Publishing{
