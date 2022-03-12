@@ -416,3 +416,48 @@ func TestCompleteClass (t *testing.T) {
 		mockStudentRepo.AssertExpectations(t)
 	})
 }
+
+func TestSearchStudents(t *testing.T) {
+	mockStudentRepo := new(mocks.StudentRepositoryMock)
+	mockReviewRepo := new(mocks.ReviewRepositoryMock)
+	var mockStudent domain.Student
+	faker.FakeData(&mockStudent)
+	var retrievedStudents []domain.Student
+	faker.FakeData(&retrievedStudents)
+
+
+	t.Run("case success", func(t *testing.T) {
+		mockStudentRepo.
+			On("SearchStudents", mock.Anything, mock.AnythingOfType("*domain.Student")).
+			Return(retrievedStudents, nil).
+			Once()
+		mockReviewRepo.
+			On("GetReviewsFor", mock.Anything, mock.AnythingOfType("string")).
+			Return([]domain.Review{domain.Review{}, domain.Review{}}, nil)
+
+		u := usecase.NewStudentUseCase(nil, mockStudentRepo, mockReviewRepo, time.Second)
+
+		student, err := u.SearchStudents(context.TODO(), &mockStudent)
+
+		assert.NoError(t, err)
+		assert.NotNil(t, student)
+
+		mockStudentRepo.AssertExpectations(t)
+	})
+
+	t.Run("internal error", func(t *testing.T) {
+		mockStudentRepo.
+			On("SearchStudents", mock.Anything, mock.AnythingOfType("*domain.Student")).
+			Return(nil, errors.New("error retrieving students")).
+			Once()
+		u := usecase.NewStudentUseCase(nil, mockStudentRepo, mockReviewRepo, time.Second)
+
+		student, err := u.SearchStudents(context.TODO(), &mockStudent)
+
+		assert.Error(t, err)
+		assert.True(t, reflect.ValueOf(student).IsNil())
+
+		mockStudentRepo.AssertExpectations(t)
+	})
+
+}

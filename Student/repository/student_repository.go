@@ -141,6 +141,7 @@ func (r *studentRepository) UpdateClasses(ctx context.Context, st *domain.Studen
 
 	return nil
 }
+
 func (r *studentRepository) SearchStudents(ctx context.Context, st *domain.Student) ([]domain.Student, error) {
 	rows, err := r.db.Query(ctx, search, st.FirstName + "%", st.LastName + "%", st.CurrentClasses)
 	if err != nil {
@@ -152,18 +153,21 @@ func (r *studentRepository) SearchStudents(ctx context.Context, st *domain.Stude
 	var students []domain.Student
 	for rows.Next() {
 		var student domain.Student
-		var school domain.School
+		var schoolID *string
 		err = rows.Scan(&student.ID, &student.FirstName, &student.LastName, &student.Email, &student.GeneralInfo,
-			&school.ID, &student.CurrentClasses, &student.ClassesTaken, &student.CreatedAt, &student.UpdatedAt)
+			&schoolID, &student.CurrentClasses, &student.ClassesTaken, &student.CreatedAt, &student.UpdatedAt)
 		if err != nil {
 			err = errors.NewInternalServerError(err.Error())
 			return nil, err
 		}
-		if school.ID != "" {
-			student.School = &school
+		if schoolID != nil {
+			student.School = &domain.School{
+				ID: *schoolID,
+			}
 		}
 		students = append(students, student)
 	}
 
 	return students, nil
 }
+
