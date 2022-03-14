@@ -316,3 +316,23 @@ func (s *studentUseCase) CompleteClass(c context.Context, id string, st *domain.
 	st.ClassesTaken = removeDuplicates(append(existingStudent.ClassesTaken, completedClasses...))
 	return s.studentRepository.UpdateClasses(ctx, st)
 }
+
+func (s *studentUseCase) SearchStudents(c context.Context, st *domain.Student) ([]domain.Student, error) {
+	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
+	defer cancel()
+
+	retrievedStudents, err := s.studentRepository.SearchStudents(ctx, st)
+
+	if err != nil {
+		return nil, err
+	}
+
+	for i := range retrievedStudents {
+		reviews, err := s.reviewRepository.GetReviewsFor(ctx, retrievedStudents[i].ID)
+		if err != nil {
+			log.Printf("Can't get the reviews for %s.", retrievedStudents[i].ID)
+		}
+		retrievedStudents[i].Reviews = reviews
+	}
+	return retrievedStudents, nil
+}

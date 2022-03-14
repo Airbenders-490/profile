@@ -505,3 +505,51 @@ func TestStudentHandlerCompleteClass(t *testing.T)  {
 		mockUseCase.AssertExpectations(t)
 	})
 }
+
+func TestStudentHandlerSearchStudents(t *testing.T) {
+	mockUseCase := new(mocks.StudentUseCase)
+	h := http.NewStudentHandler(mockUseCase)
+	mw := new(mocks.MiddlewareMock)
+	r := app.Server(h, nil, nil, nil, mw)
+	var mockRetrievedStudents []domain.Student
+	err := faker.FakeData(&mockRetrievedStudents)
+	assert.NoError(t, err)
+
+	t.Run("success", func(t *testing.T){
+		mockUseCase.On("SearchStudents", mock.Anything, mock.Anything).
+			Return(mockRetrievedStudents, nil).Once()
+		reqFound := httptest.NewRequest("GET", "/api/search/?firstName=Test&lastname=Smith&classes=class", nil)
+
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, reqFound)
+		assert.Equal(t, 200, w.Code)
+		mockUseCase.AssertExpectations(t)
+
+	})
+
+	t.Run("rest error", func(t *testing.T) {
+		restErr := e.NewConflictError("error occurred")
+		mockUseCase.On("SearchStudents", mock.Anything, mock.Anything).
+			Return(nil, restErr).Once()
+
+		reqFound := httptest.NewRequest("GET", "/api/search/?firstName=Test&lastname=Smith&classes=class", nil)
+
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, reqFound)
+		assert.Equal(t, restErr.Code, w.Code)
+		mockUseCase.AssertExpectations(t)
+	})
+
+	t.Run("usecase-default-error", func(t *testing.T) {
+		mockUseCase.On("SearchStudents", mock.Anything, mock.Anything).
+			Return(nil, errors.New("internal error")).Once()
+
+		reqFound := httptest.NewRequest("GET", "/api/search/?firstName=Test&lastname=Smith&classes=class", nil)
+
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, reqFound)
+		assert.Equal(t, 500, w.Code)
+		mockUseCase.AssertExpectations(t)
+	})
+
+}
