@@ -27,7 +27,7 @@ func mapSchoolURLs(m Middleware, h *schoolHttp.SchoolHandler, r *gin.Engine) {
 	authorized := r.Group("/api")
 	authorized.Use(m.AuthMiddleware())
 	authorized.GET("/school", h.SearchStudentSchool)
-	authorized.POST("/school/confirm", h.SendConfirmationMail)
+	authorized.GET("/school/confirm", h.SendConfirmationMail)
 }
 
 func mapTagURLs(h *tagHttp.TagHandler, r *gin.Engine) {
