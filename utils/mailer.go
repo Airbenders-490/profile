@@ -13,24 +13,24 @@ type Mailer interface {
 // NewSimpleMail is a constructor for Mailer interface. Returns a simpleMail struct
 func NewSimpleMail() Mailer {
 	return simpleMail{
-		from:     os.Getenv("EMAIL"),
+		from:     os.Getenv("EMAIL_FROM"),
+		user:     os.Getenv("USER"),
 		password: os.Getenv("PASSWORD"),
-		smtpHost: "smtp.gmail.com",
-		smtpPort: "587",
+		smtpHost: os.Getenv("SMTP_HOST"),
+		smtpPort: os.Getenv("SMTP_PORT"),
 	}
 }
 
 type simpleMail struct {
 	from     string
+	user 	 string
 	password string
-	// smtp.gmail.com
 	smtpHost string
-	// 587
 	smtpPort string
 }
 
 // SendSimpleMail utilizes the golang smtp library to send a simple mail
 func (s simpleMail) SendSimpleMail(to string, body []byte) error {
-	auth := smtp.PlainAuth("Stud Pal", s.from, s.password, s.smtpHost)
+	auth := smtp.PlainAuth("Stud Pal", s.user, s.password, s.smtpHost)
 	return smtp.SendMail(s.smtpHost+":"+s.smtpPort, auth, s.from, []string{to}, body)
 }
