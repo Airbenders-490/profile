@@ -15,7 +15,6 @@ import (
 	"github.com/stretchr/testify/mock"
 	"io/ioutil"
 	"net/http/httptest"
-	"strings"
 	"testing"
 )
 
@@ -161,17 +160,19 @@ func TestSchoolHandlerSendConfirmationMail(t *testing.T){
 	var mockSchool *domain.School
 	err := faker.FakeData(&mockSchool)
 	assert.NoError(t, err)
-
+	var arrMockSchool []domain.School
+	arrMockSchool = append(arrMockSchool, *mockSchool)
+	assert.NoError(t, err)
 
 	t.Run("success", func(t *testing.T) {
+		mockUseCase.
+			On("SearchSchoolByDomain", mock.Anything, mock.AnythingOfType("string")).
+			Return(arrMockSchool, nil).
+			Once()
 		mockUseCase.On("SendConfirmation", mock.Anything,
 			mock.AnythingOfType("*domain.Student"), mock.AnythingOfType("string"),
 			mock.AnythingOfType("*domain.School")).Return(nil).Once()
-		postBody, err := json.Marshal(mockSchool)
-		assert.NoError(t, err)
-		reader := strings.NewReader(string(postBody))
-		response, err := server.Client().Post(fmt.Sprintf(postSchoolEmailConfirmationPath, server.URL, testEmail),
-			applicationJSON, reader)
+		response, err := server.Client().Get(fmt.Sprintf(postSchoolEmailConfirmationPath, server.URL, testEmail))
 		assert.NoError(t, err)
 		defer response.Body.Close()
 
@@ -183,10 +184,9 @@ func TestSchoolHandlerSendConfirmationMail(t *testing.T){
 		mockUseCase.AssertExpectations(t)
 	})
 
-	t.Run("invalid-body", func(t *testing.T) {
-		reader := strings.NewReader("Invalid body")
-		response, err := server.Client().Post(fmt.Sprintf(postSchoolEmailConfirmationPath, server.URL, testEmail),
-			applicationJSON, reader)
+	t.Run("invalid-email", func(t *testing.T) {
+		invalidEmail := "sth@sth"
+		response, err := server.Client().Get(fmt.Sprintf(postSchoolEmailConfirmationPath, server.URL, invalidEmail))
 		assert.NoError(t, err)
 		defer response.Body.Close()
 
@@ -199,29 +199,20 @@ func TestSchoolHandlerSendConfirmationMail(t *testing.T){
 		var restError e.RestError
 		err = json.Unmarshal(responseBody, &restError)
 		assert.NoError(t, err)
-		assert.EqualValues(t, &restError, e.NewBadRequestError("must provide valid data"))
+		assert.EqualValues(t, &restError, e.NewBadRequestError("please provide a valid email"))
 		mockUseCase.AssertExpectations(t)
 	})
 
-	t.Run("invalid-email", func(t *testing.T) {
-		mockUseCase := new(mocks.SchoolUseCase)
-		h := http.NewSchoolHandler(mockUseCase)
-		r := app.Server(nil, h, nil, nil, middleware)
-		reqFound := httptest.NewRequest("POST", fmt.Sprintf("/api/school/confirm?email=%s", ""), nil)
-		w := httptest.NewRecorder()
-		r.ServeHTTP(w, reqFound)
-		assert.Equal(t, 400, w.Code)
-	})
-
 	t.Run("confirmation-failure", func(t *testing.T) {
+		mockUseCase.
+			On("SearchSchoolByDomain", mock.Anything, mock.AnythingOfType("string")).
+			Return(arrMockSchool, nil).
+			Once()
 		mockUseCase.On("SendConfirmation", mock.Anything,
 			mock.AnythingOfType("*domain.Student"), mock.AnythingOfType("string"),
 			mock.AnythingOfType("*domain.School")).Return(errors.New("some error")).Once()
-		postBody, err := json.Marshal(mockSchool)
 		assert.NoError(t, err)
-		reader := strings.NewReader(string(postBody))
-		response, err := server.Client().Post(fmt.Sprintf(postSchoolEmailConfirmationPath, server.URL, testEmail),
-			applicationJSON, reader)
+		response, err := server.Client().Get(fmt.Sprintf(postSchoolEmailConfirmationPath, server.URL, testEmail))
 		assert.NoError(t, err)
 		defer response.Body.Close()
 
