@@ -6,7 +6,8 @@ import (
 	"github.com/airbenders/profile/utils/httputils"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"reflect"
+	"regexp"
+	"strings"
 )
 
 // SchoolHandler struct
@@ -43,24 +44,49 @@ func (h *SchoolHandler) SearchStudentSchool(c *gin.Context) {
 	c.JSON(http.StatusOK, schools)
 }
 
+func isEmailValid(e string) bool {
+	emailRegex := regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+	return emailRegex.MatchString(e)
+}
+
+func extractSchool(email string) (bool, string) {
+	if !isEmailValid(email) {
+		return false, ""
+	}
+	return true, strings.Split(email, "@")[1]
+}
+
 // SendConfirmationMail sends email to the client for school confirmation
 func (h *SchoolHandler) SendConfirmationMail(c *gin.Context) {
 	ctx := c.Request.Context()
-	email := c.Query("email")
-	if email == "" {
-		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("must provide a valid email"))
-		return
-	}
-	var school domain.School
-	err := c.ShouldBindJSON(&school)
-	if err != nil || reflect.DeepEqual(school, domain.School{}) {
-		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("must provide valid data"))
-		return
-	}
-
 	key, _ := c.Get("loggedID")
 	loggedID, _ := key.(string)
 
+	email := c.Query("email")
+	ok, domainName := extractSchool(email)
+	if !ok {
+		c.JSON(http.StatusBadRequest, errors.NewBadRequestError("please provide a valid email"))
+		return
+	}
+
+	schools, err := h.u.SearchSchoolByDomain(ctx, domainName)
+	if err != nil {
+		switch v := err.(type) {
+		case *errors.RestError:
+			c.JSON(v.Code, v)
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, errors.NewInternalServerError(err.Error()))
+			return
+		}
+	}
+
+	if len(schools) == 0 {
+		c.JSON(http.StatusBadRequest, errors.NewNotFoundError("no school matching the domain found"))
+		return
+	}
+
+	school := schools[0]
 	err = h.u.SendConfirmation(ctx, &domain.Student{ID: loggedID}, email, &school)
 	if err != nil {
 		switch v := err.(type) {
