@@ -16,6 +16,7 @@ import (
 
 const caseSuccess = "case success"
 const reviewType = "*domain.Review"
+
 // TestEditReviewsBy function
 func TestEditReviewsBy(t *testing.T) {
 	mockStudentRepo := new(mocks.StudentRepositoryMock)
@@ -24,7 +25,6 @@ func TestEditReviewsBy(t *testing.T) {
 	faker.FakeData(&mockStudent)
 	var mockReview domain.Review
 	faker.FakeData(&mockReview)
-
 
 	t.Run(caseSuccess, func(t *testing.T) {
 

@@ -41,7 +41,6 @@ func Server(
 	return router
 }
 
-
 func failOnError(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s: %s", msg, err)
@@ -66,12 +65,12 @@ func Start() {
 
 	err = ch.ExchangeDeclare(
 		"profile", // name
-		"topic",      // type
-		true,         // durable
-		false,        // auto-deleted
-		false,        // internal
-		false,        // no-wait
-		nil,          // arguments
+		"topic",   // type
+		true,      // durable
+		false,     // auto-deleted
+		false,     // internal
+		false,     // no-wait
+		nil,       // arguments
 	)
 	failOnError(err, "can't create exchange")
 	mm := usecase.NewMessagingManager(ch)

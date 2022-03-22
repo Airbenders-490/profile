@@ -25,17 +25,17 @@ func TestGetByID(t *testing.T) {
 
 	t.Run("success-with-nil-school", func(t *testing.T) {
 		expectedStudent := &domain.Student{
-			ID:          "a",
-			FirstName:   "b",
-			LastName:    "c",
-			Email:       "d",
-			GeneralInfo: "e",
-			School:      nil,
+			ID:             "a",
+			FirstName:      "b",
+			LastName:       "c",
+			Email:          "d",
+			GeneralInfo:    "e",
+			School:         nil,
 			CurrentClasses: nil,
-			ClassesTaken: nil,
-			CreatedAt:   time.Now(),
-			UpdatedAt:   time.Now(),
-			Reviews:     nil,
+			ClassesTaken:   nil,
+			CreatedAt:      time.Now(),
+			UpdatedAt:      time.Now(),
+			Reviews:        nil,
 		}
 		pgxRows := pgxpoolmock.NewRows(columns).AddRow(
 			expectedStudent.ID,
@@ -48,7 +48,7 @@ func TestGetByID(t *testing.T) {
 			expectedStudent.ClassesTaken,
 			expectedStudent.CreatedAt,
 			expectedStudent.UpdatedAt,
-			).ToPgxRows()
+		).ToPgxRows()
 		mockPool.EXPECT().Query(gomock.Any(), gomock.Any(), gomock.AssignableToTypeOf("string")).Return(pgxRows, nil)
 		sr := repository.NewStudentRepository(mockPool)
 		student, err := sr.GetByID(context.Background(), "a")
@@ -59,17 +59,17 @@ func TestGetByID(t *testing.T) {
 
 	t.Run("success-with-some-school", func(t *testing.T) {
 		expectedStudent := domain.Student{
-			ID:          "a",
-			FirstName:   "b",
-			LastName:    "c",
-			Email:       "d",
-			GeneralInfo: "e",
-			School:      &domain.School{ID: "something"},
+			ID:             "a",
+			FirstName:      "b",
+			LastName:       "c",
+			Email:          "d",
+			GeneralInfo:    "e",
+			School:         &domain.School{ID: "something"},
 			CurrentClasses: nil,
-			ClassesTaken: nil,
-			CreatedAt:   time.Now(),
-			UpdatedAt:   time.Now(),
-			Reviews:     nil,
+			ClassesTaken:   nil,
+			CreatedAt:      time.Now(),
+			UpdatedAt:      time.Now(),
+			Reviews:        nil,
 		}
 		pgxRows := pgxpoolmock.NewRows(columns).AddRow(
 			expectedStudent.ID,
@@ -289,17 +289,17 @@ func TestSearchStudents(t *testing.T) {
 	t.Run("success-with-nil-school", func(t *testing.T) {
 		var retrievedStudents []domain.Student
 		expectedStudent := &domain.Student{
-			ID:          "a",
-			FirstName:   "b",
-			LastName:    "c",
-			Email:       "d",
-			GeneralInfo: "e",
-			School:      nil,
+			ID:             "a",
+			FirstName:      "b",
+			LastName:       "c",
+			Email:          "d",
+			GeneralInfo:    "e",
+			School:         nil,
 			CurrentClasses: nil,
-			ClassesTaken: nil,
-			CreatedAt:   time.Now(),
-			UpdatedAt:   time.Now(),
-			Reviews:     nil,
+			ClassesTaken:   nil,
+			CreatedAt:      time.Now(),
+			UpdatedAt:      time.Now(),
+			Reviews:        nil,
 		}
 		retrievedStudents = append(retrievedStudents, *expectedStudent)
 		pgxRows := pgxpoolmock.NewRows(columns).AddRow(
@@ -325,30 +325,30 @@ func TestSearchStudents(t *testing.T) {
 	t.Run("success-with-some-school", func(t *testing.T) {
 		var retrievedStudents []domain.Student
 		expectedStudent1 := &domain.Student{
-			ID:          "a",
-			FirstName:   "b",
-			LastName:    "c",
-			Email:       "d",
-			GeneralInfo: "e",
-			School:      &domain.School{ID: "something"},
+			ID:             "a",
+			FirstName:      "b",
+			LastName:       "c",
+			Email:          "d",
+			GeneralInfo:    "e",
+			School:         &domain.School{ID: "something"},
 			CurrentClasses: nil,
-			ClassesTaken: nil,
-			CreatedAt:   time.Now(),
-			UpdatedAt:   time.Now(),
-			Reviews:     nil,
+			ClassesTaken:   nil,
+			CreatedAt:      time.Now(),
+			UpdatedAt:      time.Now(),
+			Reviews:        nil,
 		}
 		expectedStudent2 := &domain.Student{
-			ID:          "test",
-			FirstName:   "john",
-			LastName:    "smith",
-			Email:       "jsmithy",
-			GeneralInfo: "eee",
-			School:      &domain.School{ID: "test"},
+			ID:             "test",
+			FirstName:      "john",
+			LastName:       "smith",
+			Email:          "jsmithy",
+			GeneralInfo:    "eee",
+			School:         &domain.School{ID: "test"},
 			CurrentClasses: nil,
-			ClassesTaken: nil,
-			CreatedAt:   time.Now(),
-			UpdatedAt:   time.Now(),
-			Reviews:     nil,
+			ClassesTaken:   nil,
+			CreatedAt:      time.Now(),
+			UpdatedAt:      time.Now(),
+			Reviews:        nil,
 		}
 		retrievedStudents = append(retrievedStudents, *expectedStudent1, *expectedStudent2)
 		pgxRows := pgxpoolmock.NewRows(columns).AddRow(
@@ -363,15 +363,15 @@ func TestSearchStudents(t *testing.T) {
 			expectedStudent1.CreatedAt,
 			expectedStudent1.UpdatedAt).
 			AddRow(expectedStudent2.ID,
-			expectedStudent2.FirstName,
-			expectedStudent2.LastName,
-			expectedStudent2.Email,
-			expectedStudent2.GeneralInfo,
-			&expectedStudent2.School.ID,
-			expectedStudent2.CurrentClasses,
-			expectedStudent2.ClassesTaken,
-			expectedStudent2.CreatedAt,
-			expectedStudent2.UpdatedAt).ToPgxRows()
+				expectedStudent2.FirstName,
+				expectedStudent2.LastName,
+				expectedStudent2.Email,
+				expectedStudent2.GeneralInfo,
+				&expectedStudent2.School.ID,
+				expectedStudent2.CurrentClasses,
+				expectedStudent2.ClassesTaken,
+				expectedStudent2.CreatedAt,
+				expectedStudent2.UpdatedAt).ToPgxRows()
 		mockPool.EXPECT().Query(gomock.Any(), gomock.Any(), gomock.Any()).Return(pgxRows, nil)
 		sr := repository.NewStudentRepository(mockPool)
 		student, err := sr.SearchStudents(context.Background(), &domain.Student{ID: "a"})

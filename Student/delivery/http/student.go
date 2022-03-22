@@ -221,7 +221,7 @@ func (h *StudentHandler) SearchStudents(c *gin.Context) {
 	ctx := c.Request.Context()
 	var student domain.Student
 	student.FirstName = c.Query("firstName")
-	student.LastName= c.Query("lastName")
+	student.LastName = c.Query("lastName")
 	student.CurrentClasses = c.QueryArray("classes")
 
 	students, err := h.UseCase.SearchStudents(ctx, &student)
