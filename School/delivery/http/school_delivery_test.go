@@ -185,7 +185,7 @@ func TestSchoolHandlerSendConfirmationMail(t *testing.T) {
 	})
 
 	t.Run("invalid-email", func(t *testing.T) {
-		invalidEmail := "sth"
+		invalidEmail := "sth@sth"
 		response, err := server.Client().Get(fmt.Sprintf(postSchoolEmailConfirmationPath, server.URL, invalidEmail))
 		assert.NoError(t, err)
 		defer response.Body.Close()
