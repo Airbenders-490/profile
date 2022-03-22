@@ -13,15 +13,13 @@ import (
 	"time"
 )
 
-
 const (
-	errorMessage = "No such student with ID %s exists"
+	errorMessage         = "No such student with ID %s exists"
 	existingStudentError = "Student with ID %s already exists"
-	contentType = "text/plain"
-	publishErrorMessage = "failed to publish "
-	ampqMessageSent     = "student sent to queue"
+	contentType          = "text/plain"
+	publishErrorMessage  = "failed to publish "
+	ampqMessageSent      = "student sent to queue"
 )
-
 
 type studentUseCase struct {
 	studentRepository domain.StudentRepository
@@ -51,7 +49,7 @@ func NewMessagingManager(ch mocks.Channel) *MessagingManager {
 // NewStudentUseCase returns a configured StudentUseCase
 func NewStudentUseCase(mm *MessagingManager, sr domain.StudentRepository, rr domain.ReviewRepository, timeout time.Duration) domain.StudentUseCase {
 	return &studentUseCase{
-		messagingManager: mm,
+		messagingManager:  mm,
 		studentRepository: sr,
 		reviewRepository:  rr,
 		contextTimeout:    timeout,
@@ -98,7 +96,7 @@ func (s *studentUseCase) CreateStudentTopic() {
 			false,
 			amqp.Publishing{
 				ContentType: contentType,
-				Body: st,
+				Body:        st,
 			})
 		if err != nil {
 			log.Println(publishErrorMessage, err)
@@ -168,7 +166,7 @@ func (s *studentUseCase) UpdateStudentTopic() {
 			false,
 			amqp.Publishing{
 				ContentType: contentType,
-				Body: st,
+				Body:        st,
 			})
 		if err != nil {
 			log.Println(publishErrorMessage, err)
@@ -225,7 +223,7 @@ func (s *studentUseCase) DeleteStudentTopic() {
 			false,
 			amqp.Publishing{
 				ContentType: contentType,
-				Body: []byte(studentID),
+				Body:        []byte(studentID),
 			})
 		if err != nil {
 			log.Println(publishErrorMessage, err)
@@ -290,7 +288,7 @@ func removeClasses(existingClasses, classesToRemove []string) []string {
 		classRemove[x] = struct{}{}
 	}
 	var remainingClasses []string
-	for _, i := range existingClasses{
+	for _, i := range existingClasses {
 		if _, found := classRemove[i]; !found {
 			remainingClasses = append(remainingClasses, i)
 		}

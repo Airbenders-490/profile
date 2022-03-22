@@ -39,7 +39,6 @@ func TestReviewHandlerAddReview(t *testing.T) {
 	err = faker.FakeData(&mockStudent)
 	assert.NoError(t, err)
 
-
 	t.Run("success", func(t *testing.T) {
 		mockUseCase.On("AddReview", mock.Anything, mock.AnythingOfType(reviewType), mock.AnythingOfType("string")).
 			Return(&mockReview, nil).
@@ -210,7 +209,6 @@ func TestReviewHandlerEditReview(t *testing.T) {
 	var mockStudent domain.Student
 	err = faker.FakeData(&mockStudent)
 	assert.NoError(t, err)
-
 
 	t.Run("success", func(t *testing.T) {
 		postBody, err := json.Marshal(mockReview)

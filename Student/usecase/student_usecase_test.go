@@ -22,11 +22,7 @@ func TestCreate(t *testing.T) {
 	faker.FakeData(&mockStudent)
 	channelMock := new(mocks2.ChannelMock)
 	mm := usecase.NewMessagingManager(channelMock)
-	//channelMock.On("Publish", mock.AnythingOfType("string"), mock.AnythingOfType("string"),
-	//	mock.AnythingOfType("bool"), mock.AnythingOfType("bool"), mock.Anything).Return(nil)
-	go func() {
-		<- mm.Created
-	}()
+
 	const studentType = "*domain.Student"
 	t.Run("case success", func(t *testing.T) {
 		mockStudentRepo.
@@ -38,8 +34,13 @@ func TestCreate(t *testing.T) {
 			Return(nil).
 			Once()
 		u := usecase.NewStudentUseCase(mm, mockStudentRepo, mockReviewRepo, time.Second)
+		var student domain.Student
+		go func() {
+			student = <-mm.Created
+			assert.NotNil(t, student)
+			return
+		}()
 		err := u.Create(context.TODO(), &mockStudent)
-
 		assert.NoError(t, err)
 
 		mockStudentRepo.AssertExpectations(t)
@@ -75,6 +76,25 @@ func TestCreate(t *testing.T) {
 		assert.Error(t, err)
 
 		mockStudentRepo.AssertExpectations(t)
+	})
+}
+
+func TestCreateStudentTopic(t *testing.T) {
+	channelMock := new(mocks2.ChannelMock)
+	mm := usecase.NewMessagingManager(channelMock)
+	t.Run("success", func(t *testing.T) {
+		channelMock.
+			On("Publish", mock.AnythingOfType("string"), mock.AnythingOfType("string"), false, false, mock.Anything).
+			Return(nil).
+			Twice()
+
+		u := usecase.NewStudentUseCase(mm, nil, nil, time.Second)
+		go u.CreateStudentTopic()
+		mm.Created <- domain.Student{}
+		mm.Created <- domain.Student{}
+		// wait a bit so the goroutine runs. This will ensure the other goroutine works (hopefully)
+		time.Sleep(10 * time.Millisecond)
+		channelMock.AssertExpectations(t)
 	})
 }
 
@@ -148,9 +168,6 @@ func TestUpdate(t *testing.T) {
 	mm := usecase.NewMessagingManager(channelMock)
 	channelMock.On("Publish", mock.AnythingOfType("string"), mock.AnythingOfType("string"),
 		mock.AnythingOfType("bool"), mock.AnythingOfType("bool"), mock.Anything)
-	go func() {
-		<- mm.Edited
-	}()
 	t.Run("success", func(t *testing.T) {
 		mockStudentRepo.
 			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
@@ -162,8 +179,14 @@ func TestUpdate(t *testing.T) {
 			Once()
 
 		u := usecase.NewStudentUseCase(mm, mockStudentRepo, mockReviewRepo, time.Second)
+		var student domain.Student
+		go func() {
+			student = <-mm.Edited
+			assert.NotNil(t, student)
+			return
+		}()
 		updatedStudent, err := u.Update(context.TODO(), mockStudent.ID, &mockStudent)
-
+		assert.NotNil(t, student)
 		assert.NoError(t, err)
 		assert.EqualValues(t, mockStudent, *updatedStudent)
 
@@ -199,6 +222,24 @@ func TestUpdate(t *testing.T) {
 	})
 }
 
+func TestUpdateStudentTopic(t *testing.T) {
+	channelMock := new(mocks2.ChannelMock)
+	mm := usecase.NewMessagingManager(channelMock)
+	t.Run("success", func(t *testing.T) {
+		channelMock.
+			On("Publish", mock.AnythingOfType("string"), mock.AnythingOfType("string"), false, false, mock.Anything).
+			Return(nil).
+			Twice()
+
+		u := usecase.NewStudentUseCase(mm, nil, nil, time.Second)
+		go u.UpdateStudentTopic()
+		mm.Edited <- domain.Student{}
+		mm.Edited <- domain.Student{}
+		time.Sleep(10 * time.Millisecond)
+		channelMock.AssertExpectations(t)
+	})
+}
+
 func TestDelete(t *testing.T) {
 	mockStudentRepo := new(mocks.StudentRepositoryMock)
 	mockReviewRepo := new(mocks.ReviewRepositoryMock)
@@ -208,9 +249,6 @@ func TestDelete(t *testing.T) {
 	mm := usecase.NewMessagingManager(channelMock)
 	channelMock.On("Publish", mock.AnythingOfType("string"), mock.AnythingOfType("string"),
 		mock.AnythingOfType("bool"), mock.AnythingOfType("bool"), mock.Anything)
-	go func() {
-		<- mm.Deleted
-	}()
 	t.Run("success", func(t *testing.T) {
 		mockStudentRepo.
 			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
@@ -222,10 +260,13 @@ func TestDelete(t *testing.T) {
 			Once()
 
 		u := usecase.NewStudentUseCase(mm, mockStudentRepo, mockReviewRepo, time.Second)
+		go func() {
+			id := <-mm.Deleted
+			assert.Equal(t, mockStudent.ID, id)
+			return
+		}()
 		err := u.Delete(context.TODO(), mockStudent.ID)
-
 		assert.NoError(t, err)
-
 		mockStudentRepo.AssertExpectations(t)
 	})
 
@@ -255,6 +296,24 @@ func TestDelete(t *testing.T) {
 		assert.Error(t, err)
 
 		mockStudentRepo.AssertExpectations(t)
+	})
+}
+
+func TestDeleteStudentTopic(t *testing.T) {
+	channelMock := new(mocks2.ChannelMock)
+	mm := usecase.NewMessagingManager(channelMock)
+	t.Run("success", func(t *testing.T) {
+		channelMock.
+			On("Publish", mock.AnythingOfType("string"), mock.AnythingOfType("string"), false, false, mock.Anything).
+			Return(nil).
+			Twice()
+
+		u := usecase.NewStudentUseCase(mm, nil, nil, time.Second)
+		go u.DeleteStudentTopic()
+		mm.Deleted <- "asd"
+		mm.Deleted <- "cde"
+		time.Sleep(10 * time.Millisecond)
+		channelMock.AssertExpectations(t)
 	})
 }
 
@@ -311,7 +370,7 @@ func TestAddClasses(t *testing.T) {
 	})
 }
 
-func TestRemoveClasses (t *testing.T) {
+func TestRemoveClasses(t *testing.T) {
 	mockStudentRepo := new(mocks.StudentRepositoryMock)
 	mockReviewRepo := new(mocks.ReviewRepositoryMock)
 	var mockStudent domain.Student
@@ -364,7 +423,7 @@ func TestRemoveClasses (t *testing.T) {
 	})
 }
 
-func TestCompleteClass (t *testing.T) {
+func TestCompleteClass(t *testing.T) {
 	mockStudentRepo := new(mocks.StudentRepositoryMock)
 	mockReviewRepo := new(mocks.ReviewRepositoryMock)
 	var mockStudent domain.Student
@@ -424,7 +483,6 @@ func TestSearchStudents(t *testing.T) {
 	faker.FakeData(&mockStudent)
 	var retrievedStudents []domain.Student
 	faker.FakeData(&retrievedStudents)
-
 
 	t.Run("case success", func(t *testing.T) {
 		mockStudentRepo.

@@ -32,7 +32,7 @@ const (
 	WHERE id=$1;`
 	getSchoolName = `SELECT name FROM school WHERE ID=$1`
 	updateClasses = `UPDATE public.student SET current_classes=$1, classes_taken=$2, updated_at=$3 WHERE id = $4;`
-	search = `SELECT id, first_name, last_name, email, general_info, school, current_classes, classes_taken, created_at, updated_at
+	search        = `SELECT id, first_name, last_name, email, general_info, school, current_classes, classes_taken, created_at, updated_at
 	FROM public.student WHERE first_name LIKE $1 and last_name like $2 and current_classes @> $3`
 )
 
@@ -143,7 +143,7 @@ func (r *studentRepository) UpdateClasses(ctx context.Context, st *domain.Studen
 }
 
 func (r *studentRepository) SearchStudents(ctx context.Context, st *domain.Student) ([]domain.Student, error) {
-	rows, err := r.db.Query(ctx, search, st.FirstName + "%", st.LastName + "%", st.CurrentClasses)
+	rows, err := r.db.Query(ctx, search, st.FirstName+"%", st.LastName+"%", st.CurrentClasses)
 	if err != nil {
 		err = errors.NewInternalServerError(err.Error())
 		return nil, err
@@ -170,4 +170,3 @@ func (r *studentRepository) SearchStudents(ctx context.Context, st *domain.Stude
 
 	return students, nil
 }
-

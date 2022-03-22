@@ -23,7 +23,7 @@ func NewSimpleMail() Mailer {
 
 type simpleMail struct {
 	from     string
-	user 	 string
+	user     string
 	password string
 	smtpHost string
 	smtpPort string

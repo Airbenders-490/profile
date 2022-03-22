@@ -19,7 +19,6 @@ import (
 	"testing"
 )
 
-
 const failureMessage = "failed to read from message"
 const studentType = "*domain.Student"
 const putStudentPath = "/api/student/%s"
@@ -36,8 +35,6 @@ func TestStudentHandlerGetByID(t *testing.T) {
 	var mockStudent domain.Student
 	err := faker.FakeData(&mockStudent)
 	assert.NoError(t, err)
-
-
 
 	t.Run("success", func(t *testing.T) {
 		mockUseCase.On("GetByID", mock.Anything, mock.AnythingOfType("string")).Return(&mockStudent, nil).Once()
@@ -127,7 +124,6 @@ func TestStudentHandlerCreate(t *testing.T) {
 	err := faker.FakeData(&mockStudent)
 	assert.NoError(t, err)
 
-
 	const applicationJSON = "application/JSON"
 	t.Run("success", func(t *testing.T) {
 		mockUseCase.On("Create", mock.Anything, mock.AnythingOfType(studentType)).
@@ -136,7 +132,7 @@ func TestStudentHandlerCreate(t *testing.T) {
 		assert.NoError(t, err)
 		reader := strings.NewReader(string(postBody))
 		response, err := server.Client().Post(fmt.Sprintf(postStudentPath, server.URL), applicationJSON, reader)
-			assert.NoError(t, err)
+		assert.NoError(t, err)
 		defer response.Body.Close()
 
 		assert.Equal(t, 201, response.StatusCode)
@@ -217,7 +213,6 @@ func TestStudentHandlerUpdate(t *testing.T) {
 	var mockStudent domain.Student
 	err := faker.FakeData(&mockStudent)
 	assert.NoError(t, err)
-
 
 	t.Run("success", func(t *testing.T) {
 		postBody, err := json.Marshal(mockStudent)
@@ -320,7 +315,7 @@ func TestStudentHandlerDelete(t *testing.T) {
 	})
 }
 
-func TestStudentHandlerAddClasses(t *testing.T)  {
+func TestStudentHandlerAddClasses(t *testing.T) {
 	mockUseCase := new(mocks.StudentUseCase)
 	h := &http.StudentHandler{UseCase: mockUseCase}
 	mw := new(mocks.MiddlewareMock)
@@ -382,7 +377,7 @@ func TestStudentHandlerAddClasses(t *testing.T)  {
 	})
 }
 
-func TestStudentHandlerRemoveClassesTaken(t *testing.T)  {
+func TestStudentHandlerRemoveClassesTaken(t *testing.T) {
 	mockUseCase := new(mocks.StudentUseCase)
 	h := &http.StudentHandler{UseCase: mockUseCase}
 	mw := new(mocks.MiddlewareMock)
@@ -444,7 +439,7 @@ func TestStudentHandlerRemoveClassesTaken(t *testing.T)  {
 	})
 }
 
-func TestStudentHandlerCompleteClass(t *testing.T)  {
+func TestStudentHandlerCompleteClass(t *testing.T) {
 	mockUseCase := new(mocks.StudentUseCase)
 	h := &http.StudentHandler{UseCase: mockUseCase}
 	mw := new(mocks.MiddlewareMock)
@@ -515,7 +510,7 @@ func TestStudentHandlerSearchStudents(t *testing.T) {
 	err := faker.FakeData(&mockRetrievedStudents)
 	assert.NoError(t, err)
 
-	t.Run("success", func(t *testing.T){
+	t.Run("success", func(t *testing.T) {
 		mockUseCase.On("SearchStudents", mock.Anything, mock.Anything).
 			Return(mockRetrievedStudents, nil).Once()
 		reqFound := httptest.NewRequest("GET", "/api/search/?firstName=Test&lastname=Smith&classes=class", nil)

@@ -23,7 +23,7 @@ const postSchoolEmailConfirmationPath = "%s/api/school/confirm?email=%s"
 const testEmail = "adam.yafout@gmail.com"
 const applicationJSON = "application/JSON"
 
-func TestSchoolHandlerSearchStudentSchool(t *testing.T){
+func TestSchoolHandlerSearchStudentSchool(t *testing.T) {
 	mockUseCase := new(mocks.SchoolUseCase)
 	h := http.NewSchoolHandler(mockUseCase)
 	middleware := new(mocks.MiddlewareMock)
@@ -151,7 +151,7 @@ func TestSchoolHandlerConfirmSchoolRegistration(t *testing.T) {
 	})
 }
 
-func TestSchoolHandlerSendConfirmationMail(t *testing.T){
+func TestSchoolHandlerSendConfirmationMail(t *testing.T) {
 	mockUseCase := new(mocks.SchoolUseCase)
 	h := http.NewSchoolHandler(mockUseCase)
 	middleware := new(mocks.MiddlewareMock)
@@ -185,7 +185,7 @@ func TestSchoolHandlerSendConfirmationMail(t *testing.T){
 	})
 
 	t.Run("invalid-email", func(t *testing.T) {
-		invalidEmail := "sth@sth"
+		invalidEmail := "sth"
 		response, err := server.Client().Get(fmt.Sprintf(postSchoolEmailConfirmationPath, server.URL, invalidEmail))
 		assert.NoError(t, err)
 		defer response.Body.Close()
@@ -200,6 +200,23 @@ func TestSchoolHandlerSendConfirmationMail(t *testing.T){
 		err = json.Unmarshal(responseBody, &restError)
 		assert.NoError(t, err)
 		assert.EqualValues(t, &restError, e.NewBadRequestError("please provide a valid email"))
+		mockUseCase.AssertExpectations(t)
+	})
+
+	t.Run("can't find school error", func(t *testing.T) {
+		mockUseCase.
+			On("SearchSchoolByDomain", mock.Anything, mock.AnythingOfType("string")).
+			Return(nil, errors.New("some error")).
+			Once()
+		response, err := server.Client().Get(fmt.Sprintf(postSchoolEmailConfirmationPath, server.URL, testEmail))
+		assert.NoError(t, err)
+		defer response.Body.Close()
+
+		assert.Equal(t, response.StatusCode, 500)
+		_, err = ioutil.ReadAll(response.Body)
+		if err != nil {
+			assert.Fail(t, failureMessage)
+		}
 		mockUseCase.AssertExpectations(t)
 	})
 
