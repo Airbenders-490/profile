@@ -11,7 +11,7 @@ type Review struct {
 	Reviewed  Student `json:"reviewed"`
 	Reviewer  Student `json:"reviewer"`
 	CreatedAt time.Time
-	Tags      []Tag `json:"tags"`
+	Tags      []*Tag `json:"tags"`
 }
 
 // ReviewUseCase is the contract every use case must employ

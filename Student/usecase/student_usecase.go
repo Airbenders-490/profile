@@ -23,10 +23,10 @@ const (
 
 type studentUseCase struct {
 	studentRepository domain.StudentRepository
-	// add review and possibly tag repositories to fetch their data too
-	reviewRepository domain.ReviewRepository
-	contextTimeout   time.Duration
-	messagingManager *MessagingManager
+	reviewRepository  domain.ReviewRepository
+	tagRepository     domain.TagRepository
+	contextTimeout    time.Duration
+	messagingManager  *MessagingManager
 }
 
 type MessagingManager struct {
@@ -47,11 +47,16 @@ func NewMessagingManager(ch mocks.Channel) *MessagingManager {
 }
 
 // NewStudentUseCase returns a configured StudentUseCase
-func NewStudentUseCase(mm *MessagingManager, sr domain.StudentRepository, rr domain.ReviewRepository, timeout time.Duration) domain.StudentUseCase {
+func NewStudentUseCase(mm *MessagingManager,
+	sr domain.StudentRepository,
+	rr domain.ReviewRepository,
+	tr domain.TagRepository,
+	timeout time.Duration) domain.StudentUseCase {
 	return &studentUseCase{
 		messagingManager:  mm,
 		studentRepository: sr,
 		reviewRepository:  rr,
+		tagRepository:     tr,
 		contextTimeout:    timeout,
 	}
 }
@@ -122,6 +127,22 @@ func (s *studentUseCase) GetByID(c context.Context, id string) (*domain.Student,
 	reviews, err := s.reviewRepository.GetReviewsFor(ctx, student.ID)
 	if err != nil {
 		log.Println("Can't get the reviews right now.")
+	}
+	tags, err := s.tagRepository.FetchAllTags(ctx)
+	if err != nil {
+		log.Println("Can't get tags for reviews")
+	}
+	tagMap := make(map[string]bool)
+	for _, tag := range tags {
+		tagMap[tag.Name] = tag.Positive
+	}
+	populateReview := func(review domain.Review) {
+		for _, reviewTags := range review.Tags {
+			reviewTags.Positive = tagMap[reviewTags.Name]
+		}
+	}
+	for _, review := range reviews {
+		go populateReview(review)
 	}
 	student.Reviews = reviews
 

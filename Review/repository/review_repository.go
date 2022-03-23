@@ -75,7 +75,7 @@ func (r *reviewRepository) getTagsFor(ctx context.Context, review *domain.Review
 		return errors.NewInternalServerError(err.Error())
 	}
 
-	var tags []domain.Tag
+	var tags []*domain.Tag
 	for rows.Next() {
 		values, err := rows.Values()
 		if err != nil {
@@ -85,7 +85,7 @@ func (r *reviewRepository) getTagsFor(ctx context.Context, review *domain.Review
 		var tag domain.Tag
 		tag.Name = values[0].(string)
 
-		tags = append(tags, tag)
+		tags = append(tags, &tag)
 	}
 
 	review.Tags = tags
