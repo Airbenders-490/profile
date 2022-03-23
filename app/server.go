@@ -76,7 +76,8 @@ func Start() {
 	mm := usecase.NewMessagingManager(ch)
 	studentRepository := repository.NewStudentRepository(pool)
 	reviewRepository := repository4.NewReviewRepository(pool)
-	studentUseCase := usecase.NewStudentUseCase(mm, studentRepository, reviewRepository, time.Second)
+	tagRepository := repository3.NewTagRepository(pool)
+	studentUseCase := usecase.NewStudentUseCase(mm, studentRepository, reviewRepository, tagRepository, time.Second)
 	studentHandler := http.NewStudentHandler(studentUseCase)
 	go studentUseCase.CreateStudentTopic()
 	go studentUseCase.UpdateStudentTopic()
@@ -86,7 +87,6 @@ func Start() {
 	schoolUseCase := usecase2.NewSchoolUseCase(schoolRepository, studentRepository, mail, time.Second)
 	schoolHandler := http2.NewSchoolHandler(schoolUseCase)
 
-	tagRepository := repository3.NewTagRepository(pool)
 	tagUseCase := usecase3.NewTagUseCase(tagRepository, time.Second)
 	tagHandler := http3.NewTagHandler(tagUseCase)
 
