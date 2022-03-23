@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	_ "github.com/airbenders/profile/School/utils"
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/utils"
 	"github.com/airbenders/profile/utils/errors"
@@ -107,6 +108,8 @@ func (s *schoolUseCase) SendConfirmation(c context.Context, st *domain.Student, 
 
 	err = s.r.SaveConfirmationToken(ctx, confirmation)
 	if err != nil {
+		log.Println("error in sendconfirmation, usecase: received from repo")
+		log.Println(err.Error())
 		return errors.NewInternalServerError(err.Error())
 	}
 

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"net/smtp"
 	"os"
 )
@@ -32,5 +33,7 @@ type simpleMail struct {
 // SendSimpleMail utilizes the golang smtp library to send a simple mail
 func (s simpleMail) SendSimpleMail(to string, body []byte) error {
 	auth := smtp.PlainAuth("Stud Pal", s.user, s.password, s.smtpHost)
-	return smtp.SendMail(s.smtpHost+":"+s.smtpPort, auth, s.from, []string{to}, body)
+	err := smtp.SendMail(s.smtpHost+":"+s.smtpPort, auth, s.from, []string{to}, body)
+	fmt.Println("error in sendsimplemail ", err)
+	return err
 }
