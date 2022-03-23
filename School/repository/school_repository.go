@@ -5,6 +5,7 @@ import (
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/utils/errors"
 	"github.com/driftprogramming/pgxpoolmock"
+	"log"
 )
 
 type schoolRepository struct {
@@ -68,6 +69,7 @@ func (r *schoolRepository) SaveConfirmationToken(ctx context.Context, confirmati
 
 	err = tx.Commit(ctx)
 	if err != nil {
+		log.Println("error in Save confirmation repo while saving the token")
 		return errors.NewInternalServerError(err.Error())
 	}
 

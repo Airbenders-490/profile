@@ -8,12 +8,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/airbenders/profile/domain"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"os"
+	"path"
 	"strings"
 )
 
@@ -23,13 +22,29 @@ func init() {
 	}
 }
 
+const (
+	insert = `INSERT INTO school (id, name, country, domains) VALUES ($1, $2, $3, $4)`
+	get = `SELECT * FROM school LIMIT 1`
+)
+
 func addSchoolsToDB() {
-	fmt.Println("creating schools")
 	pool, err := pgxpool.Connect(context.Background(), os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatalln(err)
 	}
-	insert := `INSERT INTO school (id, name, country, domains) VALUES ($1, $2, $3, $4)`
+
+	rows, err := pool.Query(context.Background(), get)
+	if err != nil {
+		log.Fatalln("can't get the rows in school db")
+	}
+
+	// if a row already exist means db is already populated or being populated. So return
+	for rows.Next() {
+		return
+	}
+	// if reached here, then we can create schools
+	fmt.Println("creating schools")
+
 	tx, err := pool.Begin(context.Background())
 	if err != nil {
 		log.Fatalln(err)
@@ -37,17 +52,33 @@ func addSchoolsToDB() {
 	defer tx.Rollback(context.Background())
 
 	var schools []domain.School
-	resp, _ := http.Get("https://raw.githubusercontent.com/Hipo/university-domains-list/master/world_universities_and_domains.json")
-	schoolJSON, _ := ioutil.ReadAll(resp.Body)
-	_ = json.Unmarshal(schoolJSON, &schools)
 
+	pathToFile := getPathToSchoolsFile(err)
+
+	schoolJSON, err := ioutil.ReadFile(pathToFile)
+	fatalOnError(err)
+
+	_ = json.Unmarshal(schoolJSON, &schools)
 	for _, school := range schools {
-		school.ID = uuid.New().String()
 		_, err = tx.Exec(context.Background(), insert, school.ID, school.Name, school.Country, school.Domains)
 		if err != nil {
 			log.Fatalln(err)
 		}
 
 		tx.Commit(context.Background())
+	}
+}
+
+func getPathToSchoolsFile(err error) string {
+	cwd, err := os.Getwd()
+	fatalOnError(err)
+	pathToFile := path.Join(cwd, "School", "utils", "schools.json")
+	log.Println("the path to file is", pathToFile)
+	return pathToFile
+}
+
+func fatalOnError(err error) {
+	if err != nil {
+		log.Fatalln("can't find the file!")
 	}
 }
