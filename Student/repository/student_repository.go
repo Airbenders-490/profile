@@ -5,6 +5,7 @@ import (
 	"github.com/airbenders/profile/domain"
 	"github.com/airbenders/profile/utils/errors"
 	"github.com/driftprogramming/pgxpoolmock"
+	"github.com/jackc/pgx/v4"
 	"time"
 )
 
@@ -30,10 +31,13 @@ const (
 	WHERE id=$1;`
 	deleteStudent = `DELETE FROM public.student
 	WHERE id=$1;`
-	getSchoolName = `SELECT name FROM school WHERE ID=$1`
-	updateClasses = `UPDATE public.student SET current_classes=$1, classes_taken=$2, updated_at=$3 WHERE id = $4;`
-	search        = `SELECT id, first_name, last_name, email, general_info, school, current_classes, classes_taken, created_at, updated_at
-	FROM public.student WHERE first_name LIKE $1 and last_name like $2 and current_classes @> $3`
+	getSchoolName     = `SELECT name FROM school WHERE ID=$1`
+	updateClasses     = `UPDATE public.student SET current_classes=$1, classes_taken=$2, updated_at=$3 WHERE id = $4;`
+	searchWithClasses = `SELECT id, first_name, last_name, email, general_info, school, current_classes, classes_taken, 
+	created_at, updated_at FROM public.student WHERE first_name ILIKE '%' || $1 ||'%' AND last_name  ILIKE '%' || $2 ||'%'
+	AND current_classes && $3`
+	searchWithoutClasses = `SELECT id, first_name, last_name, email, general_info, school, current_classes, classes_taken, 
+	created_at, updated_at FROM public.student WHERE first_name ILIKE '%' || $1 ||'%' AND last_name  ILIKE '%' || $2 ||'%'`
 )
 
 // Create stores the student in the db. Returns err if unable to
@@ -143,14 +147,20 @@ func (r *studentRepository) UpdateClasses(ctx context.Context, st *domain.Studen
 }
 
 func (r *studentRepository) SearchStudents(ctx context.Context, st *domain.Student) ([]domain.Student, error) {
-	rows, err := r.db.Query(ctx, search, st.FirstName+"%", st.LastName+"%", st.CurrentClasses)
+	var rows pgx.Rows
+	var err error
+	if len(st.CurrentClasses) > 0 {
+		rows, err = r.db.Query(ctx, searchWithClasses, st.FirstName, st.LastName, st.CurrentClasses)
+	} else {
+		rows, err = r.db.Query(ctx, searchWithoutClasses, st.FirstName, st.LastName)
+	}
 	if err != nil {
 		err = errors.NewInternalServerError(err.Error())
 		return nil, err
 	}
 	defer rows.Close()
 
-	var students []domain.Student
+	students := []domain.Student{}
 	for rows.Next() {
 		var student domain.Student
 		var schoolID *string
@@ -167,6 +177,5 @@ func (r *studentRepository) SearchStudents(ctx context.Context, st *domain.Stude
 		}
 		students = append(students, student)
 	}
-
 	return students, nil
 }
