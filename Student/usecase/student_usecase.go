@@ -325,12 +325,5 @@ func (s *studentUseCase) SearchStudents(c context.Context, st *domain.Student) (
 		return nil, err
 	}
 
-	for i := range retrievedStudents {
-		reviews, err := s.reviewRepository.GetReviewsFor(ctx, retrievedStudents[i].ID)
-		if err != nil {
-			log.Printf("Can't get the reviews for %s.", retrievedStudents[i].ID)
-		}
-		retrievedStudents[i].Reviews = reviews
-	}
 	return retrievedStudents, nil
 }
