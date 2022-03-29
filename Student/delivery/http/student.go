@@ -237,3 +237,22 @@ func (h *StudentHandler) SearchStudents(c *gin.Context) {
 	}
 	c.JSON(200, students)
 }
+
+func (h *StudentHandler) GetRecommendedTeammates(c *gin.Context) {
+	ctx := c.Request.Context()
+	key, _ := c.Get("loggedID")
+	loggedID, _ := key.(string)
+
+	students, err := h.UseCase.GetRecommendedTeammates(ctx, loggedID)
+	if err != nil {
+		switch v := err.(type) {
+		case *errors.RestError:
+			c.JSON(v.Code, v)
+			return
+		default:
+			c.JSON(http.StatusInternalServerError, errors.NewInternalServerError(err.Error()))
+			return
+		}
+	}
+	c.JSON(http.StatusOK, students)
+}

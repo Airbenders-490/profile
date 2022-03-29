@@ -33,6 +33,8 @@ type StudentUseCase interface {
 	CreateStudentTopic()
 	UpdateStudentTopic()
 	DeleteStudentTopic()
+	// GetRecommendedTeammates returns list of recommended teammates or empty list
+	GetRecommendedTeammates(ctx context.Context, id string) ([]Student, error)
 }
 
 // StudentRepository interface defines the functions all studentRepositories should have
@@ -43,4 +45,5 @@ type StudentRepository interface {
 	Delete(ctx context.Context, id string) error
 	UpdateClasses(ctx context.Context, st *Student) error
 	SearchStudents(ctx context.Context, st *Student) ([]Student, error)
+	SearchCurrentClass(ctx context.Context, class string) ([]Student, error)
 }

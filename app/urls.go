@@ -20,6 +20,7 @@ func mapStudentURLs(m Middleware, h *studentHttp.StudentHandler, router *gin.Eng
 	authorized.PUT("/removeClasses/:id", h.RemoveClasses)
 	authorized.PUT("/completeClasses/:id", h.CompleteAllClasses)
 	authorized.GET("/search/", h.SearchStudents)
+	authorized.GET("/recommended/teammates", h.GetRecommendedTeammates)
 }
 
 func mapSchoolURLs(m Middleware, h *schoolHttp.SchoolHandler, r *gin.Engine) {

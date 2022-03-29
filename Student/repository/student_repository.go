@@ -38,6 +38,8 @@ const (
 	AND current_classes && $3`
 	searchWithoutClasses = `SELECT id, first_name, last_name, email, general_info, school, current_classes, classes_taken, 
 	created_at, updated_at FROM public.student WHERE first_name ILIKE '%' || $1 ||'%' AND last_name  ILIKE '%' || $2 ||'%'`
+	searchCurrentClass = `SELECT id, first_name, last_name, email, general_info, school, current_classes, classes_taken, 
+	created_at, updated_at FROM public.student WHERE $1=ANY(current_classes)`
 )
 
 // Create stores the student in the db. Returns err if unable to
@@ -145,6 +147,37 @@ func (r *studentRepository) UpdateClasses(ctx context.Context, st *domain.Studen
 
 	return nil
 }
+
+func (r *studentRepository) SearchCurrentClass(ctx context.Context, class string) ([]domain.Student, error) {
+	var rows pgx.Rows
+	var err error
+	rows, err = r.db.Query(ctx, searchCurrentClass, class)
+	if err != nil {
+		return nil, errors.NewInternalServerError(err.Error())
+	}
+	defer rows.Close()
+
+	students := []domain.Student{}
+	for rows.Next() {
+		var student domain.Student
+		var schoolID *string
+		err = rows.Scan(&student.ID, &student.FirstName, &student.LastName, &student.Email, &student.GeneralInfo,
+			&schoolID, &student.CurrentClasses, &student.ClassesTaken, &student.CreatedAt, &student.UpdatedAt)
+		if err != nil {
+			err = errors.NewInternalServerError(err.Error())
+			return nil, err
+		}
+		if schoolID != nil {
+			student.School = &domain.School{
+				ID: *schoolID,
+			}
+		}
+		students = append(students, student)
+	}
+	return students, nil
+}
+
+
 
 func (r *studentRepository) SearchStudents(ctx context.Context, st *domain.Student) ([]domain.Student, error) {
 	var rows pgx.Rows
