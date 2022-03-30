@@ -1,23 +1,22 @@
 package repository_test
 
-	import (
-		"context"
-		"fmt"
-		"github.com/airbenders/profile/domain"
-		"github.com/airbenders/profile/domain/mocks"
-		"github.com/airbenders/profile/review/repository"
-		"github.com/airbenders/profile/utils/pgxmocks"
-		"github.com/bxcodec/faker"
-		"github.com/driftprogramming/pgxpoolmock"
-		"github.com/golang/mock/gomock"
-		"github.com/jackc/pgconn"
-		"github.com/pkg/errors"
-		_ "github.com/pkg/errors"
-		"github.com/stretchr/testify/assert"
-		"github.com/stretchr/testify/mock"
-		"testing"
-
-	)
+import (
+	"context"
+	"github.com/airbenders/profile/Review/repository"
+	"github.com/airbenders/profile/domain"
+	"github.com/airbenders/profile/domain/mocks"
+	"github.com/airbenders/profile/utils/pgxmocks"
+	"github.com/bxcodec/faker"
+	"github.com/driftprogramming/pgxpoolmock"
+	"github.com/golang/mock/gomock"
+	"github.com/jackc/pgconn"
+	"github.com/pkg/errors"
+	_ "github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	"testing"
+	"time"
+)
 
 func TestAddReview(t *testing.T) {
 	t.Parallel()
@@ -94,29 +93,34 @@ func TestGetReviewsBy(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-
-	columns := []string{"id", "reviewed", "reviewer","created_at"}
-
-	var mockReview domain.Review
-	faker.FakeData(&mockReview)
-fmt.Println(mockReview)
+	reviewColumns := []string{"id", "reviewed", "reviewer","created_at"}
+	tagColumns := []string{"name"}
+	 mockReview := domain.Review{
+		 ID:        "asd",
+		 Reviewed:  domain.Student{ID: "123"},
+		 Reviewer:  domain.Student{ID: "456"},
+		 CreatedAt: time.Now(),
+		 Tags:      []domain.Tag{{Name: "some"}, {Name: "thing"}},
+	 }
 
 	mockPool := pgxpoolmock.NewMockPgxPool(ctrl)
 
-
 	t.Run("success", func(t *testing.T) {
-		pgxRows := pgxpoolmock.NewRows(columns).AddRow(
+		pgxRows := pgxpoolmock.NewRows(reviewColumns).AddRow(
 			mockReview.ID ,
-			mockReview.Reviewer,
-			mockReview.Reviewed ,
+			mockReview.Reviewer.ID,
+			mockReview.Reviewed.ID,
 			mockReview.CreatedAt).ToPgxRows()
+		pgxTagRows := pgxpoolmock.NewRows(tagColumns).AddRow(mockReview.Tags[0].Name).AddRow(mockReview.Tags[1].Name).ToPgxRows()
 
-		mockPool.EXPECT().Query(gomock.Any(), gomock.Any(),  gomock.AssignableToTypeOf("string")).Return(pgxRows, nil)
-		sr := repository.NewReviewRepository(mockPool)
-		review, err := sr.GetReviewsBy(context.Background(), mockReview.Reviewer.ID)
+		mockPool.EXPECT().Query(gomock.Any(), gomock.Any(),  gomock.Any()).Return(pgxRows, nil)
+		mockPool.EXPECT().Query(gomock.Any(), gomock.Any(),  gomock.Any()).Return(pgxTagRows, nil)
+		rr := repository.NewReviewRepository(mockPool)
+
+		reviews, err := rr.GetReviewsBy(context.Background(), mockReview.Reviewer.ID)
 
 		assert.NoError(t, err)
-		assert.EqualValues(t, mockReview, review)
+		assert.EqualValues(t, []domain.Review{mockReview}, reviews)
 	})
 
 
