@@ -88,6 +88,7 @@ func TestAddReview(t *testing.T) {
 }
 
 
+
 func TestGetReviewsBy(t *testing.T) {
 	t.Parallel()
 	ctrl := gomock.NewController(t)
@@ -123,6 +124,195 @@ func TestGetReviewsBy(t *testing.T) {
 		assert.EqualValues(t, []domain.Review{mockReview}, reviews)
 	})
 
+	t.Run("failure due to review", func(t *testing.T) {
+		mockPool.EXPECT().Query(gomock.Any(), gomock.Any(),  gomock.Any()).Return(nil, errors.New("err"))
+		rr := repository.NewReviewRepository(mockPool)
+		_, err := rr.GetReviewsBy(context.Background(), mockReview.Reviewer.ID)
+		assert.Error(t, err)
+	})
+	t.Run("failure due to tags ", func(t *testing.T) {
+		pgxRows := pgxpoolmock.NewRows(reviewColumns).AddRow(
+			mockReview.ID ,
+			mockReview.Reviewer.ID,
+			mockReview.Reviewed.ID,
+			mockReview.CreatedAt).ToPgxRows()
+
+		mockPool.EXPECT().Query(gomock.Any(), gomock.Any(),  gomock.Any()).Return(pgxRows, nil)
+		mockPool.EXPECT().Query(gomock.Any(), gomock.Any(),  gomock.Any()).Return(nil, errors.New("err"))
+		rr := repository.NewReviewRepository(mockPool)
+		_, err := rr.GetReviewsBy(context.Background(), mockReview.Reviewer.ID)
+		assert.Error(t, err)
+	})
+
+
+
+}
+
+
+
+
+func TestGetReviewsFor(t *testing.T) {
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	reviewColumns := []string{"id", "reviewed", "reviewer", "created_at"}
+	tagColumns := []string{"name"}
+	mockReview := domain.Review{
+		ID:        "asd",
+		Reviewed:  domain.Student{ID: "123"},
+		Reviewer:  domain.Student{ID: "456"},
+		CreatedAt: time.Now(),
+		Tags:      []domain.Tag{{Name: "some"}, {Name: "thing"}},
+	}
+
+	mockPool := pgxpoolmock.NewMockPgxPool(ctrl)
+
+	t.Run("success", func(t *testing.T) {
+		pgxRows := pgxpoolmock.NewRows(reviewColumns).AddRow(
+			mockReview.ID,
+			mockReview.Reviewer.ID,
+			mockReview.Reviewed.ID,
+			mockReview.CreatedAt).ToPgxRows()
+		pgxTagRows := pgxpoolmock.NewRows(tagColumns).AddRow(mockReview.Tags[0].Name).AddRow(mockReview.Tags[1].Name).ToPgxRows()
+
+		mockPool.EXPECT().Query(gomock.Any(), gomock.Any(), gomock.Any()).Return(pgxRows, nil)
+		mockPool.EXPECT().Query(gomock.Any(), gomock.Any(), gomock.Any()).Return(pgxTagRows, nil)
+		rr := repository.NewReviewRepository(mockPool)
+
+		reviews, err := rr.GetReviewsFor(context.Background(), mockReview.Reviewer.ID)
+
+		assert.NoError(t, err)
+		assert.EqualValues(t, []domain.Review{mockReview}, reviews)
+	})
+	t.Run("failure", func(t *testing.T) {
+		mockPool.EXPECT().Query(gomock.Any(), gomock.Any(),  gomock.Any()).Return(nil, errors.New("err"))
+		rr := repository.NewReviewRepository(mockPool)
+		_, err := rr.GetReviewsFor(context.Background(), mockReview.Reviewer.ID)
+		assert.Error(t, err)
+	})
+}
+func TestGetReviewByAndFor(t *testing.T) {
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	tagColumns := []string{"name"}
+	reviewColumns := []string{"id", "reviewed", "reviewer", "created_at"}
+	mockReview := domain.Review{
+		ID:        "asd",
+		Reviewed:  domain.Student{ID: "123"},
+		Reviewer:  domain.Student{ID: "456"},
+		CreatedAt: time.Now(),
+		Tags:      []domain.Tag{{Name: "some"}, {Name: "thing"}},
+	}
+
+	mockPool := pgxpoolmock.NewMockPgxPool(ctrl)
+
+	t.Run("success", func(t *testing.T) {
+		pgxRows := pgxpoolmock.NewRows(reviewColumns).AddRow(
+			mockReview.ID,
+			mockReview.Reviewer.ID,
+			mockReview.Reviewed.ID,
+			mockReview.CreatedAt).ToPgxRows()
+		pgxTagRows := pgxpoolmock.NewRows(tagColumns).AddRow(mockReview.Tags[0].Name).AddRow(mockReview.Tags[1].Name).ToPgxRows()
+
+		mockPool.EXPECT().Query(gomock.Any(), gomock.Any(), gomock.Any()).Return(pgxRows, nil)
+		mockPool.EXPECT().Query(gomock.Any(), gomock.Any(), gomock.Any()).Return(pgxTagRows, nil)
+		rr := repository.NewReviewRepository(mockPool)
+
+		review, err := rr.GetReviewByAndFor(context.Background(), mockReview.Reviewer.ID, mockReview.Reviewed.ID)
+
+
+		assert.NoError(t, err)
+		assert.EqualValues(t, mockReview,*review)
+	})
+	t.Run("failure due to retrieving review", func(t *testing.T) {
+		mockPool.EXPECT().Query(gomock.Any(), gomock.Any(),  gomock.Any()).Return(nil, errors.New("err"))
+		rr := repository.NewReviewRepository(mockPool)
+		_, err := rr.GetReviewByAndFor(context.Background(), mockReview.Reviewer.ID,mockReview.Reviewed.ID)
+		assert.Error(t, err)
+	})
+	t.Run("failure due to addign tags ", func(t *testing.T) {
+		pgxRows := pgxpoolmock.NewRows(reviewColumns).AddRow(
+			mockReview.ID,
+			mockReview.Reviewer.ID,
+			mockReview.Reviewed.ID,
+			mockReview.CreatedAt).ToPgxRows()
+		mockPool.EXPECT().Query(gomock.Any(), gomock.Any(),  gomock.Any()).Return(pgxRows, nil)
+		mockPool.EXPECT().Query(gomock.Any(), gomock.Any(),  gomock.Any()).Return(nil, errors.New("err"))
+		rr := repository.NewReviewRepository(mockPool)
+		_, err := rr.GetReviewByAndFor(context.Background(), mockReview.Reviewer.ID,mockReview.Reviewed.ID)
+		assert.Error(t, err)
+	})
+
+}
+
+
+
+func TestUpdateReviewTags(t *testing.T) {
+	t.Parallel()
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockReviewRepo := new(mocks.ReviewRepositoryMock)
+	var mockReview domain.Review
+	faker.FakeData(&mockReview)
+
+	mockPool := pgxpoolmock.NewMockPgxPool(ctrl)
+	txMock := new(pgxmocks.TxMock)
+
+	t.Run("success", func(t *testing.T) {
+		mockPool.EXPECT().Begin(gomock.Any()).Return(txMock, nil)
+		txMock.On("Exec", mock.Anything, mock.Anything, mock.Anything).
+			Return(pgconn.CommandTag{}, nil).Once()
+
+		txMock.On("Commit", mock.Anything).Return(nil).Once()
+		mockReviewRepo.
+			On("addTags", mock.Anything, mock.Anything).
+			Return(nil).
+			Once()
+
+		sr := repository.NewReviewRepository(mockPool)
+		err := sr.UpdateReviewTags(context.Background(), &domain.Review{})
+
+		assert.NoError(t, err)
+		txMock.AssertExpectations(t)
+	})
+
+	t.Run("can't begin transaction", func(t *testing.T) {
+		mockPool.EXPECT().Begin(gomock.Any()).Return(nil, errors.New("err"))
+
+		sr := repository.NewReviewRepository(mockPool)
+		err := sr.UpdateReviewTags(context.Background(), &domain.Review{})
+
+		assert.Error(t, err)
+	})
+
+	t.Run("can't exec transaction", func(t *testing.T) {
+		mockPool.EXPECT().Begin(gomock.Any()).Return(txMock, nil)
+		txMock.On("Exec", mock.Anything, mock.Anything, mock.Anything).
+			Return(nil, errors.New("err")).Once()
+
+
+		sr := repository.NewReviewRepository(mockPool)
+		err := sr.UpdateReviewTags(context.Background(), &domain.Review{})
+
+		assert.Error(t, err)
+		txMock.AssertExpectations(t)
+	})
+
+	t.Run("can't commit transaction", func(t *testing.T) {
+		mockPool.EXPECT().Begin(gomock.Any()).Return(txMock, nil)
+		txMock.On("Exec", mock.Anything, mock.Anything, mock.Anything).
+			Return(pgconn.CommandTag{}, nil).Once()
+		txMock.On("Commit", mock.Anything).Return(errors.New("err")).Once()
+
+
+		sr := repository.NewReviewRepository(mockPool)
+		err := sr.UpdateReviewTags(context.Background(), &domain.Review{})
+
+		assert.Error(t, err)
+		txMock.AssertExpectations(t)
+	})
 
 
 
