@@ -6,7 +6,6 @@ import (
 	"github.com/airbenders/profile/utils/errors"
 	"github.com/driftprogramming/pgxpoolmock"
 	_ "github.com/jackc/pgx/v4/pgxpool"
-	"time"
 )
 
 type reviewRepository struct {
@@ -105,15 +104,20 @@ func (r *reviewRepository) GetReviewByAndFor(ctx context.Context, reviewer strin
 
 	var review domain.Review
 	for rows.Next() {
-		values, err := rows.Values()
-		if err != nil {
-			return nil, errors.NewInternalServerError(err.Error())
-		}
 
-		review.ID = values[0].(string)
-		review.Reviewed.ID = values[1].(string)
-		review.Reviewer.ID = values[2].(string)
-		review.CreatedAt = values[3].(time.Time)
+
+
+		err = rows.Scan(&review.ID, &review.Reviewer.ID,&review.Reviewed.ID, &review.CreatedAt)
+
+
+		if err != nil {
+			err = errors.NewInternalServerError(err.Error())
+			return nil, err
+		}
+	}
+	err = r.getTagsFor(ctx, &review)
+	if err != nil {
+		return nil, errors.NewInternalServerError(err.Error())
 	}
 
 	return &review, nil
@@ -154,16 +158,13 @@ func (r *reviewRepository) GetReviewsFor(ctx context.Context, reviewed string) (
 
 	var reviews []domain.Review
 	for rows.Next() {
-		value, err := rows.Values()
-		if err != nil {
-			return nil, errors.NewInternalServerError(err.Error())
-		}
 
 		var review domain.Review
-		review.ID = value[0].(string)
-		review.Reviewed.ID = value[1].(string)
-		review.Reviewer.ID = value[2].(string)
-		review.CreatedAt = value[3].(time.Time)
+		err = rows.Scan(&review.ID, &review.Reviewer.ID,&review.Reviewed.ID, &review.CreatedAt)
+		if err != nil {
+			err = errors.NewInternalServerError(err.Error())
+			return nil, err
+		}
 
 		err = r.getTagsFor(ctx, &review)
 		if err != nil {
