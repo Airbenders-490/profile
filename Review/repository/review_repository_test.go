@@ -101,7 +101,7 @@ func TestGetReviewsBy(t *testing.T) {
 		 Reviewed:  domain.Student{ID: "123"},
 		 Reviewer:  domain.Student{ID: "456"},
 		 CreatedAt: time.Now(),
-		 Tags:      []domain.Tag{{Name: "some"}, {Name: "thing"}},
+		 Tags:      []*domain.Tag{{Name: "some"}, {Name: "thing"}},
 	 }
 
 	mockPool := pgxpoolmock.NewMockPgxPool(ctrl)
@@ -163,7 +163,7 @@ func TestGetReviewsFor(t *testing.T) {
 		Reviewed:  domain.Student{ID: "123"},
 		Reviewer:  domain.Student{ID: "456"},
 		CreatedAt: time.Now(),
-		Tags:      []domain.Tag{{Name: "some"}, {Name: "thing"}},
+		Tags:      []*domain.Tag{{Name: "some"}, {Name: "thing"}},
 	}
 
 	mockPool := pgxpoolmock.NewMockPgxPool(ctrl)
@@ -203,7 +203,7 @@ func TestGetReviewByAndFor(t *testing.T) {
 		Reviewed:  domain.Student{ID: "123"},
 		Reviewer:  domain.Student{ID: "456"},
 		CreatedAt: time.Now(),
-		Tags:      []domain.Tag{{Name: "some"}, {Name: "thing"}},
+		Tags:      []*domain.Tag{{Name: "some"}, {Name: "thing"}},
 	}
 
 	mockPool := pgxpoolmock.NewMockPgxPool(ctrl)
