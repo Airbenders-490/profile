@@ -350,6 +350,32 @@ func (s *studentUseCase) SearchStudents(c context.Context, st *domain.Student) (
 	return retrievedStudents, nil
 }
 
+func sortStudentsDescending(studentClassCountMap map[string]int, studentsMap map[string]domain.Student) []domain.Student {
+	// the list of student IDs to sort
+	studentIDs := make([]string, 0, len(studentClassCountMap))
+	for studentID := range studentClassCountMap {
+		studentIDs = append(studentIDs, studentID)
+	}
+
+	sort.Slice(studentIDs, func(i, j int) bool { return studentClassCountMap[studentIDs[i]] > studentClassCountMap[studentIDs[j]] })
+	sortedRecommended := make([]domain.Student,  0, len(studentClassCountMap))
+	for _, studentID := range studentIDs {
+		sortedRecommended = append(sortedRecommended, studentsMap[studentID])
+	}
+	return sortedRecommended
+}
+
+func recordStudentClassCount(retrievedSt domain.Student, userID string, studentsMap map[string]domain.Student, studentClassCountMap map[string]int) {
+	if retrievedSt.ID != userID {
+		studentsMap[retrievedSt.ID] = retrievedSt
+		if val, exists := studentClassCountMap[retrievedSt.ID]; exists {
+			studentClassCountMap[retrievedSt.ID] = val + 1
+		} else {
+			studentClassCountMap[retrievedSt.ID] = 1
+		}
+	}
+}
+
 func (s *studentUseCase) GetRecommendedTeammates(c context.Context, id string) ([]domain.Student, error) {
 	ctx, cancel := context.WithTimeout(c, s.contextTimeout)
 	defer cancel()
@@ -362,7 +388,7 @@ func (s *studentUseCase) GetRecommendedTeammates(c context.Context, id string) (
 
 	// for each current class
 	var retrievedStudents []domain.Student
-	studentsMap := make(map[string]domain.Student) // used to retrieve student object after sorting studentClassCountMap
+	studentsMap := make(map[string]domain.Student) // for retrieving student object after sorting studentClassCountMap
 	studentClassCountMap := make(map[string]int) // (cannot have student object as key) student id -> common class count
 	for _, class := range student.CurrentClasses {
 		// find students who have this class in common
@@ -371,26 +397,8 @@ func (s *studentUseCase) GetRecommendedTeammates(c context.Context, id string) (
 			return nil, err
 		}
 		for _, s := range retrievedStudents {
-			if s.ID != student.ID {
-				studentsMap[s.ID] = s
-				if val, exists := studentClassCountMap[s.ID]; exists {
-					studentClassCountMap[s.ID] = val + 1
-				} else {
-					studentClassCountMap[s.ID] = 1
-				}
-			}
+			recordStudentClassCount(s, student.ID, studentsMap, studentClassCountMap)
 		}
 	}
-	studentIDs := make([]string, 0, len(studentClassCountMap))
-	for studentID := range studentClassCountMap {
-		studentIDs = append(studentIDs, studentID)
-	}
-	// sort in descending order
-	sort.Slice(studentIDs, func(i, j int) bool { return studentClassCountMap[studentIDs[i]] > studentClassCountMap[studentIDs[j]] })
-	sortedRecommended := make([]domain.Student,  0, len(studentClassCountMap))
-	for _, studentID := range studentIDs {
-		sortedRecommended = append(sortedRecommended, studentsMap[studentID])
-	}
-
-	return sortedRecommended, nil
+	return sortStudentsDescending(studentClassCountMap, studentsMap), nil
 }
