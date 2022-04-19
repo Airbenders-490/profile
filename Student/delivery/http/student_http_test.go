@@ -29,7 +29,9 @@ func TestStudentHandlerGetByID(t *testing.T) {
 	mockUseCase := new(mocks.StudentUseCase)
 	h := http.NewStudentHandler(mockUseCase)
 	mw := new(mocks.MiddlewareMock)
-	server := httptest.NewServer(app.Server(h, nil, nil, nil, mw))
+	parser := new(mocks.ClaimsParserMock)
+	r := app.Server(h, nil, nil, nil, mw, mw, parser)
+	server := httptest.NewServer(r)
 	defer server.Close()
 
 	var mockStudent domain.Student
@@ -118,7 +120,9 @@ func TestStudentHandlerCreate(t *testing.T) {
 	mockUseCase := new(mocks.StudentUseCase)
 	h := &http.StudentHandler{UseCase: mockUseCase}
 	mw := new(mocks.MiddlewareMock)
-	server := httptest.NewServer(app.Server(h, nil, nil, nil, mw))
+	parser := new(mocks.ClaimsParserMock)
+	r := app.Server(h, nil, nil, nil, mw, mw, parser)
+	server := httptest.NewServer(r)
 	defer server.Close()
 	var mockStudent domain.Student
 	err := faker.FakeData(&mockStudent)
@@ -209,7 +213,8 @@ func TestStudentHandlerUpdate(t *testing.T) {
 	mockUseCase := new(mocks.StudentUseCase)
 	h := &http.StudentHandler{UseCase: mockUseCase}
 	mw := new(mocks.MiddlewareMock)
-	r := app.Server(h, nil, nil, nil, mw)
+	parser := new(mocks.ClaimsParserMock)
+	r := app.Server(h, nil, nil, nil, mw, mw, parser)
 	var mockStudent domain.Student
 	err := faker.FakeData(&mockStudent)
 	assert.NoError(t, err)
@@ -271,7 +276,8 @@ func TestStudentHandlerDelete(t *testing.T) {
 	mockUseCase := new(mocks.StudentUseCase)
 	h := &http.StudentHandler{UseCase: mockUseCase}
 	mw := new(mocks.MiddlewareMock)
-	r := app.Server(h, nil, nil, nil, mw)
+	parser := new(mocks.ClaimsParserMock)
+	r := app.Server(h, nil, nil, nil, mw, mw, parser)
 
 	t.Run("success", func(t *testing.T) {
 		mockUseCase.On("Delete", mock.Anything, mock.AnythingOfType("string")).
@@ -319,7 +325,8 @@ func TestStudentHandlerAddClasses(t *testing.T) {
 	mockUseCase := new(mocks.StudentUseCase)
 	h := &http.StudentHandler{UseCase: mockUseCase}
 	mw := new(mocks.MiddlewareMock)
-	r := app.Server(h, nil, nil, nil, mw)
+	parser := new(mocks.ClaimsParserMock)
+	r := app.Server(h, nil, nil, nil, mw, mw, parser)
 	var mockStudent domain.Student
 	err := faker.FakeData(&mockStudent)
 	assert.NoError(t, err)
@@ -381,7 +388,8 @@ func TestStudentHandlerRemoveClassesTaken(t *testing.T) {
 	mockUseCase := new(mocks.StudentUseCase)
 	h := &http.StudentHandler{UseCase: mockUseCase}
 	mw := new(mocks.MiddlewareMock)
-	r := app.Server(h, nil, nil, nil, mw)
+	parser := new(mocks.ClaimsParserMock)
+	r := app.Server(h, nil, nil, nil, mw, mw, parser)
 	var mockStudent domain.Student
 	err := faker.FakeData(&mockStudent)
 	assert.NoError(t, err)
@@ -443,7 +451,8 @@ func TestStudentHandlerCompleteClass(t *testing.T) {
 	mockUseCase := new(mocks.StudentUseCase)
 	h := &http.StudentHandler{UseCase: mockUseCase}
 	mw := new(mocks.MiddlewareMock)
-	r := app.Server(h, nil, nil, nil, mw)
+	parser := new(mocks.ClaimsParserMock)
+	r := app.Server(h, nil, nil, nil, mw, mw, parser)
 	var mockStudent domain.Student
 	err := faker.FakeData(&mockStudent)
 	assert.NoError(t, err)
@@ -505,7 +514,8 @@ func TestStudentHandlerSearchStudents(t *testing.T) {
 	mockUseCase := new(mocks.StudentUseCase)
 	h := http.NewStudentHandler(mockUseCase)
 	mw := new(mocks.MiddlewareMock)
-	r := app.Server(h, nil, nil, nil, mw)
+	parser := new(mocks.ClaimsParserMock)
+	r := app.Server(h, nil, nil, nil, mw, mw, parser)
 	var mockRetrievedStudents []domain.Student
 	err := faker.FakeData(&mockRetrievedStudents)
 	assert.NoError(t, err)

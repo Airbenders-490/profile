@@ -31,13 +31,21 @@ func Server(
 	schoolHandler *http2.SchoolHandler,
 	tagHandler *http3.TagHandler,
 	reviewHandler *http4.ReviewHandler,
-	mw Middleware) *gin.Engine {
+	mwV0 Middleware,
+	mwV1 Middleware,
+	parser ClaimsParser) *gin.Engine {
 	router := gin.Default()
 	router.Use(cors.Default())
-	mapStudentURLs(mw, studentHandler, router)
-	mapSchoolURLs(mw, schoolHandler, router)
+
+	mapStudentURLsV0(mwV0, studentHandler, router)
+	mapSchoolURLsV0(mwV0, schoolHandler, router)
 	mapTagURLs(tagHandler, router)
-	mapReviewURLs(mw, reviewHandler, router)
+	mapReviewURLsV0(mwV0, reviewHandler, router)
+
+	mapStudentURLsV1(mwV1, parser, studentHandler, router)
+	mapSchoolURLsV1(mwV0, parser, schoolHandler, router)
+	mapReviewURLsV1(mwV0, parser, reviewHandler, router)
+
 	return router
 }
 
@@ -77,24 +85,26 @@ func Start() {
 	studentRepository := repository.NewStudentRepository(pool)
 	reviewRepository := repository4.NewReviewRepository(pool)
 	tagRepository := repository3.NewTagRepository(pool)
-	studentUseCase := usecase.NewStudentUseCase(mm, studentRepository, reviewRepository, tagRepository, time.Second)
+	studentUseCase := usecase.NewStudentUseCase(mm, studentRepository, reviewRepository, tagRepository, time.Second*3)
 	studentHandler := http.NewStudentHandler(studentUseCase)
 	go studentUseCase.CreateStudentTopic()
 	go studentUseCase.UpdateStudentTopic()
 	go studentUseCase.DeleteStudentTopic()
 	schoolRepository := repository2.NewSchoolRepository(pool)
 	mail := utils.NewSimpleMail()
-	schoolUseCase := usecase2.NewSchoolUseCase(schoolRepository, studentRepository, mail, time.Second)
+	schoolUseCase := usecase2.NewSchoolUseCase(schoolRepository, studentRepository, mail, time.Second*3)
 	schoolHandler := http2.NewSchoolHandler(schoolUseCase)
 
-	tagUseCase := usecase3.NewTagUseCase(tagRepository, time.Second)
+	tagUseCase := usecase3.NewTagUseCase(tagRepository, time.Second*3)
 	tagHandler := http3.NewTagHandler(tagUseCase)
 
-	reviewUseCase := usecase4.NewReviewUseCase(reviewRepository, studentRepository, time.Second)
+	reviewUseCase := usecase4.NewReviewUseCase(reviewRepository, studentRepository, time.Second*3)
 	reviewHandler := http4.NewReviewHandler(reviewUseCase)
 
-	mw := NewMiddleware()
+	mwV0 := NewMiddleware()
+	mwV1 := NewAuth0Middleware()
+	parser := NewParseClaimsMiddleware()
 
-	router := Server(studentHandler, schoolHandler, tagHandler, reviewHandler, mw)
+	router := Server(studentHandler, schoolHandler, tagHandler, reviewHandler, mwV0, mwV1, parser)
 	router.Run()
 }

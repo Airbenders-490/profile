@@ -22,7 +22,8 @@ func TestTagHandlerGetAllTags(t *testing.T) {
 	mockUseCase := new(mocks.TagUseCase)
 	h := http.NewTagHandler(mockUseCase)
 	mw := new(mocks.MiddlewareMock)
-	server := httptest.NewServer(app.Server(nil, nil, h, nil, mw))
+	parser := new(mocks.ClaimsParserMock)
+	server := httptest.NewServer(app.Server(nil, nil, h, nil, mw, mw, parser))
 	defer server.Close()
 
 	var mockTag []domain.Tag

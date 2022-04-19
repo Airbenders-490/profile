@@ -19,3 +19,15 @@ func (m *MiddlewareMock) AuthMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+type ClaimsParserMock struct {
+	mock.Mock
+}
+
+func (m *ClaimsParserMock) ParseClaimsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Request.Header.Get("id")
+		c.Set("loggedID", id)
+		c.Next()
+	}
+}
