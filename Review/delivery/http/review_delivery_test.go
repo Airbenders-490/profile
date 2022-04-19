@@ -29,7 +29,8 @@ func TestReviewHandlerAddReview(t *testing.T) {
 	mockUseCase := new(mocks.ReviewUseCase)
 	h := http.NewReviewHandler(mockUseCase)
 	mw := new(mocks.MiddlewareMock)
-	server := httptest.NewServer(app.Server(nil, nil, nil, h, mw))
+	parser := new(mocks.ClaimsParserMock)
+	server := httptest.NewServer(app.Server(nil, nil, nil, h, mw, mw, parser))
 	defer server.Close()
 
 	var mockReview domain.Review
@@ -160,7 +161,8 @@ func TestReviewHandlerGetReviewsBy(t *testing.T) {
 	mockUseCase := new(mocks.ReviewUseCase)
 	h := http.NewReviewHandler(mockUseCase)
 	mw := new(mocks.MiddlewareMock)
-	r := app.Server(nil, nil, nil, h, mw)
+	parser := new(mocks.ClaimsParserMock)
+	r := app.Server(nil, nil, nil, h, mw, mw, parser)
 
 	var mockReviews []domain.Review
 	err := faker.FakeData(&mockReviews)
@@ -179,7 +181,7 @@ func TestReviewHandlerGetReviewsBy(t *testing.T) {
 		reqFound.Header.Set("id", mockReviews[0].Reviewer.ID)
 		w := httptest.NewRecorder()
 		r.ServeHTTP(w, reqFound)
-		assert.Equal(t, 200, w.Code) // update not post yet it return a status 201
+		assert.Equal(t, 200, w.Code)
 		assert.NoError(t, err)
 
 		responseBody, err := ioutil.ReadAll(w.Body)
@@ -201,7 +203,8 @@ func TestReviewHandlerEditReview(t *testing.T) {
 	mockUseCase := new(mocks.ReviewUseCase)
 	h := http.NewReviewHandler(mockUseCase)
 	mw := new(mocks.MiddlewareMock)
-	r := app.Server(nil, nil, nil, h, mw)
+	parser := new(mocks.ClaimsParserMock)
+	r := app.Server(nil, nil, nil, h, mw, mw, parser)
 
 	var mockReview domain.Review
 	err := faker.FakeData(&mockReview)

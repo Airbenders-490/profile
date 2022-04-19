@@ -27,7 +27,9 @@ func TestSchoolHandlerSearchStudentSchool(t *testing.T) {
 	mockUseCase := new(mocks.SchoolUseCase)
 	h := http.NewSchoolHandler(mockUseCase)
 	middleware := new(mocks.MiddlewareMock)
-	server := httptest.NewServer(app.Server(nil, h, nil, nil, middleware))
+	parser := new(mocks.ClaimsParserMock)
+	server := httptest.NewServer(app.Server(nil, h, nil, nil,
+		middleware, middleware, parser))
 	defer server.Close()
 
 	var mockSchool domain.School
@@ -98,7 +100,9 @@ func TestSchoolHandlerConfirmSchoolRegistration(t *testing.T) {
 	mockUseCase := new(mocks.SchoolUseCase)
 	h := http.NewSchoolHandler(mockUseCase)
 	middleware := new(mocks.MiddlewareMock)
-	server := httptest.NewServer(app.Server(nil, h, nil, nil, middleware))
+	parser := new(mocks.ClaimsParserMock)
+	server := httptest.NewServer(app.Server(nil, h, nil, nil,
+		middleware, middleware, parser))
 	defer server.Close()
 
 	var mockSchool domain.School
@@ -155,7 +159,9 @@ func TestSchoolHandlerSendConfirmationMail(t *testing.T) {
 	mockUseCase := new(mocks.SchoolUseCase)
 	h := http.NewSchoolHandler(mockUseCase)
 	middleware := new(mocks.MiddlewareMock)
-	server := httptest.NewServer(app.Server(nil, h, nil, nil, middleware))
+	parser := new(mocks.ClaimsParserMock)
+	server := httptest.NewServer(app.Server(nil, h, nil, nil,
+		middleware, middleware, parser))
 	defer server.Close()
 	var mockSchool *domain.School
 	err := faker.FakeData(&mockSchool)
