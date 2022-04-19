@@ -2,7 +2,6 @@ package http_test
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/airbenders/profile/Student/delivery/http"
 	"github.com/airbenders/profile/app"
@@ -11,6 +10,7 @@ import (
 	e "github.com/airbenders/profile/utils/errors"
 	"github.com/airbenders/profile/utils/httputils"
 	"github.com/bxcodec/faker/v3"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"io/ioutil"
@@ -547,4 +547,48 @@ func TestStudentHandlerSearchStudents(t *testing.T) {
 		mockUseCase.AssertExpectations(t)
 	})
 
+}
+
+func TestStudentHandler_GetRecommendedTeammates(t *testing.T) {
+	t.Parallel()
+	mockUseCase := new(mocks.StudentUseCase)
+	h := &http.StudentHandler{UseCase: mockUseCase}
+	mw := new(mocks.MiddlewareMock)
+	r := httptest.NewServer(app.Server(h, nil, nil, nil, mw))
+	defer r.Close()
+	var mockRetrievedStudents []domain.Student
+	err := faker.FakeData(&mockRetrievedStudents)
+	assert.NoError(t, err)
+
+
+	t.Run("success", func(t *testing.T) {
+		mockUseCase.On("GetRecommendedTeammates", mock.Anything, mock.AnythingOfType("string")).
+			Return(mockRetrievedStudents, nil).Once()
+		response, err := r.Client().Get(fmt.Sprintf("%s/api/recommended/teammates", r.URL))
+		assert.NoError(t, err)
+		defer response.Body.Close()
+		assert.Equal(t, response.StatusCode, 200)
+		mockUseCase.AssertExpectations(t)
+	})
+
+	t.Run("rest error", func(t *testing.T) {
+		restErr := e.NewConflictError("error occurred")
+		mockUseCase.On("GetRecommendedTeammates", mock.Anything, mock.AnythingOfType("string")).
+			Return(nil, restErr).Once()
+		response, err := r.Client().Get(fmt.Sprintf("%s/api/recommended/teammates", r.URL))
+		assert.NoError(t, err)
+		defer response.Body.Close()
+		assert.Equal(t, restErr.Code, response.StatusCode)
+		mockUseCase.AssertExpectations(t)
+	})
+
+	t.Run("usecase-default-error", func(t *testing.T) {
+		mockUseCase.On("GetRecommendedTeammates", mock.Anything, mock.AnythingOfType("string")).
+			Return(nil, errors.New("")).Once()
+		response, err := r.Client().Get(fmt.Sprintf("%s/api/recommended/teammates", r.URL))
+		assert.NoError(t, err)
+		defer response.Body.Close()
+		assert.Equal(t, 500, response.StatusCode)
+		mockUseCase.AssertExpectations(t)
+	})
 }

@@ -522,3 +522,66 @@ func TestSearchStudents(t *testing.T) {
 	})
 
 }
+
+func TestGetRecommendedTeammates(t *testing.T) {
+	t.Parallel()
+	mockStudentRepo := new(mocks.StudentRepositoryMock)
+	st1 := domain.Student{ID: "1", CurrentClasses: []string{"1", "2"}}
+	st2 := domain.Student{ID: "2"}
+	retrievedStudents := []domain.Student{st2}
+
+	t.Run("case success", func(t *testing.T) {
+		mockStudentRepo.
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
+			Return(&st1, nil).
+			Once()
+		mockStudentRepo.
+			On("SearchCurrentClass", mock.Anything, mock.AnythingOfType("string")).
+			Return(retrievedStudents, nil).
+			Once()
+		mockStudentRepo.
+			On("SearchCurrentClass", mock.Anything, mock.AnythingOfType("string")).
+			Return(retrievedStudents, nil).
+			Once()
+
+		u := usecase.NewStudentUseCase(nil, mockStudentRepo, nil,  nil, time.Second)
+
+		rs, err := u.GetRecommendedTeammates(context.TODO(), "1")
+
+		assert.NoError(t, err)
+		assert.NotNil(t, rs)
+		mockStudentRepo.AssertExpectations(t)
+	})
+
+	t.Run("GetByID error", func(t *testing.T) {
+		mockStudentRepo.
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
+			Return(nil, errors.New("")).
+			Once()
+		u := usecase.NewStudentUseCase(nil, mockStudentRepo, nil, nil, time.Second)
+
+		rs, err := u.GetRecommendedTeammates(context.TODO(), "1")
+
+		assert.Error(t, err)
+		assert.True(t, reflect.ValueOf(rs).IsNil())
+		mockStudentRepo.AssertExpectations(t)
+	})
+
+	t.Run("SearchCurrentClass error", func(t *testing.T) {
+		mockStudentRepo.
+			On("GetByID", mock.Anything, mock.AnythingOfType("string")).
+			Return(&st1, nil).
+			Once()
+		mockStudentRepo.
+			On("SearchCurrentClass", mock.Anything, mock.AnythingOfType("string")).
+			Return(nil, errors.New("")).
+			Once()
+		u := usecase.NewStudentUseCase(nil, mockStudentRepo, nil, nil, time.Second)
+
+		rs, err := u.GetRecommendedTeammates(context.TODO(), "1")
+
+		assert.Error(t, err)
+		assert.True(t, reflect.ValueOf(rs).IsNil())
+		mockStudentRepo.AssertExpectations(t)
+	})
+}
