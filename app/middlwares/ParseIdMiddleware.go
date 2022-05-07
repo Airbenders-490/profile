@@ -1,4 +1,4 @@
-package app
+package middlwares
 
 import (
 	jwtmiddleware "github.com/auth0/go-jwt-middleware/v2"

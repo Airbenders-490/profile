@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"github.com/airbenders/profile/app/middlwares"
 	"github.com/streadway/amqp"
 	"log"
 	"os"
@@ -31,9 +32,9 @@ func Server(
 	schoolHandler *http2.SchoolHandler,
 	tagHandler *http3.TagHandler,
 	reviewHandler *http4.ReviewHandler,
-	mwV0 Middleware,
-	mwV1 Middleware,
-	parser ClaimsParser) *gin.Engine {
+	mwV0 middlwares.Middleware,
+	mwV1 middlwares.Middleware,
+	parser middlwares.ClaimsParser) *gin.Engine {
 	router := gin.Default()
 	router.Use(cors.Default())
 
@@ -43,8 +44,8 @@ func Server(
 	mapReviewURLsV0(mwV0, reviewHandler, router)
 
 	mapStudentURLsV1(mwV1, parser, studentHandler, router)
-	mapSchoolURLsV1(mwV0, parser, schoolHandler, router)
-	mapReviewURLsV1(mwV0, parser, reviewHandler, router)
+	mapSchoolURLsV1(mwV1, parser, schoolHandler, router)
+	mapReviewURLsV1(mwV1, parser, reviewHandler, router)
 
 	return router
 }
@@ -101,9 +102,9 @@ func Start() {
 	reviewUseCase := usecase4.NewReviewUseCase(reviewRepository, studentRepository, time.Second*3)
 	reviewHandler := http4.NewReviewHandler(reviewUseCase)
 
-	mwV0 := NewMiddleware()
-	mwV1 := NewAuth0Middleware()
-	parser := NewParseClaimsMiddleware()
+	mwV0 := middlwares.NewMiddleware()
+	mwV1 := middlwares.NewAuth0Middleware()
+	parser := middlwares.NewParseClaimsMiddleware()
 
 	router := Server(studentHandler, schoolHandler, tagHandler, reviewHandler, mwV0, mwV1, parser)
 	router.Run()
