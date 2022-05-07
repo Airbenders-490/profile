@@ -5,6 +5,7 @@ import (
 	schoolHttp "github.com/airbenders/profile/School/delivery/http"
 	studentHttp "github.com/airbenders/profile/Student/delivery/http"
 	tagHttp "github.com/airbenders/profile/Tag/delivery/http"
+	"github.com/airbenders/profile/app/middlwares"
 	"github.com/gin-gonic/gin"
 )
 
@@ -20,20 +21,20 @@ func studentURLs(h *studentHttp.StudentHandler, authorized *gin.RouterGroup) {
 	authorized.GET("/search/", h.SearchStudents)
 }
 
-func mapStudentURLsV0(m Middleware, h *studentHttp.StudentHandler, router *gin.Engine) {
+func mapStudentURLsV0(m middlwares.Middleware, h *studentHttp.StudentHandler, router *gin.Engine) {
 	authorized := router.Group("/api")
 	authorized.Use(m.AuthMiddleware())
 	studentURLs(h, authorized)
 }
 
-func mapStudentURLsV1(m Middleware, parserMW ClaimsParser, h *studentHttp.StudentHandler, router *gin.Engine) {
+func mapStudentURLsV1(m middlwares.Middleware, parserMW middlwares.ClaimsParser, h *studentHttp.StudentHandler, router *gin.Engine) {
 	authorized := router.Group("/api/v1")
 	authorized.Use(m.AuthMiddleware())
 	authorized.Use(parserMW.ParseClaimsMiddleware())
 	studentURLs(h, authorized)
 }
 
-func mapSchoolURLsV0(m Middleware, h *schoolHttp.SchoolHandler, r *gin.Engine) {
+func mapSchoolURLsV0(m middlwares.Middleware, h *schoolHttp.SchoolHandler, r *gin.Engine) {
 	r.GET("school/confirmation", h.ConfirmSchoolRegistration)
 	authorized := r.Group("/api")
 	authorized.Use(m.AuthMiddleware())
@@ -41,7 +42,7 @@ func mapSchoolURLsV0(m Middleware, h *schoolHttp.SchoolHandler, r *gin.Engine) {
 }
 
 // we can extract these 2 into api versions for better abstraction and maintainability
-func mapSchoolURLsV1(m Middleware, parserMW ClaimsParser, h *schoolHttp.SchoolHandler, r *gin.Engine) {
+func mapSchoolURLsV1(m middlwares.Middleware, parserMW middlwares.ClaimsParser, h *schoolHttp.SchoolHandler, r *gin.Engine) {
 	//r.GET("school/confirmation", h.ConfirmSchoolRegistration)
 	authorized := r.Group("/api/v1")
 	authorized.Use(m.AuthMiddleware())
@@ -64,13 +65,13 @@ func reviewURLs(h *reviewHttp.ReviewHandler, authorized *gin.RouterGroup) {
 	authorized.GET("/reviews-by/:reviewer", h.GetReviewsBy)
 }
 
-func mapReviewURLsV0(m Middleware, h *reviewHttp.ReviewHandler, r *gin.Engine) {
+func mapReviewURLsV0(m middlwares.Middleware, h *reviewHttp.ReviewHandler, r *gin.Engine) {
 	authorized := r.Group("/api")
 	authorized.Use(m.AuthMiddleware())
 	reviewURLs(h, authorized)
 }
 
-func mapReviewURLsV1(m Middleware, parserMW ClaimsParser, h *reviewHttp.ReviewHandler, r *gin.Engine) {
+func mapReviewURLsV1(m middlwares.Middleware, parserMW middlwares.ClaimsParser, h *reviewHttp.ReviewHandler, r *gin.Engine) {
 	authorized := r.Group("/api/v1")
 	authorized.Use(m.AuthMiddleware())
 	authorized.Use(parserMW.ParseClaimsMiddleware())

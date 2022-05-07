@@ -1,4 +1,4 @@
-package app
+package middlwares
 
 import (
 	"github.com/airbenders/profile/utils/errors"
